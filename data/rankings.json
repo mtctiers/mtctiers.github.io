@@ -319,6 +319,11 @@
       "name": "sample",
       "region": "AS",
       "device": "TP"
+    },
+    {
+      "name": "solace",
+      "region": "AS",
+      "device": "MK"
     }
   ],
   "Emerald": {
