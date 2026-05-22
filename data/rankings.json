@@ -321,11 +321,6 @@
       "device": "TP"
     },
     {
-      "name": "solace",
-      "region": "AS",
-      "device": "MK"
-    },
-    {
       "name": "Atomix",
       "region": "NA",
       "device": "MB"
