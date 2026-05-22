@@ -329,6 +329,11 @@
       "name": "Atomix",
       "region": "NA",
       "device": "MB"
+    },
+    {
+      "name": "FirstChance",
+      "region": "OC",
+      "device": "CT"
     }
   ],
   "Emerald": {
