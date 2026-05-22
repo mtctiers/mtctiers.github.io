@@ -329,6 +329,11 @@
       "name": "FirstChance",
       "region": "OC",
       "device": "CT"
+    },
+    {
+      "name": "NoT_HuMaN",
+      "region": "AS",
+      "device": "MK"
     }
   ],
   "Emerald": {
