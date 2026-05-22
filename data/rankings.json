@@ -334,6 +334,11 @@
       "name": "NoT_HuMaN",
       "region": "AS",
       "device": "MK"
+    },
+    {
+      "name": "Mobile-Murderer",
+      "region": "NA",
+      "device": "MB"
     }
   ],
   "Emerald": {
