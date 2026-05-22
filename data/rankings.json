@@ -339,6 +339,11 @@
       "name": "Mobile-Murderer",
       "region": "NA",
       "device": "MB"
+    },
+    {
+      "name": "MiddleChance",
+      "region": "OC",
+      "device": "MB"
     }
   ],
   "Emerald": {
