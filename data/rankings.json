@@ -344,6 +344,11 @@
       "name": "MiddleChance",
       "region": "OC",
       "device": "MB"
+    },
+    {
+      "name": "QuarterChance",
+      "region": "OC",
+      "device": "TP"
     }
   ],
   "Emerald": {
