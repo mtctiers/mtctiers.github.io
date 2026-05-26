@@ -349,6 +349,11 @@
       "name": "QuarterChance",
       "region": "OC",
       "device": "TP"
+    },
+    {
+      "name": "Ron_",
+      "region": "Unknown",
+      "device": "MK"
     }
   ],
   "Emerald": {
@@ -695,7 +700,8 @@
       "Kaeye",
       "skibidi1234",
       "FirstChance",
-      "QuarterChance"
+      "QuarterChance",
+      "shadow_master"
     ],
     "RLT3": [
       "Possessed_YT"
