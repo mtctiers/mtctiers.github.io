@@ -603,7 +603,6 @@
       "LifoMC"
     ],
     "HT3": [
-      "Vorthexis",
       "Husky_Multicraft",
       "vort3x",
       "FirstChance",
@@ -612,6 +611,9 @@
     "LT3": [
       "revan",
       "QuarterChance"
+    ],
+    "RHT3": [
+      "Vorthexis"
     ],
     "HT4": [
       "Kaeye",
@@ -636,7 +638,6 @@
       "system1117",
       "x9jm",
       "TimmyLoal",
-      "Vorthexis",
       "Uncontrollable"
     ],
     "LT2": [
@@ -650,6 +651,9 @@
       "vort3x",
       "LastChance",
       "QuarterChance"
+    ],
+    "RHT2": [
+      "Vorthexis"
     ],
     "RLT2": [
       "LifoMC"
