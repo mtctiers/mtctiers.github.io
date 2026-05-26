@@ -667,6 +667,9 @@
     ]
   },
   "Dragonhide Anchor": {
+    "LT1": [
+      "system1117"
+    ],
     "HT2": [
       "Game1K",
       "sample",
@@ -677,8 +680,7 @@
       "jogg"
     ],
     "LT2": [
-      "x9jm",
-      "system1117"
+      "x9jm"
     ],
     "HT3": [
       "LastChance",
