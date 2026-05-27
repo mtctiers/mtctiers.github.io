@@ -329,11 +329,6 @@
       "name": "Ron_",
       "region": "Unknown",
       "device": "MK"
-    },
-    {
-      "name": "Heavenfire",
-      "region": "NA",
-      "device": "CT"
     }
   ],
   "Emerald": {
@@ -386,8 +381,7 @@
     ],
     "LT4": [
       "supermobilenoobpvp",
-      "salton",
-      "Heavenfire"
+      "salton"
     ],
     "HT5": [
       "ArpanYT",
