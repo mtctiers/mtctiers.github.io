@@ -241,11 +241,6 @@
       "device": "MK"
     },
     {
-      "name": "salton",
-      "region": "AS",
-      "device": "TP"
-    },
-    {
       "name": "shadow_master",
       "region": "NA",
       "device": "CT"
@@ -380,8 +375,7 @@
       "shadow_master"
     ],
     "LT4": [
-      "supermobilenoobpvp",
-      "salton"
+      "supermobilenoobpvp"
     ],
     "HT5": [
       "ArpanYT",
@@ -439,7 +433,6 @@
       "shadow_master"
     ],
     "HT5": [
-      "salton",
       "bluedigit"
     ],
     "LT5": [
@@ -494,8 +487,7 @@
       "revan",
       "Herobrine",
       "Normal",
-      "Kaeye",
-      "salton"
+      "Kaeye"
     ],
     "HT4": [
       "shadow_master",
@@ -595,7 +587,6 @@
       "Mane",
       "Bloody_Hell",
       "Possessed_YT",
-      "salton",
       "jogg",
       "vort3x",
       "LastChance"
