@@ -346,11 +346,6 @@
       "device": "MB"
     },
     {
-      "name": "QuarterChance",
-      "region": "OC",
-      "device": "TP"
-    },
-    {
       "name": "Ron_",
       "region": "Unknown",
       "device": "MK"
@@ -384,7 +379,6 @@
       "revan",
       "MrDaRkYT",
       "jogg",
-      "QuarterChance",
       "Vorthexis"
     ],
     "RHT2": [
@@ -455,8 +449,7 @@
     ],
     "HT3": [
       "-_Hades_-",
-      "vort3x",
-      "QuarterChance"
+      "vort3x"
     ],
     "LT3": [
       "Bloody_Hell",
@@ -553,8 +546,7 @@
       "xenoXD",
       "CJSHORT",
       "Solace",
-      "FirstChance",
-      "QuarterChance"
+      "FirstChance"
     ],
     "LT4": [
       "supermobilenoobpvp",
@@ -611,8 +603,7 @@
       "Vorthexis"
     ],
     "LT3": [
-      "revan",
-      "QuarterChance"
+      "revan"
     ],
     "HT4": [
       "Kaeye",
@@ -649,8 +640,7 @@
       "salton",
       "jogg",
       "vort3x",
-      "LastChance",
-      "QuarterChance"
+      "LastChance"
     ],
     "RLT2": [
       "LifoMC"
@@ -709,7 +699,6 @@
       "Kaeye",
       "skibidi1234",
       "FirstChance",
-      "QuarterChance",
       "shadow_master"
     ],
     "RLT3": [
@@ -745,7 +734,6 @@
       "LastChance",
       "Bloody_Hell",
       "Possessed_YT",
-      "QuarterChance",
       "Vorthexis"
     ],
     "HT3": [
