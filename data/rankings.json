@@ -299,11 +299,6 @@
       "name": "Ron_",
       "region": "Unknown",
       "device": "MK"
-    },
-    {
-      "name": "Normal",
-      "region": "EU",
-      "device": "MK"
     }
   ],
   "Emerald": {
@@ -446,8 +441,7 @@
       "SHADE",
       "Terminator",
       "Possessed_YT",
-      "jogg",
-      "Normal"
+      "jogg"
     ],
     "RHT2": [
       "TimmyLoal"
