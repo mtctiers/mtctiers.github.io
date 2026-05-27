@@ -299,6 +299,11 @@
       "name": "Normal",
       "region": "EU",
       "device": "MK"
+    },
+    {
+      "name": "Bloody_Hell",
+      "region": "NA",
+      "device": "MK"
     }
   ],
   "Emerald": {
