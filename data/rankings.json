@@ -326,11 +326,6 @@
       "device": "MB"
     },
     {
-      "name": "MiddleChance",
-      "region": "OC",
-      "device": "MB"
-    },
-    {
       "name": "Ron_",
       "region": "Unknown",
       "device": "MK"
@@ -387,8 +382,7 @@
     "HT4": [
       "FarXD",
       "Kaeye",
-      "shadow_master",
-      "MiddleChance"
+      "shadow_master"
     ],
     "LT4": [
       "supermobilenoobpvp",
@@ -452,8 +446,7 @@
     ],
     "HT5": [
       "salton",
-      "bluedigit",
-      "MiddleChance"
+      "bluedigit"
     ],
     "LT5": [
       "Luther"
@@ -537,8 +530,7 @@
       "AntonioZga9",
       "Jetbunz99",
       "Luther",
-      "Superboy",
-      "MiddleChance"
+      "Superboy"
     ],
     "LT5": [
       "MGK",
@@ -580,8 +572,7 @@
       "revan"
     ],
     "HT4": [
-      "Kaeye",
-      "MiddleChance"
+      "Kaeye"
     ],
     "HT5": [
       "shadow_master"
@@ -628,9 +619,6 @@
       "shadow_master",
       "Solace"
     ],
-    "HT4": [
-      "MiddleChance"
-    ],
     "LT4": [
       "bluedigit",
       "Atomix"
@@ -658,8 +646,7 @@
     ],
     "HT3": [
       "LastChance",
-      "vort3x",
-      "MiddleChance"
+      "vort3x"
     ],
     "LT3": [
       "Husky_Multicraft",
@@ -709,8 +696,7 @@
       "Solace"
     ],
     "LT3": [
-      "Kaeye",
-      "MiddleChance"
+      "Kaeye"
     ],
     "HT4": [
       "Husky_Multicraft"
