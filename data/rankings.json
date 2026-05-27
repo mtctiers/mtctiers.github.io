@@ -562,7 +562,6 @@
       "LifoMC"
     ],
     "HT3": [
-      "RayValidd",
       "Husky_Multicraft",
       "revan"
     ],
@@ -570,6 +569,9 @@
       "Kaeye",
       "shadow_master",
       "Solace"
+    ],
+    "RHT3": [
+      "RayValidd"
     ],
     "LT4": [
       "bluedigit",
