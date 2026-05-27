@@ -111,11 +111,6 @@
       "device": "MB"
     },
     {
-      "name": "oncethebestpvp",
-      "region": "NA",
-      "device": "MB"
-    },
-    {
       "name": "supermobilenoobpvp",
       "region": "EU",
       "device": "MB"
@@ -505,7 +500,6 @@
     ],
     "LT4": [
       "supermobilenoobpvp",
-      "oncethebestpvp",
       "Mane",
       "chi-na",
       "-R3ZN-",
