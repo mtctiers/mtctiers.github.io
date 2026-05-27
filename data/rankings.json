@@ -76,11 +76,6 @@
       "device": "MB"
     },
     {
-      "name": "-_Hades_-",
-      "region": "NA",
-      "device": "CT"
-    },
-    {
       "name": "MGK",
       "region": "AS",
       "device": "MB"
@@ -339,7 +334,6 @@
     "HT3": [
       "CJSHORT",
       "CosmicallyXVII",
-      "-_Hades_-",
       "Mane",
       "Husky_Multicraft",
       "LastChance",
@@ -388,7 +382,6 @@
       "LifoMC"
     ],
     "HT3": [
-      "-_Hades_-",
       "vort3x"
     ],
     "LT3": [
@@ -457,7 +450,6 @@
       "Jerryisking",
       "Husky_Multicraft",
       "RayValidd",
-      "-_Hades_-",
       "LastChance"
     ],
     "LT3": [
@@ -644,7 +636,8 @@
     "LT2": [
       "LastChance",
       "Possessed_YT",
-      "Vorthexis"
+      "Vorthexis",
+      "Bloody_Hell"
     ],
     "HT3": [
       "revan",
