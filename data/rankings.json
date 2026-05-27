@@ -299,6 +299,11 @@
       "name": "Ron_",
       "region": "Unknown",
       "device": "MK"
+    },
+    {
+      "name": "Normal",
+      "region": "EU",
+      "device": "MK"
     }
   ],
   "Emerald": {
