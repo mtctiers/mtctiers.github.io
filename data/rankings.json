@@ -241,11 +241,6 @@
       "device": "MK"
     },
     {
-      "name": "Uncontrollable",
-      "region": "NA",
-      "device": "CT"
-    },
-    {
       "name": "salton",
       "region": "AS",
       "device": "TP"
@@ -326,11 +321,6 @@
       "device": "MB"
     },
     {
-      "name": "FirstChance",
-      "region": "OC",
-      "device": "CT"
-    },
-    {
       "name": "NoT_HuMaN",
       "region": "AS",
       "device": "MK"
@@ -371,7 +361,6 @@
       "x9jm"
     ],
     "LT2": [
-      "Uncontrollable",
       "skibidi1234",
       "ChillPotato",
       "RayValidd",
@@ -398,7 +387,6 @@
       "LastChance"
     ],
     "LT3": [
-      "FirstChance",
       "vort3x",
       "Solace"
     ],
@@ -436,7 +424,6 @@
       "x9jm",
       "jogg",
       "sample",
-      "Uncontrollable",
       "Vorthexis"
     ],
     "LT2": [
@@ -465,8 +452,7 @@
     ],
     "HT4": [
       "CosmicallyXVII",
-      "Corpse",
-      "FirstChance"
+      "Corpse"
     ],
     "LT4": [
       "shadow_master"
@@ -512,8 +498,7 @@
       "Terminator",
       "Possessed_YT",
       "abnormal",
-      "jogg",
-      "Uncontrollable"
+      "jogg"
     ],
     "RHT2": [
       "TimmyLoal"
@@ -545,8 +530,7 @@
       "Oden_Sama",
       "xenoXD",
       "CJSHORT",
-      "Solace",
-      "FirstChance"
+      "Solace"
     ],
     "LT4": [
       "supermobilenoobpvp",
@@ -589,8 +573,7 @@
       "skibidi1234",
       "Bloody_Hell",
       "jogg",
-      "Jerryisking",
-      "Uncontrollable"
+      "Jerryisking"
     ],
     "RHT2": [
       "LifoMC"
@@ -598,7 +581,6 @@
     "HT3": [
       "Husky_Multicraft",
       "vort3x",
-      "FirstChance",
       "LastChance",
       "Vorthexis"
     ],
@@ -628,7 +610,6 @@
       "system1117",
       "x9jm",
       "TimmyLoal",
-      "Uncontrollable",
       "Vorthexis"
     ],
     "LT2": [
@@ -651,7 +632,6 @@
       "revan"
     ],
     "LT3": [
-      "FirstChance",
       "Kaeye",
       "shadow_master",
       "Solace"
@@ -679,7 +659,6 @@
       "sample",
       "Bloody_Hell",
       "TimmyLoal",
-      "Uncontrollable",
       "jogg"
     ],
     "LT2": [
@@ -698,7 +677,6 @@
       "revan",
       "Kaeye",
       "skibidi1234",
-      "FirstChance",
       "shadow_master"
     ],
     "RLT3": [
@@ -727,8 +705,7 @@
       "x9jm",
       "jogg",
       "Jerryisking",
-      "vort3x",
-      "Uncontrollable"
+      "vort3x"
     ],
     "LT2": [
       "LastChance",
@@ -747,8 +724,7 @@
       "MiddleChance"
     ],
     "HT4": [
-      "Husky_Multicraft",
-      "FirstChance"
+      "Husky_Multicraft"
     ],
     "LT4": [
       "bluedigit"
@@ -765,11 +741,6 @@
   "Dragonhide KB\"": {
     "LT2": [
       "NoT_HuMaN"
-    ]
-  },
-  "Novelty": {
-    "HT2": [
-      "Uncontrollable"
     ]
   }
 }
