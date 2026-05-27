@@ -266,11 +266,6 @@
       "device": "MK"
     },
     {
-      "name": "abnormal",
-      "region": "EU",
-      "device": "MK"
-    },
-    {
       "name": "Duality",
       "region": "AS",
       "device": "MB"
@@ -303,6 +298,11 @@
     {
       "name": "Ron_",
       "region": "Unknown",
+      "device": "MK"
+    },
+    {
+      "name": "Normal",
+      "region": "EU",
       "device": "MK"
     }
   ],
@@ -446,7 +446,6 @@
       "SHADE",
       "Terminator",
       "Possessed_YT",
-      "abnormal",
       "jogg"
     ],
     "RHT2": [
