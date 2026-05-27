@@ -111,11 +111,6 @@
       "device": "MB"
     },
     {
-      "name": "supermobilenoobpvp",
-      "region": "EU",
-      "device": "MB"
-    },
-    {
       "name": "CosmicallyXVII",
       "region": "EU",
       "device": "MK"
@@ -311,11 +306,6 @@
       "device": "MK"
     },
     {
-      "name": "Mobile-Murderer",
-      "region": "NA",
-      "device": "MB"
-    },
-    {
       "name": "Ron_",
       "region": "Unknown",
       "device": "MK"
@@ -368,9 +358,6 @@
       "FarXD",
       "Kaeye",
       "shadow_master"
-    ],
-    "LT4": [
-      "supermobilenoobpvp"
     ],
     "HT5": [
       "ArpanYT",
@@ -499,11 +486,9 @@
       "Solace"
     ],
     "LT4": [
-      "supermobilenoobpvp",
       "Mane",
       "chi-na",
-      "-R3ZN-",
-      "Mobile-Murderer"
+      "-R3ZN-"
     ],
     "HT5": [
       "FarXD",
