@@ -186,11 +186,6 @@
       "device": "MK"
     },
     {
-      "name": "Normal",
-      "region": "EU",
-      "device": "CT"
-    },
-    {
       "name": "LastChance",
       "region": "OC",
       "device": "MK"
@@ -468,7 +463,6 @@
     "LT3": [
       "revan",
       "Herobrine",
-      "Normal",
       "Kaeye"
     ],
     "HT4": [
