@@ -261,11 +261,6 @@
       "device": "MK"
     },
     {
-      "name": "actuallybad",
-      "region": "NA",
-      "device": "TP"
-    },
-    {
       "name": "Corpse",
       "region": "NA",
       "device": "CT"
@@ -374,8 +369,7 @@
       "DivyamGamerYT"
     ],
     "RLT2": [
-      "LifoMC",
-      "actuallybad"
+      "LifoMC"
     ],
     "HT3": [
       "Bloody_Hell",
@@ -447,8 +441,7 @@
       "Solace"
     ],
     "RHT3": [
-      "DivyamGamerYT",
-      "actuallybad"
+      "DivyamGamerYT"
     ],
     "HT4": [
       "CosmicallyXVII",
@@ -475,8 +468,7 @@
     ],
     "RLT1": [
       "DivyamGamerYT",
-      "LifoMC",
-      "actuallybad"
+      "LifoMC"
     ],
     "HT2": [
       "ChillPotato",
@@ -635,9 +627,6 @@
       "Kaeye",
       "shadow_master",
       "Solace"
-    ],
-    "RHT3": [
-      "actuallybad"
     ],
     "HT4": [
       "MiddleChance"
