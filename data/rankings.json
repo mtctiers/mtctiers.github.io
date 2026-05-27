@@ -211,11 +211,6 @@
       "device": "MB"
     },
     {
-      "name": "Bloody_Hell",
-      "region": "NA",
-      "device": "MK"
-    },
-    {
       "name": "vort3x",
       "region": "EU",
       "device": "MK"
@@ -337,7 +332,6 @@
       "LifoMC"
     ],
     "HT3": [
-      "Bloody_Hell",
       "CJSHORT",
       "CosmicallyXVII",
       "-_Hades_-",
@@ -392,7 +386,6 @@
       "vort3x"
     ],
     "LT3": [
-      "Bloody_Hell",
       "Possessed_YT",
       "Husky_Multicraft",
       "LastChance",
@@ -442,7 +435,6 @@
       "MrDaRkYT",
       "CosmicallyXVII",
       "skibidi1234",
-      "Bloody_Hell",
       "SHADE",
       "Terminator",
       "Possessed_YT",
@@ -514,7 +506,6 @@
       "x9jm",
       "Possessed_YT",
       "skibidi1234",
-      "Bloody_Hell",
       "jogg",
       "Jerryisking"
     ],
@@ -558,7 +549,6 @@
       "CosmicallyXVII",
       "Jerryisking",
       "Mane",
-      "Bloody_Hell",
       "Possessed_YT",
       "jogg",
       "vort3x",
@@ -592,7 +582,6 @@
     "HT2": [
       "Game1K",
       "sample",
-      "Bloody_Hell",
       "TimmyLoal",
       "jogg"
     ],
@@ -643,7 +632,6 @@
     ],
     "LT2": [
       "LastChance",
-      "Bloody_Hell",
       "Possessed_YT",
       "Vorthexis"
     ],
