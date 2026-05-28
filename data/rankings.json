@@ -6,6 +6,11 @@
       "device": "MK"
     },
     {
+      "name": "ziadlive",
+      "region": "EG",
+      "device": "PC"
+    },
+    {
       "name": "system1117",
       "region": "NA",
       "device": "MK"
@@ -303,7 +308,7 @@
   ],
   "Emerald": {
     "HT1": [
-      "Game1K"
+      "ziadlive"
     ],
     "LT1": [
       "system1117",
