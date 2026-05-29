@@ -17,7 +17,6 @@
 <meta property="twitter:image" content="https://mtctiers.github.io/assets/mtctiers.png">
 <meta name="theme-color" content="#a855f7">
 <link rel="stylesheet" href="style.css">
-
 </head>
 <body>
 <div class="sweep-bg"></div>
@@ -30,33 +29,32 @@
 </header>
 
 <nav>
+    <div id="navUserBadge">
+        <span id="navUserName"></span>
+        <span id="navUserRole" class="nav-role-badge"></span>
+    </div>
     <div class="nav-center">
         <div id="nav-home"     class="nav-link active" onclick="switchTab('home')">HOME</div>
         <div id="nav-rankings" class="nav-link"        onclick="switchTab('rankings')">RANKINGS</div>
         <div id="nav-hof"      class="nav-link"        onclick="switchTab('hof')">HALL OF FAME</div>
         <div id="nav-testers"  class="nav-link"        onclick="switchTab('testers')">TIER TESTERS</div>
+        <div id="nav-duels"    class="nav-link"         onclick="switchTab('duels')">DUELS</div>
     </div>
     <div class="search-wrap">
         <input type="text" id="playerSearch" placeholder="SEARCH PLAYER..." oninput="handleSearch(this.value)">
         <div id="searchPopup"></div>
     </div>
+    <button id="loginNavBtn" onclick="handleAuthBtn()">LOGIN</button>
 </nav>
 
 <div id="viewLabel">OVERALL</div>
 <div id="kitBar"></div>
 
-<!-- Filter bar — shown only on Overall -->
 <div id="filterBar">
     <span class="filter-label">FILTER BY</span>
-    <select class="filter-select" id="filterKit" onchange="applyFilters()">
-        <option value="">ALL KITS</option>
-    </select>
-    <select class="filter-select" id="filterRegion" onchange="applyFilters()">
-        <option value="">ALL REGIONS</option>
-    </select>
-    <select class="filter-select" id="filterDevice" onchange="applyFilters()">
-        <option value="">ALL DEVICES</option>
-    </select>
+    <select class="filter-select" id="filterKit"     onchange="applyFilters()"><option value="">ALL KITS</option></select>
+    <select class="filter-select" id="filterRegion"  onchange="applyFilters()"><option value="">ALL REGIONS</option></select>
+    <select class="filter-select" id="filterDevice"  onchange="applyFilters()"><option value="">ALL DEVICES</option></select>
     <select class="filter-select" id="filterRetired" onchange="applyFilters()">
         <option value="">ACTIVE + RETIRED</option>
         <option value="active">ACTIVE ONLY</option>
@@ -65,13 +63,10 @@
     <button id="filterResetBtn" onclick="resetFilters()">RESET</button>
 </div>
 
-<!-- Podium top 3 -->
 <div id="topPlayersTitle" style="display:none;font-family:'MultiCraftFont',monospace;font-size:1.8rem;color:var(--gold);text-shadow:0 0 15px var(--gold-glow);text-align:center;width:100%;margin-bottom:10px;animation:blurRise 0.5s ease-out both;">Top Players</div>
 <div id="podiumWrap"></div>
-
 <div id="displayList"></div>
 <div id="showMoreBtn" onclick="toggleShowMore()">FULL LEADERBOARD ▶</div>
-
 <div class="info-btn" onclick="openInfo()">i</div>
 
 <!-- Info modal -->
@@ -99,16 +94,16 @@
                 <div><span style="color:#b044ff; font-family:'MultiCraftFont';">Combat Specialist</span> - 50+ pts</div>
                 <div><span style="color:#00ff88; font-family:'MultiCraftFont';">Combat Cadet</span> - 20+ pts</div>
                 <div><span style="color:#ff7f50; font-family:'MultiCraftFont';">Combat Novice</span> - 10+ pts</div>
-                <div><span style="color:#888;    font-family:'MultiCraftFont';">Rookie</span> - Under 10 pts</div>
+                <div><span style="color:#888; font-family:'MultiCraftFont';">Rookie</span> - Under 10 pts</div>
             </div>
         </div>
     </div>
 </div>
 
 <!-- Profile modal -->
-<div id="profileModal" class="modal-overlay" onclick="this.style.display='none';setUrl({player:''});document.querySelector('.profile-modal-content').style.boxShadow=''">
+<div id="profileModal" class="modal-overlay" onclick="closeProfileModal()">
     <div class="profile-modal-content" onclick="event.stopPropagation()">
-        <button class="profile-close-btn" onclick="document.getElementById('profileModal').style.display='none';setUrl({player:''});document.querySelector('.profile-modal-content').style.boxShadow=''">✕</button>
+        <button class="profile-close-btn" onclick="closeProfileModal()">✕</button>
         <button class="profile-copy-btn" id="profileCopyBtn" onclick="copyProfileLink()" title="Copy profile link">⧉</button>
         <div class="profile-left">
             <div id="pBadgeRow" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
@@ -117,8 +112,8 @@
             </div>
             <h2 id="pName" class="profile-name">Player</h2>
             <div id="pMeta" style="margin-bottom:14px;"></div>
-            <div id="pSkin" style="margin-top:auto; padding-top:12px; display:none; justify-content:center;">
-                <img id="pSkinImg" src="" alt="" style="width:256px; height:256px; image-rendering:pixelated; object-fit:contain;">
+            <div id="pSkin" style="margin-top:auto;padding-top:12px;display:none;justify-content:center;">
+                <img id="pSkinImg" src="" alt="" style="width:256px;height:256px;image-rendering:pixelated;object-fit:contain;">
             </div>
             <div id="pPoints" class="profile-elo">0 <span class="profile-elo-label">PTS</span></div>
         </div>
@@ -129,629 +124,796 @@
     </div>
 </div>
 
+<!-- Duel detail modal -->
+<div id="duelModal" class="modal-overlay" onclick="this.style.display='none'">
+    <div class="modal-content" style="max-width:420px;" onclick="event.stopPropagation()">
+        <div id="duelModalContent"></div>
+    </div>
+</div>
+
+<!-- Login modal -->
+<div id="loginModal" onclick="closeLoginModal()">
+    <div class="lc" onclick="event.stopPropagation()">
+        <button class="lc-close" onclick="closeLoginModal()">✕</button>
+        <div class="lc-logo">
+            <img src="assets/mtctiers.png" alt="MTC">
+            <div class="lc-logo-title">MTC TIERS</div>
+            <div class="lc-logo-sub">PLAYER LOGIN</div>
+        </div>
+        <label class="lc-label" for="lcName">YOUR NAME</label>
+        <input class="lc-input" id="lcName" type="text" placeholder="Exact name from rankings..." autocomplete="off" spellcheck="false">
+        <label class="lc-label" for="lcCode">LOGIN CODE</label>
+        <input class="lc-input" id="lcCode" type="text" placeholder="••••••••" maxlength="16" autocomplete="off" spellcheck="false">
+        <button class="lc-btn" id="lcSubmit" onclick="doLogin()">LOGIN</button>
+    </div>
+</div>
+
 <script>
-/* ═══════════════════════════════════════════════════════════════
-   CONFIGURATION
-   ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════ */
+const AUTH_API = "https://mtc-backend-production-e0ab.up.railway.app/api";
 
 const KIT_MAP = {
-    "Overall":           { img: "",                             color: "var(--gold)" },
-    "Emerald":           { img: "assets/emerald.png",          color: "#1a7a1a" },
-    "Emerald KB":        { img: "assets/emerald_kb.png",       color: "#00e5b0" },
-    "Dragonhide KB":     { img: "assets/dragonhide_kb.png",    color: "#ff6a00" },
-    "Manhunt":           { img: "assets/manhunt.png",          color: "#ff1a6b" },
-    "Diamond":           { img: "assets/diamond.png",          color: "#00c8ff" },
-    "Novelty Axe":       { img: "assets/novelty_axe.png",      color: "#ffaa00" },
-    "Dragonhide Anchor": { img: "assets/dragonhide_anchor.png",color: "#8a2be2" },
-    "Void":              { img: "assets/void.png",             color: "#ff00ff" },
+    "Overall":           { img:"",                              color:"var(--gold)"  },
+    "Emerald":           { img:"assets/emerald.png",           color:"#1a7a1a"      },
+    "Emerald KB":        { img:"assets/emerald_kb.png",        color:"#00e5b0"      },
+    "Dragonhide KB":     { img:"assets/dragonhide_kb.png",     color:"#ff6a00"      },
+    "Manhunt":           { img:"assets/manhunt.png",           color:"#ff1a6b"      },
+    "Diamond":           { img:"assets/diamond.png",           color:"#00c8ff"      },
+    "Novelty Axe":       { img:"assets/novelty_axe.png",       color:"#ffaa00"      },
+    "Dragonhide Anchor": { img:"assets/dragonhide_anchor.png", color:"#8a2be2"      },
+    "Void":              { img:"assets/void.png",              color:"#ff00ff"      },
 };
-
 const REGION_MAP = {
-    "NA": { label: "North America",  color: "#3498db" },
-    "SA": { label: "South America",  color: "#00ff88" },
-    "EU": { label: "Europe",         color: "#ff4d4d" },
-    "AS": { label: "Asia",           color: "#ff8800" },
-    "OC": { label: "Oceania",        color: "#ff00ff" },
-    "AF": { label: "Africa",         color: "#00d4ff" },
+    "NA":{ label:"North America", color:"#3498db" }, "SA":{ label:"South America", color:"#00ff88" },
+    "EU":{ label:"Europe",        color:"#ff4d4d" }, "AS":{ label:"Asia",          color:"#ff8800" },
+    "OC":{ label:"Oceania",       color:"#ff00ff" }, "AF":{ label:"Africa",        color:"#00d4ff" },
 };
-
 const DEVICE_MAP = {
-    "MK": { label: "Mouse & Keyboard", color: "#00ffff"  },
-    "MB": { label: "Mobile",           color: "#ff7f50"  },
-    "CT": { label: "Controller",       color: "#b044ff"  },
-    "TP": { label: "Touchpad",         color: "#ff00aa"  },
+    "MK":{ label:"Mouse & Keyboard", color:"#00ffff" }, "MB":{ label:"Mobile",    color:"#ff7f50" },
+    "CT":{ label:"Controller",       color:"#b044ff" }, "TP":{ label:"Touchpad",  color:"#ff00aa" },
 };
 
-/* ═══════════════════════════════════════════════════════════════
-   STATE
-   ═══════════════════════════════════════════════════════════════ */
+const THEME_PRESETS = {
+    "DEFAULT": { bg:"",                                         border:"",        glow:"",        name:"",        nameStyle:"" },
+    "CYBER":   { bg:"#06060a",                                  border:"#00eeff", glow:"#00eeff", name:"#00eeff", nameStyle:"" },
+    "GOLD":    { bg:"linear-gradient(135deg,#0a0800,#1a1200)",  border:"#ffd700", glow:"#ffd700", name:"#ffd700", nameStyle:"gradient:#ffd700-#ff8800" },
+    "VOID":    { bg:"linear-gradient(135deg,#0a0010,#1a0030)",  border:"#b044ff", glow:"#b044ff", name:"#cc88ff", nameStyle:"gradient:#b044ff-#ff00ff" },
+    "BLOOD":   { bg:"linear-gradient(135deg,#0d0000,#1a0000)",  border:"#ff3333", glow:"#ff3333", name:"#ff6666", nameStyle:"glow:#ff3333" },
+    "OCEAN":   { bg:"linear-gradient(135deg,#00080d,#001a2a)",  border:"#0088ff", glow:"#0088ff", name:"#44aaff", nameStyle:"gradient:#0088ff-#00eeff" },
+    "FOREST":  { bg:"linear-gradient(135deg,#000a00,#001a00)",  border:"#00cc44", glow:"#00cc44", name:"#44ff88", nameStyle:"glow:#00cc44" },
+    "SUNSET":  { bg:"linear-gradient(135deg,#0d0500,#1a0a00)",  border:"#ff6a00", glow:"#ff6a00", name:"#ffaa44", nameStyle:"gradient:#ff6a00-#ffd700" },
+    "RAINBOW": { bg:"#06060a",                                  border:"#ff00ff", glow:"#ff00ff", name:"",        nameStyle:"animated" },
+};
 
-let DATA        = {};
-let CURRENT_TAB = 'home';
-let CURRENT_KIT = 'Overall';
-let SHOW_ALL    = false;
-const PREVIEW   = 2; // rows shown below podium (top 3 podium + 2 = top 5 total)
+/* ═══════════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════════ */
+let AUTH = null;
+const TOKEN_KEY  = "mtc_token";
+const saveToken  = t => localStorage.setItem(TOKEN_KEY,t);
+const loadToken  = ()=> localStorage.getItem(TOKEN_KEY)||"";
+const clearToken = ()=> localStorage.removeItem(TOKEN_KEY);
 
-const PTS = { "HT1":50,"LT1":40,"HT2":30,"LT2":20,"HT3":12,"LT3":8,"HT4":5,"LT4":3,"HT5":2,"LT5":1 };
-
-/* skin HEAD-check cache: name → true|false */
-const skinCache = {};
-
-const DEFAULT_SKIN = 'assets/mtctiers_default_skin.png';
-
-async function hasSkin(name) {
-    if (name in skinCache) return skinCache[name];
-    try {
-        const r = await fetch(`assets/${name.toLowerCase()}.png`, { method: 'HEAD' });
-        skinCache[name] = r.ok;
-    } catch { skinCache[name] = false; }
-    return skinCache[name];
+async function authCall(method,path,body){
+    const opts={method,headers:{"Content-Type":"application/json","Authorization":`Bearer ${loadToken()}`}};
+    if(body!==undefined) opts.body=JSON.stringify(body);
+    let res;
+    try{ res=await fetch(AUTH_API+path,opts); }
+    catch(e){ throw new Error("Cannot reach server."); }
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok) throw new Error(data.error||`Server error (${res.status})`);
+    return data;
 }
 
-// Returns the skin src for a player — their own if it exists, otherwise the default
-function skinSrc(name) {
-    return (skinCache[name] ? `assets/${name.toLowerCase()}.png` : DEFAULT_SKIN);
+async function restoreSession(){
+    if(!loadToken()) return;
+    try{
+        const d=await authCall("GET","/me");
+        AUTH={name:d.name,role:d.role,profile:d.profile};
+        updateNavAuth();
+    }catch(_){ clearToken(); AUTH=null; }
 }
 
-async function prewarmSkins(names) {
-    await Promise.all(names.map(hasSkin));
+async function doLogin(){
+    const name=document.getElementById('lcName').value.trim();
+    const code=document.getElementById('lcCode').value.trim();
+    const btn=document.getElementById('lcSubmit');
+    if(!name||!code) return;
+    btn.disabled=true; btn.textContent="LOGGING IN...";
+    try{
+        const d=await authCall("POST","/login",{name,code});
+        saveToken(d.token);
+        AUTH={name:d.name,role:d.role,profile:null};
+        try{ const me=await authCall("GET","/me"); AUTH.profile=me.profile; }catch(_){}
+        updateNavAuth(); playBtnSound(); setTimeout(closeLoginModal,300);
+    }catch(err){
+        let el=document.getElementById('lcErrMsg');
+        if(!el){ el=document.createElement('div'); el.id='lcErrMsg'; el.style.cssText='font-family:"MultiCraftFont",monospace;font-size:0.5rem;color:#ff4444;text-align:center;margin-top:8px;letter-spacing:1px;'; document.getElementById('lcSubmit').after(el); }
+        el.textContent=err.message||"Login failed.";
+        setTimeout(()=>{ if(el) el.textContent=""; },3000);
+    }finally{ btn.disabled=false; btn.textContent="LOGIN"; }
 }
 
-/* ─── Typing animation ──────────────────────────────────── */
-function typeText(el, text, duration=1000) {
-    el.textContent = '';
-    const chars = text.split('');
-    const interval = duration / chars.length;
-    let i = 0;
-    const tick = setInterval(() => {
-        el.textContent += chars[i++];
-        if (i >= chars.length) clearInterval(tick);
-    }, interval);
+async function doLogout(){
+    try{ await authCall("POST","/logout"); }catch(_){}
+    clearToken(); AUTH=null; updateNavAuth();
 }
 
-/* ─── Theme ─────────────────────────────────────────────── */
-function buildThemeVars() {
-    let css = ":root {\n";
-    for (const [c,{color}] of Object.entries(REGION_MAP)) css += `  --reg-${c.toLowerCase()}: ${color};\n`;
-    for (const [c,{color}] of Object.entries(DEVICE_MAP))  css += `  --dev-${c.toLowerCase()}: ${color};\n`;
-    css += "}\n";
-    for (const [c] of Object.entries(REGION_MAP)) { const v=`var(--reg-${c.toLowerCase()})`; css+=`.tag-reg-${c.toLowerCase()}{color:${v};border-color:${v}!important}\n`; }
-    for (const [c] of Object.entries(DEVICE_MAP))  { const v=`var(--dev-${c.toLowerCase()})`; css+=`.tag-dev-${c.toLowerCase()}{color:${v};border-color:${v}!important}\n`; }
-    const el=document.createElement('style'); el.textContent=css; document.head.appendChild(el);
-}
+/* ═══════════════════════════════════════════════
+   SAVE PROFILE
+═══════════════════════════════════════════════ */
+async function saveProfileEdits(){
+    const btn=document.getElementById('peSave');
+    const msg=document.getElementById('peMsg');
+    if(!btn) return;
+    btn.disabled=true; btn.textContent="SAVING...";
+    try{
+        const socialEntries=[];
+        document.querySelectorAll('.social-entry').forEach(row=>{
+            const label=row.querySelector('.pe-social-label')?.value.trim()||"";
+            const url=row.querySelector('.pe-social-url')?.value.trim()||"";
+            const icon=row.dataset.icon||"";
+            socialEntries.push({label,url,icon});
+        });
 
-/* ─── Audio ─────────────────────────────────────────────── */
-function playBtnSound() {
-    const a=new Audio('sounds/button.mp3'); a.volume=0.5; a.play().catch(()=>{});
-}
-
-/* ─── Tags ──────────────────────────────────────────────── */
-function getTags(name) {
-    const p = DATA.Players?.find(x=>x.name===name) || {region:"?",device:"?"};
-    const reg=REGION_MAP[p.region]; const dev=DEVICE_MAP[p.device];
-    return `<div style="margin-top:5px;">
-        <div class="tag-wrap ${reg?'has-hover':''}">
-            <span class="tag tag-reg-${p.region.toLowerCase()}">${p.region}</span>
-            ${reg?`<div class="tag-popup">${reg.label}</div>`:''}
-        </div>
-        <div class="tag-wrap ${dev?'has-hover':''}">
-            <span class="tag tag-dev-${p.device.toLowerCase()}">${p.device}</span>
-            ${dev?`<div class="tag-popup">${dev.label}</div>`:''}
-        </div>
-    </div>`;
-}
-
-/* ─── Load data ─────────────────────────────────────────── */
-async function load() {
-    buildThemeVars();
-    populateFilterDropdowns();
-    try {
-        const r = await fetch(`data/rankings.json?v=${Date.now()}`);
-        DATA = await r.json();
-        let totals = {};
-        for (let k in DATA) {
-            if (k==="Overall"||k==="Players") continue;
-            for (let t in DATA[k]) DATA[k][t].forEach(p=>{ totals[p]=(totals[p]||0)+(PTS[t.replace('R','')]||0); });
-        }
-        if (DATA.Players) DATA.Players.forEach(p=>{ if(!(p.name in totals)) totals[p.name]=0; });
-        DATA["Overall"] = totals;
-        buildKitBar();
-        CURRENT_TAB='home';
-        await renderOverall();
-    } catch(e) { console.error("Could not load rankings.json",e); }
-}
-
-/* ─── Kit bar ───────────────────────────────────────────── */
-function buildKitBar() {
-    const bar=document.getElementById('kitBar'); bar.innerHTML="";
-    Object.entries(KIT_MAP).forEach(([name,{img,color}])=>{
-        const btn=document.createElement('button');
-        const active=name==='Overall';
-        btn.className=`kit-btn ${active?'active':''}`;
-        btn.style.setProperty('--kit-active-color',color);
-        btn.style.color=color; btn.style.opacity=active?'1':'0.4';
-        btn.innerHTML=(img?`<img src="${img}" style="width:16px;vertical-align:middle;">`:'') + name.toUpperCase();
-        btn.onclick=()=>{
-            playBtnSound();
-            if(CURRENT_TAB!=='rankings' && CURRENT_TAB!=='home') return;
-            document.querySelectorAll('.kit-btn').forEach(b=>{b.classList.remove('active');b.style.opacity='0.4';});
-            btn.classList.add('active'); btn.style.opacity='1';
-            CURRENT_KIT=name;
-            setUrl({kit:name==='Overall'?'':name, player:''});
-            if(name==='Overall') renderOverall(); else renderKit(name);
+        const parseColor=v=>{
+            v=(v||"").trim(); if(!v) return "";
+            if(/^#[0-9a-fA-F]{3,8}([-,]#[0-9a-fA-F]{3,8})+$/.test(v)){
+                return `linear-gradient(135deg,${v.split(/[-,]/).filter(s=>s.startsWith('#')).join(',')})`;
+            }
+            return v;
         };
-        bar.appendChild(btn);
-    });
-}
 
-/* ─── Filter dropdowns ──────────────────────────────────── */
-function populateFilterDropdowns() {
-    const ks=document.getElementById('filterKit');
-    Object.keys(KIT_MAP).forEach(k=>{ if(k==='Overall') return; const o=document.createElement('option'); o.value=k; o.textContent=k.toUpperCase(); ks.appendChild(o); });
-    const rs=document.getElementById('filterRegion');
-    Object.entries(REGION_MAP).forEach(([code,{label}])=>{ const o=document.createElement('option'); o.value=code; o.textContent=`${code} — ${label}`; rs.appendChild(o); });
-    const ds=document.getElementById('filterDevice');
-    Object.entries(DEVICE_MAP).forEach(([code,{label}])=>{ const o=document.createElement('option'); o.value=code; o.textContent=`${code} — ${label}`; ds.appendChild(o); });
-}
-
-function getFilters() {
-    return {
-        kit:     document.getElementById('filterKit').value,
-        region:  document.getElementById('filterRegion').value,
-        device:  document.getElementById('filterDevice').value,
-        retired: document.getElementById('filterRetired').value,
-    };
-}
-function applyFilters()  {
-    if(CURRENT_KIT && CURRENT_KIT!=='Overall') {
-        renderKit(CURRENT_KIT);
-    } else {
-        if(CURRENT_TAB!=='rankings') { SHOW_ALL=false; document.getElementById('kitBar').style.display='none'; }
-        renderOverall();
-    }
-}
-function resetFilters()  {
-    ['filterKit','filterRegion','filterDevice','filterRetired'].forEach(id=>document.getElementById(id).value='');
-    if(CURRENT_KIT && CURRENT_KIT!=='Overall') {
-        renderKit(CURRENT_KIT);
-    } else {
-        if(CURRENT_TAB!=='rankings') { SHOW_ALL=false; document.getElementById('kitBar').style.display='none'; }
-        renderOverall();
-    }
-}
-function toggleShowMore(){
-    switchTab('rankings');
-}
-
-/* ─── Build filtered sorted list ───────────────────────── */
-function buildFilteredOverall() {
-    const {kit,region,device,retired}=getFilters();
-
-    let scoredMap = {};
-
-    const playerStatus = {};
-    for (let k in DATA) {
-        if (k==='Overall'||k==='Players') continue;
-        for (let t in DATA[k]) {
-            const isR = t.startsWith('R');
-            DATA[k][t].forEach(name => {
-                if (!playerStatus[name]) playerStatus[name] = {active:false, retired:false};
-                if (isR) playerStatus[name].retired = true;
-                else     playerStatus[name].active  = true;
-            });
-        }
-    }
-
-    if (!retired) {
-        scoredMap = { ...DATA.Overall };
-    } else {
-        for (let k in DATA) {
-            if (k==='Overall'||k==='Players') continue;
-            for (let t in DATA[k]) {
-                const isR = t.startsWith('R');
-                // For "active only": skip retired tiers from scoring, but keep the player
-                if (retired==='active'  &&  isR) continue;
-                // For "retired only": skip active tiers from scoring
-                if (retired==='retired' && !isR) continue;
-                const pts = PTS[t.replace('R','')];
-                if (!pts) continue;
-                DATA[k][t].forEach(name => {
-                    scoredMap[name] = (scoredMap[name]||0) + pts;
-                });
-            }
-        }
-        if (DATA.Players) DATA.Players.forEach(p=>{ if(!(p.name in scoredMap)) scoredMap[p.name]=0; });
-    }
-
-    let entries = Object.entries(scoredMap);
-
-    if (region||device) {
-        entries=entries.filter(([name])=>{
-            const p=DATA.Players?.find(x=>x.name===name);
-            if(!p) return false;
-            if(region&&p.region!==region) return false;
-            if(device&&p.device!==device) return false;
-            return true;
+        const d=await authCall("PATCH","/profile",{
+            pronouns:          document.getElementById('pePronouns')?.value.trim()||"",
+            description:       document.getElementById('peDescription')?.value.trim()||"",
+            rival:             document.getElementById('peRival')?.value.trim()||"",
+            banner:            parseColor(document.getElementById('peBanner')?.value||""),
+            lfm_status:        document.getElementById('peLfm')?.checked?1:0,
+            socials:           socialEntries,
+            theme_bg:          parseColor(document.getElementById('peThemeBg')?.value||""),
+            theme_bg_image:    AUTH.profile?.theme_bg_image||"", // preserved from current
+            theme_border:      document.getElementById('peThemeBorder')?.value.trim()||"",
+            theme_glow:        document.getElementById('peThemeGlow')?.value.trim()||"",
+            theme_name_color:  document.getElementById('peThemeNameColor')?.value.trim()||"",
+            theme_name_style:  document.getElementById('peThemeNameStyle')?.value.trim()||"",
         });
-    }
-
-    // FIX: "active only" — show players who have ANY active tier.
-    // Retired tiers are already excluded from scoring above; don't hide players who also have retired tiers.
-    if (retired==='active') {
-        entries=entries.filter(([name])=>{
-            const s=playerStatus[name];
-            return s && s.active;
-        });
-    } else if (retired==='retired') {
-        // "retired only" — show players whose ONLY tiers are retired ones
-        entries=entries.filter(([name])=>{
-            const s=playerStatus[name];
-            return s && s.retired && !s.active;
-        });
-    }
-
-    if (retired) {
-        entries=entries.filter(([,pts])=>pts>0);
-    }
-
-    if (kit) {
-        const kitScores={};
-        if (DATA[kit]) {
-            for (let t in DATA[kit]) {
-                const isRetiredTier=t.startsWith('R');
-                if (retired==='active'  &&  isRetiredTier) continue;
-                if (retired==='retired' && !isRetiredTier) continue;
-                const pts=PTS[t.replace('R','')];
-                if (!pts) continue;
-                DATA[kit][t].forEach(name=>{
-                    if (!kitScores[name]||kitScores[name].pts<pts)
-                        kitScores[name]={pts,tier:t};
-                });
-            }
+        if(AUTH) AUTH.profile=d.profile;
+        const currentName=document.getElementById('pName')?.innerText.trim();
+        if(currentName&&document.getElementById('profileModal').style.display!=='none'){
+            clearProfileExtras();
+            applyProfileTheme(d.profile);
+            injectProfileExtras(currentName,AUTH.role,d.profile);
+            injectEditPanel(currentName);
         }
-        entries=entries
-            .filter(([name])=>kitScores[name])
-            .map(([name])=>[name,kitScores[name].pts,kitScores[name].tier]);
-        entries.sort((a,b)=>b[1]-a[1]);
-        return {entries,kitMode:true,kitName:kit};
+        if(msg){ msg.textContent="✓ Saved!"; msg.className="pe-msg ok"; }
+    }catch(err){
+        if(msg){ msg.textContent=err.message||"Save failed."; msg.className="pe-msg err"; }
+    }finally{
+        if(btn){ btn.disabled=false; btn.textContent="SAVE CHANGES"; }
+        setTimeout(()=>{ if(msg) msg.textContent=""; },3000);
+    }
+}
+
+async function saveBgImage(b64){
+    try{
+        const d=await authCall("PATCH","/profile",{theme_bg_image:b64});
+        if(AUTH) AUTH.profile=d.profile;
+        applyProfileTheme(d.profile);
+    }catch(e){ console.warn("BG image save failed",e); }
+}
+
+/* ═══════════════════════════════════════════════
+   NAV AUTH
+═══════════════════════════════════════════════ */
+function updateNavAuth(){
+    const btn=document.getElementById('loginNavBtn');
+    const badge=document.getElementById('navUserBadge');
+    const uname=document.getElementById('navUserName');
+    const urole=document.getElementById('navUserRole');
+    if(!btn) return;
+    if(AUTH){
+        btn.textContent="LOGOUT"; btn.classList.add('li');
+        uname.textContent=AUTH.name;
+        urole.textContent=AUTH.role.toUpperCase(); urole.dataset.r=AUTH.role;
+        badge.classList.add('vis');
+    }else{
+        btn.textContent="LOGIN"; btn.classList.remove('li');
+        badge.classList.remove('vis');
+    }
+}
+
+let _logoutConfirm=false;
+function handleAuthBtn(){
+    playBtnSound();
+    if(!AUTH){ openLoginModal(); return; }
+    if(_logoutConfirm){ doLogout(); _logoutConfirm=false; return; }
+    _logoutConfirm=true;
+    const btn=document.getElementById('loginNavBtn');
+    btn.textContent="CONFIRM?"; btn.style.color="#ff4444"; btn.style.borderColor="#ff4444";
+    setTimeout(()=>{ _logoutConfirm=false; btn.textContent="LOGOUT"; btn.style.color=""; btn.style.borderColor=""; },2500);
+}
+
+function openLoginModal(){ document.getElementById('loginModal').classList.add('open'); document.getElementById('lcName').focus(); }
+function closeLoginModal(){ document.getElementById('loginModal').classList.remove('open'); document.getElementById('lcCode').value=""; }
+
+document.getElementById('lcName').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+document.getElementById('lcCode').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
+
+/* ═══════════════════════════════════════════════
+   PROFILE THEME
+═══════════════════════════════════════════════ */
+function parseCss(v){
+    v=(v||"").trim(); if(!v) return "";
+    if(/^#[0-9a-fA-F]{3,8}([-,]#[0-9a-fA-F]{3,8})+$/.test(v)){
+        return `linear-gradient(135deg,${v.split(/[-,]/).filter(s=>s.startsWith('#')).join(',')})`;
+    }
+    return v;
+}
+
+function applyProfileTheme(profile){
+    const modal=document.querySelector('.profile-modal-content');
+    const nameEl=document.getElementById('pName');
+    if(!modal||!profile) return;
+
+    const bg      = profile.theme_bg       ||"";
+    const bgImg   = profile.theme_bg_image ||"";
+    const border  = profile.theme_border   ||"";
+    const glow    = profile.theme_glow     ||"";
+    const nameC   = profile.theme_name_color||"";
+    const nameStyle= profile.theme_name_style||"";
+    const banner  = profile.banner         ||"";
+
+    // Background: image takes priority over gradient
+    if(bgImg){
+        modal.style.background=`url(${bgImg}) center/cover no-repeat`;
+    } else if(bg){
+        modal.style.background=bg;
+    } else {
+        modal.style.background="";
     }
 
-    entries.sort((a,b)=>b[1]-a[1]);
-    return {entries,kitMode:false,kitName:null};
+    modal.style.borderColor = border||"";
+    modal.style.boxShadow   = glow ? `0 0 40px ${glow}55, 0 0 80px ${glow}22` : "";
+
+    // Name styling
+    if(nameEl){
+        applyNameStyle(nameEl, nameC, nameStyle);
+    }
+
+    // Banner strip
+    if(banner){
+        let strip=document.querySelector('.profile-banner-strip');
+        if(!strip){ strip=document.createElement('div'); strip.className='profile-banner-strip'; modal.prepend(strip); }
+        strip.style.background=banner;
+    }
 }
 
-/* ─── Rank Titles ───────────────────────────────────────── */
-function getRankTitle(pts, rank) {
-    if (rank === 1 || pts >= 300) return { title: "Combat Grandmaster", color: "#ffd700" };
-    if (rank <= 3 || pts >= 200)  return { title: "Combat Master",      color: "#00eeff" };
-    if (pts >= 150)               return { title: "Combat Ace",         color: "#ff6a00" };
-    if (pts >= 50)                return { title: "Combat Specialist",  color: "#b044ff" };
-    if (pts >= 20)                return { title: "Combat Cadet",       color: "#00ff88" };
-    if (pts >= 10)                return { title: "Combat Novice",      color: "#ff7f50" };
-    return                               { title: "Rookie",             color: "#888"    };
-}
+function applyNameStyle(el, color, style){
+    // Reset
+    el.style.color="";
+    el.style.webkitTextFillColor="";
+    el.style.webkitBackgroundClip="";
+    el.style.backgroundClip="";
+    el.style.background="";
+    el.style.textShadow="";
+    el.classList.remove('name-animated');
 
-/* ─── Title badge HTML helper ───────────────────────────── */
-function titleBadgeHtml(pts, rank) {
-    const {title, color} = getRankTitle(pts, rank);
-    return `<span style="font-family:'MultiCraftFont',monospace;font-size:0.45rem;color:${color};border:1px solid ${color};border-radius:20px;padding:2px 8px;letter-spacing:1px;background:${color}18;white-space:nowrap;">${title}</span>`;
-}
+    if(!style && !color){ return; }
 
-/* ─── Render Overall ────────────────────────────────────── */
-async function renderOverall() {
-    if(CURRENT_TAB!=='rankings' && CURRENT_TAB!=='home') return;
-
-    const lbl=document.getElementById('viewLabel');
-    const isHome = CURRENT_TAB==='home';
-    lbl.style.display = isHome ? 'none' : '';
-    if(!isHome) { lbl.innerText='OVERALL'; lbl.style.color=KIT_MAP['Overall'].color; }
-
-    document.getElementById('filterBar').style.display= isHome ? 'none' : 'flex';
-    document.getElementById('topPlayersTitle').style.display= isHome ? 'block' : 'none';
-    if(!isHome) document.getElementById('filterKit').style.display='';
-    document.getElementById('kitBar').style.display= (!isHome && SHOW_ALL) ? 'flex' : 'none';
-
-    const dl=document.getElementById('displayList');
-    dl.innerHTML=''; dl.classList.add('overall-mode');
-
-    const podium=document.getElementById('podiumWrap');
-    podium.innerHTML='';
-
-    const smBtn=document.getElementById('showMoreBtn');
-
-    const {entries,kitMode}=buildFilteredOverall();
-
-    if(entries.length===0) {
-        podium.style.display='none'; smBtn.style.display='none';
-        dl.innerHTML=`<div class="empty-state"><h2>NO PLAYERS MATCH FILTERS</h2></div>`;
+    if(style==="animated"){
+        el.classList.add('name-animated');
         return;
     }
-
-    if (SHOW_ALL) {
-        podium.style.display='none';
-    } else {
-        const top3=entries.slice(0,3);
-        await prewarmSkins(top3.map(e=>e[0]));
-        podium.style.display='flex';
-        for(let i=0;i<top3.length;i++) {
-            const [name,pts,tier]=top3[i]; const rank=i+1;
-            const rankColors=['var(--gold)','#aaa','#cd7f32'];
-            const {title: pTitle, color: pColor} = getRankTitle(pts, rank);
-            const card=document.createElement('div');
-            card.className=`podium-card rank-${rank}`;
-            card.onclick=()=>{ playBtnSound(); openProfile(name); };
-            card.innerHTML=`
-                <div class="podium-name">${name}</div>
-                <div class="podium-skin-wrap"><img src="${skinSrc(name)}" alt="${name}"></div>
-                <div class="podium-platform">
-                    <div class="podium-pts-badge" style="border-color:${rankColors[i]};color:${rankColors[i]};">${pts} PTS</div>
-                    <span class="podium-rank-num">${rank}</span>
-                </div>
-                <div style="font-family:'MultiCraftFont',monospace;font-size:0.45rem;color:${pColor};border:1px solid ${pColor};border-radius:20px;padding:2px 8px;margin-top:6px;letter-spacing:1px;background:${pColor}18;text-align:center;">${pTitle}</div>
-            `;
-            card.style.animation = `podiumDrop 0.5s cubic-bezier(0.22,1,0.36,1) ${i*0.12}s both`;
-            podium.appendChild(card);
+    if(style && style.startsWith("gradient:")){
+        const stops=style.slice(9).split(/[-,]/).filter(s=>s.startsWith('#'));
+        if(stops.length>=2){
+            const grad=`linear-gradient(90deg,${stops.join(',')})`;
+            el.style.background=grad;
+            el.style.webkitBackgroundClip="text";
+            el.style.backgroundClip="text";
+            el.style.webkitTextFillColor="transparent";
+            return;
         }
     }
-
-    /* ── Rows ── */
-    if(isHome) {
-        document.getElementById('topPlayersTitle').style.display='block';
-
-        const homeList = document.createElement('div');
-        homeList.id = 'overallList';
-        const homeRows = entries.slice(3, 3+PREVIEW);
-        await prewarmSkins(homeRows.map(e=>e[0]));
-        for(let i=0;i<homeRows.length;i++) {
-            const [name,pts]=homeRows[i]; const rank=i+4;
-            const row=document.createElement('div');
-            row.className='ol-row';
-            row.onclick=()=>{ playBtnSound(); openProfile(name); };
-            row.style.animationDelay=`${i*0.08}s`;
-            row.innerHTML=`
-                <span class="ol-rank">${rank}</span>
-                <div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div>
-                <div class="ol-name-block">
-                    <div class="ol-name" style="font-family:'MultiCraftFont',monospace;">${name}</div>
-                    ${getTags(name)}
-                    <div style="margin-top:4px;">${titleBadgeHtml(pts, rank)}</div>
-                </div>
-                <div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>
-            `;
-            homeList.appendChild(row);
-        }
-        dl.appendChild(homeList);
-
-        if(entries.length > 3+PREVIEW) {
-            const flDiv = document.createElement('div');
-            flDiv.style.cssText = "font-family:'MultiCraftFont',monospace;font-size:0.65rem;color:#555;cursor:pointer;margin-top:10px;margin-bottom:10px;letter-spacing:1px;text-align:center;width:100%;transition:color 0.2s;";
-            flDiv.textContent = 'FULL LEADERBOARD ▶';
-            flDiv.onmouseenter = () => flDiv.style.color='var(--purple)';
-            flDiv.onmouseleave = () => flDiv.style.color='#555';
-            flDiv.onclick = () => switchTab('rankings');
-            dl.appendChild(flDiv);
-        }
-        document.getElementById('showMoreBtn').style.display='none';
+    if(style && style.startsWith("glow:")){
+        const glowColor=style.slice(5);
+        el.style.color=color||glowColor;
+        el.style.textShadow=`0 0 10px ${glowColor}, 0 0 20px ${glowColor}88`;
         return;
     }
-
-    const listWrap=document.createElement('div'); listWrap.id='overallList';
-    const rowEntries = SHOW_ALL ? entries : entries.slice(3, 3+PREVIEW);
-    await prewarmSkins(rowEntries.map(e=>e[0]));
-
-    for(let i=0;i<rowEntries.length;i++) {
-        const [name,pts,tier]=rowEntries[i]; const rank= SHOW_ALL ? i+1 : i+4;
-        const isFullLB = SHOW_ALL;
-
-        const row=document.createElement('div');
-        row.className='ol-row' + (isFullLB ? ' ol-row-full' : '');
-        row.onclick=()=>{ playBtnSound(); openProfile(name); };
-
-        if (isFullLB) {
-            const p = DATA.Players?.find(x=>x.name===name);
-            const regCode = p?.region || '?';
-            const regColor = REGION_MAP[regCode]?.color || '#555';
-            const devCode = p?.device || '?';
-            const devColor = DEVICE_MAP[devCode]?.color || '#555';
-
-            let kitIconsHtml = '<div class="ol-kit-icons">';
-            Object.entries(KIT_MAP).forEach(([kname, {img, color}]) => {
-                if (kname === 'Overall') return;
-                let tierLabel = '';
-                let tierColor = '#2a2a2a';
-                if (DATA[kname]) {
-                    for (let t in DATA[kname]) {
-                        if (DATA[kname][t].includes(name)) {
-                            const isR = t.startsWith('R');
-                            tierLabel = isR ? t.slice(1) : t;
-                            tierColor = isR ? '#444' : color;
-                            break;
-                        }
-                    }
-                }
-                kitIconsHtml += `<div class="ol-kit-icon" style="border-color:${tierColor};opacity:${tierLabel?'1':'0.25'};">
-                    ${img ? `<img src="${img}" style="width:20px;height:20px;image-rendering:pixelated;display:block;">` : ''}
-                    <span class="ol-kit-icon-label" style="color:${tierColor};font-size:0.5rem;">${tierLabel||''}</span>
-                </div>`;
-            });
-            kitIconsHtml += '</div>';
-
-            row.innerHTML = `
-                <span class="ol-rank">${rank}</span>
-                <div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div>
-                <div class="ol-name-block">
-                    <div class="ol-name" style="font-family:'MultiCraftFont',monospace;">${name}</div>
-                    <div style="margin-top:4px;">${titleBadgeHtml(pts, rank)}</div>
-                </div>
-                <div class="tag-wrap has-hover" style="position:relative;">
-                    <span class="ol-region-badge" style="background:${regColor}22;border:1px solid ${regColor};color:${regColor};cursor:help;">${regCode}</span>
-                    <div class="tag-popup" style="border-color:${regColor};">${REGION_MAP[regCode]?.label||regCode}</div>
-                </div>
-                <div class="tag-wrap has-hover" style="position:relative;">
-                    <span class="ol-region-badge" style="background:${devColor}22;border:1px solid ${devColor};color:${devColor};cursor:help;">${devCode}</span>
-                    <div class="tag-popup" style="border-color:${devColor};">${DEVICE_MAP[devCode]?.label||devCode}</div>
-                </div>
-                ${kitIconsHtml}
-                <div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>
-            `;
+    if(color){
+        // color might itself be a gradient shorthand
+        const parsed=parseCss(color);
+        if(parsed.includes("gradient")){
+            el.style.background=parsed;
+            el.style.webkitBackgroundClip="text";
+            el.style.backgroundClip="text";
+            el.style.webkitTextFillColor="transparent";
         } else {
-            row.innerHTML = `
-                <span class="ol-rank">${rank}</span>
-                <div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div>
-                <div class="ol-name-block">
-                    <div class="ol-name">${name}</div>
-                    ${getTags(name)}
-                    <div style="margin-top:4px;">${titleBadgeHtml(pts, rank)}</div>
-                </div>
-                ${kitMode&&tier?`<span class="ol-tier-badge">${tier.startsWith('R')?'Retired '+tier.slice(1):tier}</span>`:''}
-                <div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>
-            `;
+            el.style.color=color;
         }
-
-        row.style.animationDelay = `${i*0.06}s`;
-        listWrap.appendChild(row);
     }
-    dl.appendChild(listWrap);
-
-    if(!isHome && entries.length > 3+PREVIEW) {
-        smBtn.style.display='block';
-        smBtn.textContent=SHOW_ALL?'▲ SHOW LESS':'FULL LEADERBOARD ▶';
-    } else { smBtn.style.display='none'; }
 }
 
-/* ─── Render kit tab (non-Overall) ─────────────────────── */
-async function renderKit(kit) {
-    if(CURRENT_TAB!=='rankings' && CURRENT_TAB!=='home') return;
-    const {region,device,retired}=getFilters();
-    const color=KIT_MAP[kit]?.color||'var(--gold)';
-    const lbl=document.getElementById('viewLabel'); lbl.innerText=kit.toUpperCase(); lbl.style.color=color;
-    document.getElementById('filterBar').style.display='flex';
-    document.getElementById('filterKit').style.display='none';
-    document.getElementById('topPlayersTitle').style.display='none';
-    document.getElementById('podiumWrap').style.display='none';
-    document.getElementById('showMoreBtn').style.display='none';
-    const dl=document.getElementById('displayList'); dl.innerHTML=''; dl.classList.remove('overall-mode');
+function resetProfileTheme(){
+    const modal=document.querySelector('.profile-modal-content');
+    const nameEl=document.getElementById('pName');
+    if(modal){ modal.style.background=""; modal.style.borderColor=""; modal.style.boxShadow=""; }
+    if(nameEl){
+        nameEl.style.color=""; nameEl.style.webkitTextFillColor="";
+        nameEl.style.webkitBackgroundClip=""; nameEl.style.backgroundClip="";
+        nameEl.style.background=""; nameEl.style.textShadow="";
+        nameEl.classList.remove('name-animated');
+    }
+}
 
-    const kitPlayerStatus = {};
-    for (let k in DATA) {
-        if (k==='Overall'||k==='Players') continue;
-        for (let t in DATA[k]) {
-            const isR = t.startsWith('R');
-            DATA[k][t].forEach(name => {
-                if (!kitPlayerStatus[name]) kitPlayerStatus[name] = {active:false,retired:false};
-                if (isR) kitPlayerStatus[name].retired=true; else kitPlayerStatus[name].active=true;
-            });
-        }
+/* ═══════════════════════════════════════════════
+   EDIT PANEL
+═══════════════════════════════════════════════ */
+function toggleEditDropdown(toggle){
+    toggle.classList.toggle('open');
+    document.getElementById('editDropdownBody')?.classList.toggle('vis');
+}
+
+function injectEditPanel(profileName){
+    document.getElementById('profileEditPanel')?.remove();
+    if(!AUTH||AUTH.name!==profileName) return;
+    const p=AUTH.profile||{};
+    const left=document.querySelector('.profile-left');
+    if(!left) return;
+
+    const toShorthand=v=>{
+        if(!v) return '';
+        const m=v.match(/linear-gradient\([^,]+,(#[0-9a-fA-F]{3,8}(?:,#[0-9a-fA-F]{3,8})*)\)/);
+        return m?m[1].replace(/,/g,'-'):v;
+    };
+
+    const socialsArr=Array.isArray(p.socials)?p.socials:[];
+    let socialsHtml='';
+    socialsArr.forEach((s,i)=>{
+        const iconHtml=s.icon?`<img src="${s.icon}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:3px;">`:`<span style="font-size:0.55rem;color:#333;">📷</span>`;
+        socialsHtml+=`<div class="social-entry" data-icon="${esc(s.icon||'')}" id="soc-${i}">
+            <div class="social-icon-btn" onclick="pickSocialIcon(this)" title="Upload icon">${iconHtml}</div>
+            <input class="pe-input pe-social-label" placeholder="Label (optional)" maxlength="40" value="${esc(s.label||'')}">
+            <input class="pe-input pe-social-url" placeholder="URL or text" maxlength="300" value="${esc(s.url||'')}">
+            <button class="social-del-btn" onclick="this.closest('.social-entry').remove()" title="Remove">✕</button>
+        </div>`;
+    });
+
+    const presetBtns=Object.keys(THEME_PRESETS).map(k=>`<button class="theme-preset-btn" onclick="applyPreset('${k}',this)">${k}</button>`).join('');
+
+    const panel=document.createElement('div');
+    panel.id='profileEditPanel'; panel.className='vis';
+    panel.innerHTML=`
+        <div id="editDropdownToggle" onclick="toggleEditDropdown(this)">
+            <span>✏ EDIT PROFILE</span><span class="edit-arrow">▼</span>
+        </div>
+        <div id="editDropdownBody">
+            <div class="pe-group-label">BASIC</div>
+            <div><label class="pe-field-label">PRONOUNS</label>
+                <input class="pe-input" id="pePronouns" placeholder="e.g. he/him" maxlength="30" value="${esc(p.pronouns||'')}"></div>
+            <div><label class="pe-field-label">STATUS / DESCRIPTION</label>
+                <input class="pe-input" id="peDescription" placeholder="Something about you..." maxlength="120" value="${esc(p.description||'')}"></div>
+            <div><label class="pe-field-label">RIVAL</label>
+                <input class="pe-input" id="peRival" placeholder="Player name..." maxlength="50" value="${esc(p.rival||'')}"></div>
+            <div class="lfm-wrap">
+                <input type="checkbox" id="peLfm" ${p.lfm_status?'checked':''}>
+                <label class="lfm-track" for="peLfm"></label>
+                <span class="lfm-lbl">LOOKING FOR MATCH</span>
+            </div>
+
+            <div class="pe-group-label">SOCIALS</div>
+            <div id="socialsContainer">${socialsHtml}</div>
+            <button class="add-social-btn" onclick="addSocialEntry()">+ ADD SOCIAL</button>
+
+            <div class="pe-group-label">THEME</div>
+            <div class="theme-presets">${presetBtns}</div>
+
+            <div><label class="pe-field-label">BACKGROUND  <span style="color:#333">(#hex, gradient #a-#b, or CSS)</span></label>
+                <div class="theme-row"><div class="theme-swatch" id="swatchBg"></div>
+                <input class="pe-input" id="peThemeBg" placeholder="#06060a  or  #0a0800-#1a1200" maxlength="300" value="${esc(toShorthand(p.theme_bg||''))}"></div></div>
+
+            <div><label class="pe-field-label">BACKGROUND IMAGE</label>
+                <div style="display:flex;gap:6px;align-items:center;">
+                    <div id="bgImgPreview" style="width:40px;height:28px;border-radius:4px;border:1px solid #222;background:${p.theme_bg_image?`url(${p.theme_bg_image}) center/cover`:'#111'};flex-shrink:0;"></div>
+                    <button class="add-social-btn" style="flex:1;" onclick="pickBgImage()">📷 UPLOAD IMAGE</button>
+                    ${p.theme_bg_image?`<button class="social-del-btn" onclick="clearBgImage()" title="Remove image">✕</button>`:''}
+                </div></div>
+
+            <div><label class="pe-field-label">BORDER COLOR  <span style="color:#333">(#hex or #a-#b)</span></label>
+                <div class="theme-row"><div class="theme-swatch" id="swatchBorder"></div>
+                <input class="pe-input" id="peThemeBorder" placeholder="#00eeff  or  #ff00ff-#00eeff" maxlength="100" value="${esc(p.theme_border||'')}"></div></div>
+
+            <div><label class="pe-field-label">GLOW COLOR</label>
+                <div class="theme-row"><div class="theme-swatch" id="swatchGlow"></div>
+                <input class="pe-input" id="peThemeGlow" placeholder="#00eeff" maxlength="30" value="${esc(p.theme_glow||'')}"></div></div>
+
+            <div><label class="pe-field-label">NAME COLOR  <span style="color:#333">(#hex or #a-#b for gradient)</span></label>
+                <div class="theme-row"><div class="theme-swatch" id="swatchName"></div>
+                <input class="pe-input" id="peThemeNameColor" placeholder="#ffffff  or  #ff00ff-#00eeff" maxlength="100" value="${esc(p.theme_name_color||'')}"></div></div>
+
+            <div><label class="pe-field-label">NAME EFFECT</label>
+                <select class="pe-input" id="peThemeNameStyle" style="cursor:pointer;">
+                    <option value="" ${!p.theme_name_style?'selected':''}>None</option>
+                    <option value="animated" ${p.theme_name_style==='animated'?'selected':''}>🌈 Animated Rainbow</option>
+                    <option value="glow:#00eeff" ${p.theme_name_style==='glow:#00eeff'?'selected':''}>💡 Cyan Glow</option>
+                    <option value="glow:#ffd700" ${p.theme_name_style==='glow:#ffd700'?'selected':''}>✨ Gold Glow</option>
+                    <option value="glow:#ff3333" ${p.theme_name_style==='glow:#ff3333'?'selected':''}>🔴 Red Glow</option>
+                    <option value="glow:#b044ff" ${p.theme_name_style==='glow:#b044ff'?'selected':''}>💜 Purple Glow</option>
+                    <option value="gradient:#00eeff-#b044ff" ${p.theme_name_style==='gradient:#00eeff-#b044ff'?'selected':''}>🎨 Cyan→Purple</option>
+                    <option value="gradient:#ffd700-#ff6a00" ${p.theme_name_style==='gradient:#ffd700-#ff6a00'?'selected':''}>🎨 Gold→Orange</option>
+                    <option value="gradient:#ff0080-#7700ff" ${p.theme_name_style==='gradient:#ff0080-#7700ff'?'selected':''}>🎨 Pink→Violet</option>
+                    <option value="custom" ${p.theme_name_style&&!['animated','glow:#00eeff','glow:#ffd700','glow:#ff3333','glow:#b044ff','gradient:#00eeff-#b044ff','gradient:#ffd700-#ff6a00','gradient:#ff0080-#7700ff'].includes(p.theme_name_style)?'selected':''}>✏ Custom (use name color)</option>
+                </select></div>
+
+            <div><label class="pe-field-label">BANNER STRIP  <span style="color:#333">(#a-#b)</span></label>
+                <div class="banner-bar" id="peBannerPreview"></div>
+                <input class="pe-input" id="peBanner" placeholder="#00eeff-#4122fd-#ff00ff" maxlength="200" value="${esc(toShorthand(p.banner||''))}"></div>
+
+            <button class="pe-save" id="peSave" onclick="saveProfileEdits()">SAVE CHANGES</button>
+            <div class="pe-msg" id="peMsg"></div>
+        </div>`;
+
+    left.appendChild(panel);
+
+    // Live swatch + theme preview
+    const liveTheme=[
+        {id:'peThemeBg',        swatch:'swatchBg',     apply:v=>{ const m=document.querySelector('.profile-modal-content'); if(m) m.style.background=parseCss(v)||""; }},
+        {id:'peThemeBorder',    swatch:'swatchBorder', apply:v=>{ const m=document.querySelector('.profile-modal-content'); if(m) m.style.borderColor=parseCss(v)||""; }},
+        {id:'peThemeGlow',      swatch:'swatchGlow',   apply:v=>{ const m=document.querySelector('.profile-modal-content'); if(m) m.style.boxShadow=v?`0 0 40px ${v}55,0 0 80px ${v}22`:""; }},
+        {id:'peThemeNameColor', swatch:'swatchName',   apply:v=>{ const n=document.getElementById('pName'); const s=document.getElementById('peThemeNameStyle')?.value||""; if(n) applyNameStyle(n,v,s); }},
+    ];
+    liveTheme.forEach(({id,swatch,apply})=>{
+        const inp=document.getElementById(id);
+        const sw=document.getElementById(swatch);
+        if(!inp||!sw) return;
+        const update=()=>{ const v=inp.value.trim(); sw.style.background=parseCss(v)||"#111"; apply(v); };
+        update(); inp.addEventListener('input',update);
+    });
+    document.getElementById('peThemeNameStyle')?.addEventListener('change',()=>{
+        const v=document.getElementById('peThemeNameColor')?.value.trim()||"";
+        const s=document.getElementById('peThemeNameStyle').value;
+        const n=document.getElementById('pName');
+        if(n) applyNameStyle(n,v,s);
+    });
+
+    // Banner preview
+    const bannerInp=document.getElementById('peBanner');
+    const bannerPrev=document.getElementById('peBannerPreview');
+    const syncBanner=()=>{
+        const parsed=parseCss(bannerInp.value);
+        bannerPrev.style.background=parsed||'transparent';
+        let strip=document.querySelector('.profile-banner-strip');
+        if(!strip&&parsed){ strip=document.createElement('div'); strip.className='profile-banner-strip'; document.querySelector('.profile-modal-content').prepend(strip); }
+        if(strip) strip.style.background=parsed||'transparent';
+    };
+    syncBanner(); bannerInp.addEventListener('input',syncBanner);
+}
+
+function pickBgImage(){
+    const input=document.createElement('input');
+    input.type='file'; input.accept='image/*';
+    input.onchange=()=>{
+        const file=input.files[0]; if(!file) return;
+        const reader=new FileReader();
+        reader.onload=e=>{
+            const b64=e.target.result;
+            saveBgImage(b64);
+            const prev=document.getElementById('bgImgPreview');
+            if(prev) prev.style.background=`url(${b64}) center/cover`;
+        };
+        reader.readAsDataURL(file);
+    };
+    input.click();
+}
+
+async function clearBgImage(){
+    try{
+        const d=await authCall("PATCH","/profile",{theme_bg_image:""});
+        if(AUTH) AUTH.profile=d.profile;
+        applyProfileTheme(d.profile);
+        const prev=document.getElementById('bgImgPreview');
+        if(prev) prev.style.background='#111';
+    }catch(e){ console.warn(e); }
+}
+
+/* ═══════════════════════════════════════════════
+   SOCIAL HELPERS
+═══════════════════════════════════════════════ */
+function addSocialEntry(){
+    const container=document.getElementById('socialsContainer');
+    if(!container||container.querySelectorAll('.social-entry').length>=8) return;
+    const div=document.createElement('div');
+    div.className='social-entry'; div.dataset.icon='';
+    div.innerHTML=`
+        <div class="social-icon-btn" onclick="pickSocialIcon(this)" title="Upload icon"><span style="font-size:0.55rem;color:#333;">📷</span></div>
+        <input class="pe-input pe-social-label" placeholder="Label (optional)" maxlength="40">
+        <input class="pe-input pe-social-url" placeholder="URL or text" maxlength="300">
+        <button class="social-del-btn" onclick="this.closest('.social-entry').remove()" title="Remove">✕</button>`;
+    container.appendChild(div);
+}
+
+function pickSocialIcon(iconBtn){
+    const input=document.createElement('input');
+    input.type='file'; input.accept='image/*';
+    input.onchange=()=>{
+        const file=input.files[0]; if(!file) return;
+        // Resize to max 48x48 to keep storage small
+        const img=new Image();
+        const url=URL.createObjectURL(file);
+        img.onload=()=>{
+            const canvas=document.createElement('canvas');
+            const size=48; canvas.width=size; canvas.height=size;
+            const ctx=canvas.getContext('2d');
+            ctx.drawImage(img,0,0,size,size);
+            const b64=canvas.toDataURL('image/png');
+            URL.revokeObjectURL(url);
+            iconBtn.innerHTML=`<img src="${b64}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:3px;">`;
+            iconBtn.closest('.social-entry').dataset.icon=b64;
+        };
+        img.src=url;
+    };
+    input.click();
+}
+
+/* ═══════════════════════════════════════════════
+   THEME PRESET
+═══════════════════════════════════════════════ */
+function applyPreset(name,btn){
+    document.querySelectorAll('.theme-preset-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const preset=THEME_PRESETS[name]; if(!preset) return;
+    const toShorthand=v=>{ if(!v) return ''; const m=v.match(/linear-gradient\([^,]+,(#[0-9a-fA-F]{3,8}(?:,#[0-9a-fA-F]{3,8})*)\)/); return m?m[1].replace(/,/g,'-'):v; };
+    const set=(id,val)=>{ const el=document.getElementById(id); if(el){ el.value=toShorthand(val); el.dispatchEvent(new Event('input')); } };
+    set('peThemeBg',        preset.bg);
+    set('peThemeBorder',    preset.border);
+    set('peThemeGlow',      preset.glow);
+    set('peThemeNameColor', preset.name);
+    const styleEl=document.getElementById('peThemeNameStyle');
+    if(styleEl){ styleEl.value=preset.nameStyle||""; styleEl.dispatchEvent(new Event('change')); }
+}
+
+/* ═══════════════════════════════════════════════
+   PROFILE EXTRAS
+═══════════════════════════════════════════════ */
+function clearProfileExtras(){
+    document.querySelectorAll('.lfm-badge,.rival-badge,.profile-role-badge,.profile-pronouns,.profile-description,.custom-social-row').forEach(el=>el.remove());
+    document.querySelector('.profile-banner-strip')?.remove();
+    document.getElementById('profileEditPanel')?.remove();
+    resetProfileTheme();
+}
+
+function injectProfileExtras(name,role,profile){
+    if(!profile) return;
+    const badgeRow=document.getElementById('pBadgeRow');
+    const meta=document.getElementById('pMeta');
+
+    // Role badge
+    if((role==='owner'||role==='tester')&&badgeRow&&!badgeRow.querySelector('.profile-role-badge')){
+        const b=document.createElement('div');
+        b.className=`profile-role-badge ${role}`;
+        b.textContent=role==='owner'?'👑 Owner':'Tier Tester';
+        badgeRow.appendChild(b);
     }
 
-    function kitPlayerVisible(name) {
-        const p = DATA.Players?.find(x=>x.name===name);
-        if (region && (!p || p.region!==region)) return false;
-        if (device && (!p || p.device!==device)) return false;
-        // FIX: "active only" — show players who have ANY active tier anywhere.
-        // Don't hide them just because they also have retired tiers.
-        if (retired==='active') {
-            const s=kitPlayerStatus[name]; if(!s||!s.active) return false;
-        } else if (retired==='retired') {
-            // "retired only" — players whose ONLY tiers are retired
-            const s=kitPlayerStatus[name]; if(!s||!s.retired||s.active) return false;
-        }
-        return true;
-    }
+    // Pronouns
+    if(profile.pronouns){ const pr=document.createElement('div'); pr.className='profile-pronouns'; pr.textContent=profile.pronouns; meta.insertBefore(pr,meta.firstChild); }
 
-    const allKitPlayers = [];
-    if(DATA[kit]) { for(let t in DATA[kit]) DATA[kit][t].forEach(n=>{ if(!allKitPlayers.includes(n)) allKitPlayers.push(n); }); }
-    await prewarmSkins(allKitPlayers);
+    // Description/status
+    if(profile.description){ const ds=document.createElement('div'); ds.className='profile-description'; ds.textContent=profile.description; meta.appendChild(ds); }
 
-    const kitTop = [];
-    if (DATA[kit]) {
-        const tierOrder2 = ['HT1','RHT1','LT1','RLT1','HT2','RHT2','LT2','RLT2','HT3','RHT3','LT3','RLT3','HT4','RHT4','LT4','RLT4','HT5','RHT5','LT5','RLT5'];
-        for (const t of tierOrder2) {
-            // For "active only": skip retired tiers from the podium
-            if (retired==='active' && t.startsWith('R')) continue;
-            // For "retired only": skip active tiers from the podium
-            if (retired==='retired' && !t.startsWith('R')) continue;
-            if (DATA[kit][t]) DATA[kit][t].forEach(n => { if(kitTop.length<3 && kitPlayerVisible(n)) kitTop.push({name:n,tier:t}); });
-            if (kitTop.length>=3) break;
-        }
-    }
+    // LFM
+    if(profile.lfm_status&&badgeRow){ const b=document.createElement('div'); b.className='lfm-badge'; b.textContent='⚔ Looking For Match'; badgeRow.appendChild(b); }
 
-    if (kitTop.length > 0) {
-        const mp = document.createElement('div');
-        mp.id = 'podiumWrap2';
-        mp.style.cssText = 'display:flex;justify-content:center;align-items:flex-end;gap:16px;margin-bottom:28px;padding:0 12px;';
-        for (let i = 0; i < kitTop.length; i++) {
-            const {name, tier} = kitTop[i];
-            const rank = i+1;
-            const rankColors = ['var(--gold)','#aaa','#cd7f32'];
-            const card = document.createElement('div');
-            card.className = `podium-card rank-${rank}`;
-            card.onclick = () => { playBtnSound(); openProfile(name); };
-            card.innerHTML = `
-                <div class="podium-name">${name}</div>
-                <div class="podium-skin-wrap"><img src="${skinSrc(name)}" alt="${name}"></div>
-                <div class="podium-platform">
-                    <div class="podium-pts-badge" style="border-color:${rankColors[i]};color:${rankColors[i]};">${tier}</div>
-                    <span class="podium-rank-num">${rank}</span>
-                </div>
-            `;
-            card.style.animation = `podiumDrop 0.5s cubic-bezier(0.22,1,0.36,1) ${i*0.12}s both`;
-            mp.appendChild(card);
-        }
-        dl.appendChild(mp);
-    }
+    // Rival
+    if(profile.rival&&badgeRow){ const b=document.createElement('div'); b.className='rival-badge'; b.textContent=`⚡ RIVAL: ${profile.rival}`; badgeRow.appendChild(b); }
 
-    const grid=document.createElement('div');
-    grid.style.cssText="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:24px;";
-    let anyPlayers=false;
+    // Apply theme
+    applyProfileTheme(profile);
 
-    const TIER_ORDER = ['HT1','RHT1','LT1','RLT1','HT2','RHT2','LT2','RLT2','HT3','RHT3','LT3','RLT3','HT4','RHT4','LT4','RLT4','HT5','RHT5','LT5','RLT5'];
-
-    if(DATA[kit]) {
-        ["T1","T2","T3","T4","T5"].forEach(lvl=>{
-            const lvlNum = lvl.slice(1);
-            const orderedTiers = TIER_ORDER.filter(t => {
-                const base = t.startsWith('R') ? t.slice(1) : t;
-                return base.slice(-1) === lvlNum;
-            });
-
-            let col=`<div style="min-width:200px;">
-                <div style="color:var(--purple);border-bottom:1px solid var(--border);margin-bottom:10px;text-align:center;font-family:'MultiCraftFont';font-size:0.9rem;">${lvl}</div>`;
-            let has=false;
-            orderedTiers.forEach(t=>{
-                if(!DATA[kit][t]) return;
-                // For "active only": skip rendering retired tier rows entirely
-                if (retired==='active' && t.startsWith('R')) return;
-                // For "retired only": skip rendering active tier rows
-                if (retired==='retired' && !t.startsWith('R')) return;
-                DATA[kit][t].forEach(name=>{
-                    if(!kitPlayerVisible(name)) return;
-                    has=true; anyPlayers=true;
-                    const isR=t.startsWith('R');
-                    const label=isR?'Retired '+t.substring(1):t;
-                    const lc=isR?'var(--grey)':'var(--gold)';
-                    col+=`<div class="tier-card clickable" style="width:200px;padding:12px;display:flex;align-items:center;gap:10px;" onclick="openProfile('${name}')">
-                        <img src="${skinSrc(name)}" alt="${name}" style="width:36px;height:36px;image-rendering:pixelated;object-fit:cover;object-position:top;transform:scale(1.3);transform-origin:top;flex-shrink:0;">
-                        <div>
-                            <div style="font-size:0.9rem;font-weight:bold;">${name}</div>
-                            ${getTags(name)}
-                            <div style="font-size:0.6rem;color:${lc};margin-top:4px;font-weight:bold;">${label}</div>
-                        </div>
-                    </div>`;
-                });
-            });
-            if(has){ col+=`</div>`; grid.innerHTML+=col; }
+    // Custom socials
+    const socials=Array.isArray(profile.socials)?profile.socials.filter(s=>s.url||s.label):[];
+    if(socials.length){
+        const row=document.createElement('div'); row.className='custom-social-row';
+        socials.forEach(s=>{
+            const a=document.createElement('a');
+            if(s.url){
+                a.href=s.url.startsWith('http')?s.url:`https://${s.url}`;
+                a.target='_blank'; a.rel='noopener';
+            } else {
+                a.href='#'; a.onclick=e=>e.preventDefault();
+            }
+            a.className='custom-social-link';
+            if(s.icon){
+                const img=document.createElement('img');
+                img.src=s.icon; img.alt=''; img.style.cssText='width:13px;height:13px;object-fit:cover;border-radius:2px;';
+                // Handle broken images gracefully
+                img.onerror=()=>img.remove();
+                a.appendChild(img);
+            }
+            if(s.label){ const txt=document.createElement('span'); txt.textContent=s.label; a.appendChild(txt); }
+            else if(!s.icon){ const txt=document.createElement('span'); txt.textContent=s.url; a.appendChild(txt); }
+            row.appendChild(a);
         });
+        const pts=document.getElementById('pPoints');
+        if(pts) pts.parentNode.insertBefore(row,pts);
     }
-
-    if(!anyPlayers) {
-        dl.innerHTML=`<div class="empty-state"><h2>NO RANKED PLAYERS</h2></div>`; return;
-    }
-    dl.appendChild(grid);
 }
 
-/* ─── Tab switch ────────────────────────────────────────── */
-async function switchTab(tab) {
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+
+/* ═══════════════════════════════════════════════
+   SITE CORE
+═══════════════════════════════════════════════ */
+let DATA={}, CURRENT_TAB='home', CURRENT_KIT='Overall', SHOW_ALL=false;
+const PREVIEW=2;
+const PTS={"HT1":50,"LT1":40,"HT2":30,"LT2":20,"HT3":12,"LT3":8,"HT4":5,"LT4":3,"HT5":2,"LT5":1};
+const skinCache={};
+const DEFAULT_SKIN='assets/mtctiers_default_skin.png';
+
+async function hasSkin(n){if(n in skinCache)return skinCache[n];try{const r=await fetch(`assets/${n.toLowerCase()}.png`,{method:'HEAD'});skinCache[n]=r.ok;}catch{skinCache[n]=false;}return skinCache[n];}
+function skinSrc(n){return skinCache[n]?`assets/${n.toLowerCase()}.png`:DEFAULT_SKIN;}
+async function prewarmSkins(names){await Promise.all(names.map(hasSkin));}
+function typeText(el,text,duration=1000){el.textContent='';const chars=text.split('');const interval=duration/chars.length;let i=0;const tick=setInterval(()=>{el.textContent+=chars[i++];if(i>=chars.length)clearInterval(tick);},interval);}
+function buildThemeVars(){let css=":root{\n";for(const[c,{color}]of Object.entries(REGION_MAP))css+=`--reg-${c.toLowerCase()}:${color};\n`;for(const[c,{color}]of Object.entries(DEVICE_MAP))css+=`--dev-${c.toLowerCase()}:${color};\n`;css+="}\n";for(const[c]of Object.entries(REGION_MAP)){const v=`var(--reg-${c.toLowerCase()})`;css+=`.tag-reg-${c.toLowerCase()}{color:${v};border-color:${v}!important}\n`;}for(const[c]of Object.entries(DEVICE_MAP)){const v=`var(--dev-${c.toLowerCase()})`;css+=`.tag-dev-${c.toLowerCase()}{color:${v};border-color:${v}!important}\n`;}const el=document.createElement('style');el.textContent=css;document.head.appendChild(el);}
+function playBtnSound(){const a=new Audio('sounds/button.mp3');a.volume=0.5;a.play().catch(()=>{});}
+function getTags(name){const p=DATA.Players?.find(x=>x.name===name)||{region:"?",device:"?"};const reg=REGION_MAP[p.region];const dev=DEVICE_MAP[p.device];return `<div style="margin-top:5px;"><div class="tag-wrap ${reg?'has-hover':''}"><span class="tag tag-reg-${p.region.toLowerCase()}">${p.region}</span>${reg?`<div class="tag-popup">${reg.label}</div>`:''}</div><div class="tag-wrap ${dev?'has-hover':''}"><span class="tag tag-dev-${p.device.toLowerCase()}">${p.device}</span>${dev?`<div class="tag-popup">${dev.label}</div>`:''}</div></div>`;}
+
+async function load(){buildThemeVars();populateFilterDropdowns();try{const r=await fetch(`data/rankings.json?v=${Date.now()}`);DATA=await r.json();let totals={};for(let k in DATA){if(k==="Overall"||k==="Players")continue;for(let t in DATA[k])DATA[k][t].forEach(p=>{totals[p]=(totals[p]||0)+(PTS[t.replace('R','')]||0);});}if(DATA.Players)DATA.Players.forEach(p=>{if(!(p.name in totals))totals[p.name]=0;});DATA["Overall"]=totals;buildKitBar();CURRENT_TAB='home';await renderOverall();}catch(e){console.error("Could not load rankings.json",e);}}
+function buildKitBar(){const bar=document.getElementById('kitBar');bar.innerHTML="";Object.entries(KIT_MAP).forEach(([name,{img,color}])=>{const btn=document.createElement('button');const active=name==='Overall';btn.className=`kit-btn ${active?'active':''}`;btn.style.setProperty('--kit-active-color',color);btn.style.color=color;btn.style.opacity=active?'1':'0.4';btn.innerHTML=(img?`<img src="${img}" style="width:16px;vertical-align:middle;">`:'') + name.toUpperCase();btn.onclick=()=>{playBtnSound();if(CURRENT_TAB!=='rankings'&&CURRENT_TAB!=='home')return;document.querySelectorAll('.kit-btn').forEach(b=>{b.classList.remove('active');b.style.opacity='0.4';});btn.classList.add('active');btn.style.opacity='1';CURRENT_KIT=name;setUrl({kit:name==='Overall'?'':name,player:''});if(name==='Overall')renderOverall();else renderKit(name);};bar.appendChild(btn);});}
+function populateFilterDropdowns(){const ks=document.getElementById('filterKit');Object.keys(KIT_MAP).forEach(k=>{if(k==='Overall')return;const o=document.createElement('option');o.value=k;o.textContent=k.toUpperCase();ks.appendChild(o);});const rs=document.getElementById('filterRegion');Object.entries(REGION_MAP).forEach(([code,{label}])=>{const o=document.createElement('option');o.value=code;o.textContent=`${code} — ${label}`;rs.appendChild(o);});const ds=document.getElementById('filterDevice');Object.entries(DEVICE_MAP).forEach(([code,{label}])=>{const o=document.createElement('option');o.value=code;o.textContent=`${code} — ${label}`;ds.appendChild(o);});}
+function getFilters(){return{kit:document.getElementById('filterKit').value,region:document.getElementById('filterRegion').value,device:document.getElementById('filterDevice').value,retired:document.getElementById('filterRetired').value};}
+function applyFilters(){if(CURRENT_KIT&&CURRENT_KIT!=='Overall'){renderKit(CURRENT_KIT);}else{if(CURRENT_TAB!=='rankings'){SHOW_ALL=false;document.getElementById('kitBar').style.display='none';}renderOverall();}}
+function resetFilters(){['filterKit','filterRegion','filterDevice','filterRetired'].forEach(id=>document.getElementById(id).value='');applyFilters();}
+function toggleShowMore(){switchTab('rankings');}
+function buildFilteredOverall(){const{kit,region,device,retired}=getFilters();let scoredMap={};const playerStatus={};for(let k in DATA){if(k==='Overall'||k==='Players')continue;for(let t in DATA[k]){const isR=t.startsWith('R');DATA[k][t].forEach(name=>{if(!playerStatus[name])playerStatus[name]={active:false,retired:false};if(isR)playerStatus[name].retired=true;else playerStatus[name].active=true;});}}if(!retired){scoredMap={...DATA.Overall};}else{for(let k in DATA){if(k==='Overall'||k==='Players')continue;for(let t in DATA[k]){const isR=t.startsWith('R');if(retired==='active'&&isR)continue;if(retired==='retired'&&!isR)continue;const pts=PTS[t.replace('R','')];if(!pts)continue;DATA[k][t].forEach(name=>{scoredMap[name]=(scoredMap[name]||0)+pts;});}}if(DATA.Players)DATA.Players.forEach(p=>{if(!(p.name in scoredMap))scoredMap[p.name]=0;});}let entries=Object.entries(scoredMap);if(region||device)entries=entries.filter(([name])=>{const p=DATA.Players?.find(x=>x.name===name);if(!p)return false;if(region&&p.region!==region)return false;if(device&&p.device!==device)return false;return true;});if(retired==='active')entries=entries.filter(([name])=>{const s=playerStatus[name];return s&&s.active;});else if(retired==='retired')entries=entries.filter(([name])=>{const s=playerStatus[name];return s&&s.retired&&!s.active;});if(retired)entries=entries.filter(([,pts])=>pts>0);if(kit){const kitScores={};if(DATA[kit]){for(let t in DATA[kit]){const isR=t.startsWith('R');if(retired==='active'&&isR)continue;if(retired==='retired'&&!isR)continue;const pts=PTS[t.replace('R','')];if(!pts)continue;DATA[kit][t].forEach(name=>{if(!kitScores[name]||kitScores[name].pts<pts)kitScores[name]={pts,tier:t};});}}entries=entries.filter(([name])=>kitScores[name]).map(([name])=>[name,kitScores[name].pts,kitScores[name].tier]);entries.sort((a,b)=>b[1]-a[1]);return{entries,kitMode:true,kitName:kit};}entries.sort((a,b)=>b[1]-a[1]);return{entries,kitMode:false,kitName:null};}
+function getRankTitle(pts,rank){if(rank===1||pts>=300)return{title:"Combat Grandmaster",color:"#ffd700"};if(rank<=3||pts>=200)return{title:"Combat Master",color:"#00eeff"};if(pts>=150)return{title:"Combat Ace",color:"#ff6a00"};if(pts>=50)return{title:"Combat Specialist",color:"#b044ff"};if(pts>=20)return{title:"Combat Cadet",color:"#00ff88"};if(pts>=10)return{title:"Combat Novice",color:"#ff7f50"};return{title:"Rookie",color:"#888"};}
+function titleBadgeHtml(pts,rank){const{title,color}=getRankTitle(pts,rank);return `<span style="font-family:'MultiCraftFont',monospace;font-size:0.45rem;color:${color};border:1px solid ${color};border-radius:20px;padding:2px 8px;letter-spacing:1px;background:${color}18;white-space:nowrap;">${title}</span>`;}
+
+async function renderOverall(){if(CURRENT_TAB!=='rankings'&&CURRENT_TAB!=='home')return;const lbl=document.getElementById('viewLabel');const isHome=CURRENT_TAB==='home';lbl.style.display=isHome?'none':'';if(!isHome){lbl.innerText='OVERALL';lbl.style.color=KIT_MAP['Overall'].color;}document.getElementById('filterBar').style.display=isHome?'none':'flex';document.getElementById('topPlayersTitle').style.display=isHome?'block':'none';if(!isHome)document.getElementById('filterKit').style.display='';document.getElementById('kitBar').style.display=(!isHome&&SHOW_ALL)?'flex':'none';const dl=document.getElementById('displayList');dl.innerHTML='';dl.classList.add('overall-mode');const podium=document.getElementById('podiumWrap');podium.innerHTML='';const smBtn=document.getElementById('showMoreBtn');const{entries,kitMode}=buildFilteredOverall();if(entries.length===0){podium.style.display='none';smBtn.style.display='none';dl.innerHTML=`<div class="empty-state"><h2>NO PLAYERS MATCH FILTERS</h2></div>`;return;}if(SHOW_ALL){podium.style.display='none';}else{const top3=entries.slice(0,3);await prewarmSkins(top3.map(e=>e[0]));podium.style.display='flex';for(let i=0;i<top3.length;i++){const[name,pts]=top3[i];const rank=i+1;const rankColors=['var(--gold)','#aaa','#cd7f32'];const{title:pTitle,color:pColor}=getRankTitle(pts,rank);const card=document.createElement('div');card.className=`podium-card rank-${rank}`;card.onclick=()=>{playBtnSound();openProfile(name);};card.innerHTML=`<div class="podium-name">${name}</div><div class="podium-skin-wrap"><img src="${skinSrc(name)}" alt="${name}"></div><div class="podium-platform"><div class="podium-pts-badge" style="border-color:${rankColors[i]};color:${rankColors[i]};">${pts} PTS</div><span class="podium-rank-num">${rank}</span></div><div style="font-family:'MultiCraftFont',monospace;font-size:0.45rem;color:${pColor};border:1px solid ${pColor};border-radius:20px;padding:2px 8px;margin-top:6px;letter-spacing:1px;background:${pColor}18;text-align:center;">${pTitle}</div>`;card.style.animation=`podiumDrop 0.5s cubic-bezier(0.22,1,0.36,1) ${i*0.12}s both`;podium.appendChild(card);}}if(isHome){document.getElementById('topPlayersTitle').style.display='block';const homeList=document.createElement('div');homeList.id='overallList';const homeRows=entries.slice(3,3+PREVIEW);await prewarmSkins(homeRows.map(e=>e[0]));for(let i=0;i<homeRows.length;i++){const[name,pts]=homeRows[i];const rank=i+4;const row=document.createElement('div');row.className='ol-row';row.onclick=()=>{playBtnSound();openProfile(name);};row.style.animationDelay=`${i*0.08}s`;row.innerHTML=`<span class="ol-rank">${rank}</span><div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div><div class="ol-name-block"><div class="ol-name" style="font-family:'MultiCraftFont',monospace;">${name}</div>${getTags(name)}<div style="margin-top:4px;">${titleBadgeHtml(pts,rank)}</div></div><div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>`;homeList.appendChild(row);}dl.appendChild(homeList);if(entries.length>3+PREVIEW){const flDiv=document.createElement('div');flDiv.style.cssText="font-family:'MultiCraftFont',monospace;font-size:0.65rem;color:#555;cursor:pointer;margin-top:10px;margin-bottom:10px;letter-spacing:1px;text-align:center;width:100%;transition:color 0.2s;";flDiv.textContent='FULL LEADERBOARD ▶';flDiv.onmouseenter=()=>flDiv.style.color='var(--purple)';flDiv.onmouseleave=()=>flDiv.style.color='#555';flDiv.onclick=()=>switchTab('rankings');dl.appendChild(flDiv);}document.getElementById('showMoreBtn').style.display='none';return;}const listWrap=document.createElement('div');listWrap.id='overallList';const rowEntries=SHOW_ALL?entries:entries.slice(3,3+PREVIEW);await prewarmSkins(rowEntries.map(e=>e[0]));for(let i=0;i<rowEntries.length;i++){const[name,pts,tier]=rowEntries[i];const rank=SHOW_ALL?i+1:i+4;const isFullLB=SHOW_ALL;const row=document.createElement('div');row.className='ol-row'+(isFullLB?' ol-row-full':'');row.onclick=()=>{playBtnSound();openProfile(name);};if(isFullLB){const p=DATA.Players?.find(x=>x.name===name);const regCode=p?.region||'?';const regColor=REGION_MAP[regCode]?.color||'#555';const devCode=p?.device||'?';const devColor=DEVICE_MAP[devCode]?.color||'#555';let kitIconsHtml='<div class="ol-kit-icons">';Object.entries(KIT_MAP).forEach(([kname,{img,color}])=>{if(kname==='Overall')return;let tierLabel='',tierColor='#2a2a2a';if(DATA[kname]){for(let t in DATA[kname]){if(DATA[kname][t].includes(name)){const isR=t.startsWith('R');tierLabel=isR?t.slice(1):t;tierColor=isR?'#444':color;break;}}}kitIconsHtml+=`<div class="ol-kit-icon" style="border-color:${tierColor};opacity:${tierLabel?'1':'0.25'};"><img src="${img}" style="width:20px;height:20px;image-rendering:pixelated;display:block;"><span class="ol-kit-icon-label" style="color:${tierColor};font-size:0.5rem;">${tierLabel||''}</span></div>`;});kitIconsHtml+='</div>';row.innerHTML=`<span class="ol-rank">${rank}</span><div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div><div class="ol-name-block"><div class="ol-name" style="font-family:'MultiCraftFont',monospace;">${name}</div><div style="margin-top:4px;">${titleBadgeHtml(pts,rank)}</div></div><div class="tag-wrap has-hover" style="position:relative;"><span class="ol-region-badge" style="background:${regColor}22;border:1px solid ${regColor};color:${regColor};cursor:help;">${regCode}</span><div class="tag-popup" style="border-color:${regColor};">${REGION_MAP[regCode]?.label||regCode}</div></div><div class="tag-wrap has-hover" style="position:relative;"><span class="ol-region-badge" style="background:${devColor}22;border:1px solid ${devColor};color:${devColor};cursor:help;">${devCode}</span><div class="tag-popup" style="border-color:${devColor};">${DEVICE_MAP[devCode]?.label||devCode}</div></div>${kitIconsHtml}<div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>`;}else{row.innerHTML=`<span class="ol-rank">${rank}</span><div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div><div class="ol-name-block"><div class="ol-name">${name}</div>${getTags(name)}<div style="margin-top:4px;">${titleBadgeHtml(pts,rank)}</div></div>${kitMode&&tier?`<span class="ol-tier-badge">${tier.startsWith('R')?'Retired '+tier.slice(1):tier}</span>`:''}<div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>`;}row.style.animationDelay=`${i*0.06}s`;listWrap.appendChild(row);}dl.appendChild(listWrap);if(!isHome&&entries.length>3+PREVIEW){smBtn.style.display='block';smBtn.textContent=SHOW_ALL?'▲ SHOW LESS':'FULL LEADERBOARD ▶';}else{smBtn.style.display='none';}}
+
+async function renderKit(kit){if(CURRENT_TAB!=='rankings'&&CURRENT_TAB!=='home')return;const{region,device,retired}=getFilters();const color=KIT_MAP[kit]?.color||'var(--gold)';const lbl=document.getElementById('viewLabel');lbl.innerText=kit.toUpperCase();lbl.style.color=color;document.getElementById('filterBar').style.display='flex';document.getElementById('filterKit').style.display='none';document.getElementById('topPlayersTitle').style.display='none';document.getElementById('podiumWrap').style.display='none';document.getElementById('showMoreBtn').style.display='none';const dl=document.getElementById('displayList');dl.innerHTML='';dl.classList.remove('overall-mode');const kitPlayerStatus={};for(let k in DATA){if(k==='Overall'||k==='Players')continue;for(let t in DATA[k]){const isR=t.startsWith('R');DATA[k][t].forEach(name=>{if(!kitPlayerStatus[name])kitPlayerStatus[name]={active:false,retired:false};if(isR)kitPlayerStatus[name].retired=true;else kitPlayerStatus[name].active=true;});}}function kitPlayerVisible(name){const p=DATA.Players?.find(x=>x.name===name);if(region&&(!p||p.region!==region))return false;if(device&&(!p||p.device!==device))return false;if(retired==='active'){const s=kitPlayerStatus[name];if(!s||!s.active)return false;}else if(retired==='retired'){const s=kitPlayerStatus[name];if(!s||!s.retired||s.active)return false;}return true;}const allKitPlayers=[];if(DATA[kit]){for(let t in DATA[kit])DATA[kit][t].forEach(n=>{if(!allKitPlayers.includes(n))allKitPlayers.push(n);})}await prewarmSkins(allKitPlayers);const kitTop=[];if(DATA[kit]){const tierOrder2=['HT1','RHT1','LT1','RLT1','HT2','RHT2','LT2','RLT2','HT3','RHT3','LT3','RLT3','HT4','RHT4','LT4','RLT4','HT5','RHT5','LT5','RLT5'];for(const t of tierOrder2){if(retired==='active'&&t.startsWith('R'))continue;if(retired==='retired'&&!t.startsWith('R'))continue;if(DATA[kit][t])DATA[kit][t].forEach(n=>{if(kitTop.length<3&&kitPlayerVisible(n))kitTop.push({name:n,tier:t});});if(kitTop.length>=3)break;}}if(kitTop.length>0){const mp=document.createElement('div');mp.id='podiumWrap2';mp.style.cssText='display:flex;justify-content:center;align-items:flex-end;gap:16px;margin-bottom:28px;padding:0 12px;';for(let i=0;i<kitTop.length;i++){const{name,tier}=kitTop[i];const rank=i+1;const rankColors=['var(--gold)','#aaa','#cd7f32'];const card=document.createElement('div');card.className=`podium-card rank-${rank}`;card.onclick=()=>{playBtnSound();openProfile(name);};card.innerHTML=`<div class="podium-name">${name}</div><div class="podium-skin-wrap"><img src="${skinSrc(name)}" alt="${name}"></div><div class="podium-platform"><div class="podium-pts-badge" style="border-color:${rankColors[i]};color:${rankColors[i]};">${tier}</div><span class="podium-rank-num">${rank}</span></div>`;card.style.animation=`podiumDrop 0.5s cubic-bezier(0.22,1,0.36,1) ${i*0.12}s both`;mp.appendChild(card);}dl.appendChild(mp);}const grid=document.createElement('div');grid.style.cssText="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:24px;";let anyPlayers=false;const TIER_ORDER=['HT1','RHT1','LT1','RLT1','HT2','RHT2','LT2','RLT2','HT3','RHT3','LT3','RLT3','HT4','RHT4','LT4','RLT4','HT5','RHT5','LT5','RLT5'];if(DATA[kit]){["T1","T2","T3","T4","T5"].forEach(lvl=>{const lvlNum=lvl.slice(1);const orderedTiers=TIER_ORDER.filter(t=>{const base=t.startsWith('R')?t.slice(1):t;return base.slice(-1)===lvlNum;});let col=`<div style="min-width:200px;"><div style="color:var(--purple);border-bottom:1px solid var(--border);margin-bottom:10px;text-align:center;font-family:'MultiCraftFont';font-size:0.9rem;">${lvl}</div>`;let has=false;orderedTiers.forEach(t=>{if(!DATA[kit][t])return;if(retired==='active'&&t.startsWith('R'))return;if(retired==='retired'&&!t.startsWith('R'))return;DATA[kit][t].forEach(name=>{if(!kitPlayerVisible(name))return;has=true;anyPlayers=true;const isR=t.startsWith('R');const label=isR?'Retired '+t.substring(1):t;const lc=isR?'var(--grey)':'var(--gold)';col+=`<div class="tier-card clickable" style="width:200px;padding:12px;display:flex;align-items:center;gap:10px;" onclick="openProfile('${name}')"><img src="${skinSrc(name)}" alt="${name}" style="width:36px;height:36px;image-rendering:pixelated;object-fit:cover;object-position:top;transform:scale(1.3);transform-origin:top;flex-shrink:0;"><div><div style="font-size:0.9rem;font-weight:bold;">${name}</div>${getTags(name)}<div style="font-size:0.6rem;color:${lc};margin-top:4px;font-weight:bold;">${label}</div></div></div>`;});});if(has){col+=`</div>`;grid.innerHTML+=col;}});}if(!anyPlayers){dl.innerHTML=`<div class="empty-state"><h2>NO RANKED PLAYERS</h2></div>`;return;}dl.appendChild(grid);}
+
+/* ═══════════════════════════════════════════════
+   DUELS TAB
+═══════════════════════════════════════════════ */
+async function renderDuels(playerFilter){
+    document.getElementById('kitBar').style.display='none';
+    document.getElementById('filterBar').style.display='none';
+    document.getElementById('showMoreBtn').style.display='none';
+    document.getElementById('podiumWrap').style.display='none';
+    const dl=document.getElementById('displayList');
+    dl.innerHTML=''; dl.classList.remove('overall-mode');
+    const lbl=document.getElementById('viewLabel');
+    lbl.innerText=playerFilter?`${playerFilter}'s DUELS`:'DUEL HISTORY';
+    lbl.style.color='var(--theme)';
+
+    dl.innerHTML=`<div style="font-family:'MultiCraftFont',monospace;font-size:0.55rem;color:#444;letter-spacing:1px;margin-top:40px;">LOADING...</div>`;
+
+    try{
+        const url=playerFilter
+            ?`${AUTH_API.replace('/api','')}/api/duels?player=${encodeURIComponent(playerFilter)}&limit=50`
+            :`${AUTH_API.replace('/api','')}/api/duels?limit=100`;
+        const res=await fetch(url);
+        const data=await res.json();
+        const duels=data.duels||[];
+
+        if(duels.length===0){
+            dl.innerHTML=`<div class="empty-state"><h2>NO DUELS FOUND</h2></div>`;
+            return;
+        }
+
+        dl.innerHTML='';
+        const list=document.createElement('div');
+        list.style.cssText='display:flex;flex-direction:column;gap:8px;width:100%;max-width:650px;padding:0 12px;box-sizing:border-box;';
+
+        duels.forEach((d,i)=>{
+            const isWin   = (playerFilter?d.player1===playerFilter:true) ? d.result==='Won' : d.result==='Lost';
+            const p1      = playerFilter||d.player1;
+            const p2      = p1===d.player1?d.player2:d.player1;
+            const p1score = p1===d.player1?d.player1_score:d.player2_score;
+            const p2score = p1===d.player1?d.player2_score:d.player1_score;
+            const won     = p1score>p2score;
+            const resultColor = won?'#00ff88':'#ff4444';
+            const resultText  = won?'W':'L';
+            const date=new Date(d.timestamp).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+            const outcomeColor = d.outcome==='promoted'?'#00ff88':d.outcome==='demoted'?'#ff4444':d.outcome==='failed'?'#ff8800':'#555';
+
+            const row=document.createElement('div');
+            row.className='duel-row';
+            row.style.animationDelay=`${i*0.04}s`;
+            row.innerHTML=`
+                <div class="duel-result-badge" style="background:${resultColor}22;border-color:${resultColor};color:${resultColor};">${resultText}</div>
+                <div class="duel-names">
+                    <span class="duel-p1" onclick="event.stopPropagation();openProfile('${p1}')">${p1}</span>
+                    <span class="duel-vs">vs</span>
+                    <span class="duel-p2" onclick="event.stopPropagation();openProfile('${p2}')">${p2}</span>
+                </div>
+                <div class="duel-score">${p1score}<span style="color:#333;margin:0 3px;">-</span>${p2score}</div>
+                <div class="duel-meta">
+                    <span class="duel-kit">${d.kit}</span>
+                    <span class="duel-tier">${d.tier}</span>
+                    ${d.outcome&&d.outcome!=='tested'?`<span style="font-family:'MultiCraftFont',monospace;font-size:0.38rem;color:${outcomeColor};letter-spacing:1px;">${d.outcome.toUpperCase()}</span>`:''}
+                </div>
+                <div class="duel-date">${date}</div>`;
+            row.onclick=()=>openDuelDetail(d,playerFilter);
+            list.appendChild(row);
+        });
+        dl.appendChild(list);
+    }catch(e){
+        dl.innerHTML=`<div class="empty-state"><h2>COULD NOT LOAD DUELS</h2><p style="font-size:0.6rem;color:#333;margin-top:8px;">${e.message}</p></div>`;
+    }
+}
+
+function openDuelDetail(d,perspective){
+    const p1=perspective||d.player1;
+    const p2=p1===d.player1?d.player2:d.player1;
+    const p1score=p1===d.player1?d.player1_score:d.player2_score;
+    const p2score=p1===d.player1?d.player2_score:d.player1_score;
+    const won=p1score>p2score;
+    const date=new Date(d.timestamp).toLocaleString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    const outcomeColor=d.outcome==='promoted'?'#00ff88':d.outcome==='demoted'?'#ff4444':d.outcome==='failed'?'#ff8800':'#555';
+
+    document.getElementById('duelModalContent').innerHTML=`
+        <div style="font-family:'MultiCraftFont',monospace;text-align:center;">
+            <div style="font-size:0.5rem;color:#444;letter-spacing:2px;margin-bottom:12px;">${d.kit} · ${d.tier}</div>
+            <div style="font-size:1.4rem;color:${won?'#00ff88':'#ff4444'};margin-bottom:4px;">${won?'VICTORY':'DEFEAT'}</div>
+            <div style="font-size:0.9rem;color:#fff;margin-bottom:16px;cursor:pointer;" onclick="document.getElementById('duelModal').style.display='none';openProfile('${p1}')">${p1}</div>
+            <div style="font-size:2.5rem;color:#fff;letter-spacing:8px;margin-bottom:8px;">${p1score} <span style="color:#333;font-size:1.2rem;">-</span> ${p2score}</div>
+            <div style="font-size:0.9rem;color:#555;margin-bottom:16px;cursor:pointer;" onclick="document.getElementById('duelModal').style.display='none';openProfile('${p2}')">${p2}</div>
+            ${d.outcome&&d.outcome!=='tested'?`<div style="font-size:0.5rem;color:${outcomeColor};border:1px solid ${outcomeColor};border-radius:20px;padding:3px 12px;display:inline-block;margin-bottom:12px;">${d.outcome.toUpperCase()}</div>`:''}
+            <div style="font-size:0.42rem;color:#333;margin-top:8px;">${date}</div>
+        </div>`;
+    document.getElementById('duelModal').style.display='flex';
+}
+
+async function renderProfileDuels(playerName){
+    try{
+        const res=await fetch(`${AUTH_API.replace('/api','')}/api/duels?player=${encodeURIComponent(playerName)}&limit=10`);
+        const data=await res.json();
+        const duels=data.duels||[];
+        if(duels.length===0) return;
+
+        const left=document.querySelector('.profile-left');
+        if(!left) return;
+
+        const section=document.createElement('div');
+        section.style.cssText='margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,238,255,0.08);';
+        section.innerHTML=`<div style="font-family:'MultiCraftFont',monospace;font-size:0.45rem;color:#444;letter-spacing:2px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;">
+            <span>DUEL HISTORY</span>
+            <span style="cursor:pointer;color:var(--purple);" onclick="switchTab('duels');closeProfileModal();">VIEW ALL ▶</span>
+        </div>`;
+
+        duels.forEach(d=>{
+            const p1    =d.player1===playerName?d.player1:d.player2;
+            const p2    =d.player1===playerName?d.player2:d.player1;
+            const p1s   =d.player1===playerName?d.player1_score:d.player2_score;
+            const p2s   =d.player1===playerName?d.player2_score:d.player1_score;
+            const won   =p1s>p2s;
+            const rColor=won?'#00ff88':'#ff4444';
+            const row=document.createElement('div');
+            row.style.cssText='display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:1px solid #0a0a0a;cursor:pointer;';
+            row.innerHTML=`
+                <span style="font-family:'MultiCraftFont',monospace;font-size:0.42rem;color:${rColor};border:1px solid ${rColor};border-radius:4px;padding:1px 5px;flex-shrink:0;">${won?'W':'L'}</span>
+                <span style="font-family:'MultiCraftFont',monospace;font-size:0.55rem;color:#ccc;flex:1;">${p2}</span>
+                <span style="font-family:'MultiCraftFont',monospace;font-size:0.55rem;color:${rColor};">${p1s}-${p2s}</span>
+                <span style="font-family:'MultiCraftFont',monospace;font-size:0.38rem;color:#333;">${d.kit.split(' ')[0]}</span>`;
+            row.onclick=()=>openDuelDetail(d,playerName);
+            section.appendChild(row);
+        });
+
+        const pts=document.getElementById('pPoints');
+        if(pts) pts.parentNode.insertBefore(section,pts); else left.appendChild(section);
+    }catch(_){}
+}
+
+/* ═══════════════════════════════════════════════
+   SWITCH TAB
+═══════════════════════════════════════════════ */
+async function switchTab(tab){
     playBtnSound();
     CURRENT_TAB=tab;
     document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
@@ -763,250 +925,99 @@ async function switchTab(tab) {
     document.getElementById('filterBar').style.display='none';
     document.getElementById('showMoreBtn').style.display='none';
 
-    if(tab==='home') {
-        setUrl({tab:'', kit:'', player:''});
+    if(tab==='home'){
+        setUrl({tab:'',kit:'',player:''});
         document.getElementById('kitBar').style.display='none';
-        SHOW_ALL=false;
-        CURRENT_KIT='Overall';
+        SHOW_ALL=false; CURRENT_KIT='Overall';
         document.querySelectorAll('.kit-btn').forEach(b=>{b.classList.remove('active');b.style.opacity='0.4';});
-        const overallBtn=[...document.querySelectorAll('.kit-btn')].find(b=>b.textContent.trim()==='OVERALL');
-        if(overallBtn){overallBtn.classList.add('active');overallBtn.style.opacity='1';}
+        const ob=[...document.querySelectorAll('.kit-btn')].find(b=>b.textContent.trim()==='OVERALL');
+        if(ob){ob.classList.add('active');ob.style.opacity='1';}
         await renderOverall();
-    } else if(tab==='rankings') {
-        setUrl({tab:'rankings', kit:'', player:''});
+    } else if(tab==='rankings'){
+        setUrl({tab:'rankings',kit:'',player:''});
         SHOW_ALL=true;
         document.getElementById('kitBar').style.display='flex';
         document.getElementById('filterBar').style.display='flex';
         document.getElementById('topPlayersTitle').style.display='none';
         dl.innerHTML='';
         if(CURRENT_KIT==='Overall') await renderOverall(); else await renderKit(CURRENT_KIT);
+    } else if(tab==='duels'){
+        setUrl({tab:'duels',kit:'',player:''});
+        await renderDuels();
     } else {
         document.getElementById('kitBar').style.display='none';
-        setUrl({tab:tab, kit:'', player:''});
+        setUrl({tab:tab,kit:'',player:''});
         const lbl=document.getElementById('viewLabel');
-        lbl.innerText=tab==='hof'?"HALL OF FAME":"TIER TESTERS"; lbl.style.color='var(--gold)';
-        try {
+        lbl.innerText=tab==='hof'?"HALL OF FAME":"TIER TESTERS";
+        lbl.style.color='var(--gold)';
+        try{
             const r=await fetch(`data/${tab}.json?v=${Date.now()}`);
             const data=await r.json();
             data.forEach(i=>{
                 const hasProf=(i.name in DATA.Overall);
-                dl.innerHTML+=`<div class="tier-card ${hasProf?'clickable':''}" ${hasProf?`onclick="openProfile('${i.name}')"`:''}">
-                    <b style="color:var(--purple);font-family:'MultiCraftFont';font-size:1rem;">${i.name}</b>
-                    ${i.discord?`<div style="color:var(--purple);font-size:0.85rem;font-weight:bold;margin-top:5px;">Discord: ${i.discord}</div>`:''}
-                    <p style="font-size:0.75rem;color:#bbb;margin-top:8px;">${i.description||''}</p>
-                </div>`;
+                dl.innerHTML+=`<div class="tier-card ${hasProf?'clickable':''}" ${hasProf?`onclick="openProfile('${i.name}')"`:''}><b style="color:var(--purple);font-family:'MultiCraftFont';font-size:1rem;">${i.name}</b>${i.discord?`<div style="color:var(--purple);font-size:0.85rem;font-weight:bold;margin-top:5px;">Discord: ${i.discord}</div>`:''}<p style="font-size:0.75rem;color:#bbb;margin-top:8px;">${i.description||''}</p></div>`;
             });
-        } catch(e){ console.error(`Could not load ${tab}.json`,e); }
+        }catch(e){ console.error(`Could not load ${tab}.json`,e); }
     }
 }
 
-/* ─── Confetti ──────────────────────────────────────────── */
-function fireConfetti() {
-    const colors = ['#ffd700','#fff','var(--theme)','#ff00ff','#00eeff','#ff6a00'];
-    const canvas = document.createElement('canvas');
-    canvas.style.cssText = 'position:fixed;inset:0;z-index:9999;pointer-events:none;';
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    document.body.appendChild(canvas);
-    const ctx = canvas.getContext('2d');
-    const pieces = Array.from({length:120}, () => ({
-        x: Math.random() * canvas.width,
-        y: -20 - Math.random() * 200,
-        r: Math.random() * 7 + 3,
-        color: colors[Math.floor(Math.random()*colors.length)],
-        vx: (Math.random()-0.5) * 4,
-        vy: Math.random() * 4 + 2,
-        spin: Math.random() * 0.3 - 0.15,
-        angle: Math.random() * Math.PI * 2,
-        shape: Math.random() > 0.5 ? 'rect' : 'circle',
-        w: Math.random() * 10 + 5,
-        h: Math.random() * 5 + 3,
-        alpha: 1,
-    }));
-    const start = performance.now();
-    const duration = 2800;
-    function draw(now) {
-        const elapsed = now - start;
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        pieces.forEach(p => {
-            p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.angle += p.spin;
-            p.alpha = Math.max(0, 1 - (elapsed / duration) * 1.2);
-            ctx.globalAlpha = p.alpha;
-            ctx.fillStyle = p.color;
-            ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.angle);
-            if (p.shape === 'rect') {
-                ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-            } else {
-                ctx.beginPath(); ctx.arc(0, 0, p.r, 0, Math.PI*2); ctx.fill();
-            }
-            ctx.restore();
-        });
-        ctx.globalAlpha = 1;
-        if (elapsed < duration) requestAnimationFrame(draw);
-        else canvas.remove();
-    }
-    requestAnimationFrame(draw);
-
-    const modal = document.querySelector('.profile-modal-content');
-    modal.style.boxShadow = '0 0 40px rgba(255,215,0,0.6), 0 0 80px rgba(255,215,0,0.25)';
+function closeProfileModal(){
+    document.getElementById('profileModal').style.display='none';
+    clearProfileExtras();
+    setUrl({player:''});
 }
 
-/* ─── Profile modal ─────────────────────────────────────── */
-function openProfile(name) {
+function fireConfetti(){const colors=['#ffd700','#fff','var(--theme)','#ff00ff','#00eeff','#ff6a00'];const canvas=document.createElement('canvas');canvas.style.cssText='position:fixed;inset:0;z-index:9999;pointer-events:none;';canvas.width=window.innerWidth;canvas.height=window.innerHeight;document.body.appendChild(canvas);const ctx=canvas.getContext('2d');const pieces=Array.from({length:120},()=>({x:Math.random()*canvas.width,y:-20-Math.random()*200,r:Math.random()*7+3,color:colors[Math.floor(Math.random()*colors.length)],vx:(Math.random()-.5)*4,vy:Math.random()*4+2,spin:Math.random()*.3-.15,angle:Math.random()*Math.PI*2,shape:Math.random()>.5?'rect':'circle',w:Math.random()*10+5,h:Math.random()*5+3,alpha:1}));const start=performance.now();const duration=2800;function draw(now){const elapsed=now-start;ctx.clearRect(0,0,canvas.width,canvas.height);pieces.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.08;p.angle+=p.spin;p.alpha=Math.max(0,1-(elapsed/duration)*1.2);ctx.globalAlpha=p.alpha;ctx.fillStyle=p.color;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.angle);if(p.shape==='rect'){ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);}else{ctx.beginPath();ctx.arc(0,0,p.r,0,Math.PI*2);ctx.fill();}ctx.restore();});ctx.globalAlpha=1;if(elapsed<duration)requestAnimationFrame(draw);else canvas.remove();}requestAnimationFrame(draw);}
+
+async function openProfile(name){
     playBtnSound();
     if(!(name in DATA.Overall)) return;
     const sorted=Object.entries(DATA.Overall).sort((a,b)=>b[1]-a[1]);
-    const rankIdx=sorted.findIndex(x=>x[0]===name);
-    const rankNum = rankIdx+1;
-    const rankPts = DATA.Overall[name];
-    const {title: rankTitle, color: rankTitleColor} = getRankTitle(rankPts, rankNum);
-
-    document.getElementById('pRank').innerText = "RANK #" + rankNum;
-    const titleBadge = document.getElementById('pTitleBadge');
-    titleBadge.textContent = rankTitle;
-    titleBadge.style.color = rankTitleColor;
-    titleBadge.style.borderColor = rankTitleColor;
-    titleBadge.style.background = rankTitleColor + '18';
-
-    typeText(document.getElementById('pName'), name, 1000);
+    const rankIdx=sorted.findIndex(x=>x[0]===name); const rankNum=rankIdx+1; const rankPts=DATA.Overall[name];
+    const{title:rankTitle,color:rankTitleColor}=getRankTitle(rankPts,rankNum);
+    document.getElementById('pRank').innerText="RANK #"+rankNum;
+    const titleBadge=document.getElementById('pTitleBadge');
+    titleBadge.textContent=rankTitle; titleBadge.style.color=rankTitleColor; titleBadge.style.borderColor=rankTitleColor; titleBadge.style.background=rankTitleColor+'18';
+    clearProfileExtras();
+    typeText(document.getElementById('pName'),name,1000);
     document.getElementById('pMeta').innerHTML=getTags(name);
-
-    const targetPts = DATA.Overall[name];
-    const pPoints = document.getElementById('pPoints');
+    const targetPts=DATA.Overall[name]; const pPoints=document.getElementById('pPoints');
     pPoints.innerHTML='0 <span class="profile-elo-label">PTS</span>';
-    const duration = 1500;
-    const startTime = performance.now();
-    function countUp(now) {
-        const elapsed = now - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const current = Math.round(eased * targetPts);
-        pPoints.innerHTML = current + ' <span class="profile-elo-label">PTS</span>';
-        if (progress < 1) requestAnimationFrame(countUp);
-    }
+    const dur=1500; const st=performance.now();
+    function countUp(now){const el=now-st;const pr=Math.min(el/dur,1);const ea=1-Math.pow(1-pr,3);pPoints.innerHTML=Math.round(ea*targetPts)+' <span class="profile-elo-label">PTS</span>';if(pr<1)requestAnimationFrame(countUp);}
     requestAnimationFrame(countUp);
-
     let ranked=[],unranked=[];
-    Object.keys(KIT_MAP).forEach(k=>{
-        if(k==="Overall") return;
-        let found=false,display="",color="var(--grey)";
-        const img=KIT_MAP[k]?.img;
-        if(DATA[k]) {
-            for(let t in DATA[k]) {
-                if(DATA[k][t].includes(name)){
-                    found=true;
-                    const isR=t.startsWith('R');
-                    display=isR?'Retired '+t.substring(1):t;
-                    color=isR?'var(--grey)':'var(--gold)'; break;
-                }
-            }
-        }
-        const html=`<div class="p-kit-item">
-            <div class="kit-popup" style="border-color:${color}">
-                <span style="color:${color}">${found?display:"UNRANKED"}</span><br>
-                <span style="color:#666">${k}</span>
-            </div>
-            <div class="p-kit-circle" style="border-color:${found?color:'#222'};opacity:${found?'1':'0.3'};">
-                ${img?`<img src="${img}">`:''}
-            </div>
-            <div class="p-kit-tier-label" style="color:${color};">${found?display:"—"}</div>
-        </div>`;
-        if(found) ranked.push(html); else unranked.push(html);
-    });
-    const allTiers = [...ranked,...unranked];
-    document.getElementById('pTiers').innerHTML = allTiers.map((html,i) =>
-        html.replace('<div class="p-kit-item">', `<div class="p-kit-item" style="animation:kitCircleIn 0.4s ease-out ${i*0.05}s both;">`)
-    ).join('');
-
-    const skinWrap=document.getElementById('pSkin');
-    const skinImg=document.getElementById('pSkinImg');
-    hasSkin(name).then(()=>{
-        skinImg.src=skinSrc(name); skinWrap.style.display='flex';
-    });
-
-    setUrl({player:name}); document.getElementById('profileModal').style.display='flex';
-    if(rankIdx===0) fireConfetti();
+    Object.keys(KIT_MAP).forEach(k=>{if(k==="Overall")return;let found=false,display="",color="var(--grey)";const img=KIT_MAP[k]?.img;if(DATA[k]){for(let t in DATA[k]){if(DATA[k][t].includes(name)){found=true;const isR=t.startsWith('R');display=isR?'Retired '+t.substring(1):t;color=isR?'var(--grey)':'var(--gold)';break;}}}const html=`<div class="p-kit-item"><div class="kit-popup" style="border-color:${color}"><span style="color:${color}">${found?display:"UNRANKED"}</span><br><span style="color:#666">${k}</span></div><div class="p-kit-circle" style="border-color:${found?color:'#222'};opacity:${found?'1':'0.3'};"><img src="${img}"></div><div class="p-kit-tier-label" style="color:${color};">${found?display:"—"}</div></div>`;if(found)ranked.push(html);else unranked.push(html);});
+    document.getElementById('pTiers').innerHTML=[...ranked,...unranked].map((h,i)=>h.replace('<div class="p-kit-item">',`<div class="p-kit-item" style="animation:kitCircleIn 0.4s ease-out ${i*0.05}s both;">`)).join('');
+    const skinWrap=document.getElementById('pSkin'); const skinImg=document.getElementById('pSkinImg');
+    hasSkin(name).then(()=>{ skinImg.src=skinSrc(name); skinWrap.style.display='flex'; });
+    setUrl({player:name});
+    document.getElementById('profileModal').style.display='flex';
+    // No confetti for #1 anymore (removed as requested)
+    try{
+        const data=await authCall("GET",`/profile/${encodeURIComponent(name)}`);
+        injectProfileExtras(name,data.role,data.profile);
+        injectEditPanel(name);
+    }catch(e){ console.warn("Profile extras unavailable:",e.message); }
+    // Load duel history for profile
+    renderProfileDuels(name);
 }
 
-/* ─── Shareable URLs ───────────────────────────────────── */
-async function handleUrlOnLoad() {
-    const p = new URLSearchParams(window.location.search);
-    const player = p.get('player');
-    const kit    = p.get('kit');
-    const tab    = p.get('tab');
-    if (player && DATA.Overall && player in DATA.Overall) {
-        openProfile(player);
-    } else if (tab === 'rankings') {
-        switchTab('rankings');
-    } else if (tab === 'hof' || tab === 'testers') {
-        switchTab(tab);
-    } else if (kit && kit !== 'Overall' && KIT_MAP[kit]) {
-        CURRENT_KIT = kit;
-        document.querySelectorAll('.kit-btn').forEach(b=>{b.classList.remove('active');b.style.opacity='0.4';});
-        const btn = [...document.querySelectorAll('.kit-btn')]
-            .find(b => b.textContent.trim() === kit.toUpperCase());
-        if (btn) { btn.classList.add('active'); btn.style.opacity='1'; }
-        document.getElementById('filterBar').style.display='none';
-        document.getElementById('showMoreBtn').style.display='none';
-        document.getElementById('kitBar').style.display='flex';
-        await renderKit(kit);
-    }
-}
-
-function copyProfileLink() {
-    const url = new URL(window.location.href);
-    const name = document.getElementById('pName').innerText;
-    url.searchParams.set('player', name);
-    navigator.clipboard.writeText(url.toString()).then(()=>{
-        const btn = document.getElementById('profileCopyBtn');
-        btn.textContent = '✓';
-        btn.style.borderColor = 'var(--purple)';
-        btn.style.color = 'var(--purple)';
-        setTimeout(()=>{ btn.textContent='⧉'; btn.style.borderColor=''; btn.style.color=''; }, 1500);
-    });
-}
-
-function setUrl(params) {
-    const u = new URL(window.location.href);
-    Object.entries(params).forEach(([k,v]) => v ? u.searchParams.set(k,v) : u.searchParams.delete(k));
-    window.history.replaceState({}, '', u);
-}
-
-/* ─── Search ────────────────────────────────────────────── */
-function handleSearch(val) {
-    const pop=document.getElementById('searchPopup');
-    if(!val){ pop.style.display='none'; return; }
-    const matches=Object.keys(DATA.Overall||{}).filter(n=>n.toLowerCase().includes(val.toLowerCase())).slice(0,5);
-    pop.innerHTML=matches.map(m=>`<div class="search-item" onclick="openProfile('${m}');document.getElementById('searchPopup').style.display='none';"><b>${m}</b><span style="color:var(--purple);font-size:0.5rem;">VIEW PROFILE</span></div>`).join('')||'';
-    pop.style.display=matches.length?'block':'none';
-}
-
+async function handleUrlOnLoad(){const p=new URLSearchParams(window.location.search);const player=p.get('player');const kit=p.get('kit');const tab=p.get('tab');if(player&&DATA.Overall&&player in DATA.Overall){openProfile(player);}else if(tab==='rankings'){switchTab('rankings');}else if(tab==='hof'||tab==='testers'){switchTab(tab);}else if(tab==='duels'){switchTab('duels');}else if(kit&&kit!=='Overall'&&KIT_MAP[kit]){CURRENT_KIT=kit;document.querySelectorAll('.kit-btn').forEach(b=>{b.classList.remove('active');b.style.opacity='0.4';});const btn=[...document.querySelectorAll('.kit-btn')].find(b=>b.textContent.trim()===kit.toUpperCase());if(btn){btn.classList.add('active');btn.style.opacity='1';}document.getElementById('filterBar').style.display='none';document.getElementById('showMoreBtn').style.display='none';document.getElementById('kitBar').style.display='flex';await renderKit(kit);}}
+function copyProfileLink(){const url=new URL(window.location.href);const name=document.getElementById('pName').innerText.trim();url.searchParams.set('player',name);navigator.clipboard.writeText(url.toString()).then(()=>{const btn=document.getElementById('profileCopyBtn');btn.textContent='✓';btn.style.borderColor='var(--purple)';btn.style.color='var(--purple)';setTimeout(()=>{btn.textContent='⧉';btn.style.borderColor='';btn.style.color='';},1500);});}
+function setUrl(params){const u=new URL(window.location.href);Object.entries(params).forEach(([k,v])=>v?u.searchParams.set(k,v):u.searchParams.delete(k));window.history.replaceState({},'',u);}
+function handleSearch(val){const pop=document.getElementById('searchPopup');if(!val){pop.style.display='none';return;}const matches=Object.keys(DATA.Overall||{}).filter(n=>n.toLowerCase().includes(val.toLowerCase())).slice(0,5);pop.innerHTML=matches.map(m=>`<div class="search-item" onclick="openProfile('${m}');document.getElementById('searchPopup').style.display='none';"><b>${m}</b><span style="color:var(--purple);font-size:0.5rem;">VIEW PROFILE</span></div>`).join('')||'';pop.style.display=matches.length?'block':'none';}
 function openInfo(){ playBtnSound(); document.getElementById('infoModal').style.display='flex'; }
 
-load().then(handleUrlOnLoad);
+(async()=>{
+    await restoreSession();
+    await load();
+    await handleUrlOnLoad();
+})();
+
 document.addEventListener('click',e=>{ if(!e.target.closest('.search-wrap')) document.getElementById('searchPopup').style.display='none'; });
 
-/* ─── Star canvas ───────────────────────────────────────── */
-const canvas=document.createElement('canvas');
-canvas.style.cssText='position:fixed;inset:0;z-index:0;pointer-events:none;';
-document.body.prepend(canvas);
-const ctx=canvas.getContext('2d');
-canvas.width=window.innerWidth; canvas.height=window.innerHeight;
-window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});
-let stars=[];
-function spawnStar(){return{x:Math.random()*canvas.width,y:-10,size:Math.random()*3+1,speed:Math.random()*8+4,drift:Math.random()*1.5-0.75};}
-setInterval(()=>{for(let i=0;i<6;i++)stars.push(spawnStar());},80);
-(function animate(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    for(let i=0;i<stars.length;i++){
-        const s=stars[i];
-        ctx.beginPath();ctx.fillStyle='white';ctx.shadowBlur=10;ctx.shadowColor='#00eeff';
-        ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();
-        s.y+=s.speed;s.x+=s.drift;
-        if(s.y>canvas.height+20){stars.splice(i,1);i--;}
-    }
-    requestAnimationFrame(animate);
-})();
+const canvas=document.createElement('canvas');canvas.style.cssText='position:fixed;inset:0;z-index:0;pointer-events:none;';document.body.prepend(canvas);const ctx=canvas.getContext('2d');canvas.width=window.innerWidth;canvas.height=window.innerHeight;window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});let stars=[];function spawnStar(){return{x:Math.random()*canvas.width,y:-10,size:Math.random()*3+1,speed:Math.random()*8+4,drift:Math.random()*1.5-.75};}setInterval(()=>{for(let i=0;i<6;i++)stars.push(spawnStar());},80);(function animate(){ctx.clearRect(0,0,canvas.width,canvas.height);for(let i=0;i<stars.length;i++){const s=stars[i];ctx.beginPath();ctx.fillStyle='white';ctx.shadowBlur=10;ctx.shadowColor='#00eeff';ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();s.y+=s.speed;s.x+=s.drift;if(s.y>canvas.height+20){stars.splice(i,1);i--;}}requestAnimationFrame(animate);})();
 </script>
 </body>
 </html>
