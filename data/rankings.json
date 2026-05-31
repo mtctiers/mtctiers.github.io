@@ -304,6 +304,11 @@
       "name": "TERRORRR",
       "region": "AS",
       "device": "MK"
+    },
+    {
+      "name": "MTCTIERS",
+      "region": "MTCTIERS",
+      "device": "MTCTIERS"
     }
   ],
   "Emerald": {
