@@ -615,12 +615,12 @@
       "jogg",
       "Bloody_Hell"
     ],
-    "LT2": [
-      "x9jm"
-    ],
     "RHT2": [
       "Vorthexis",
       "TimmyLoal"
+    ],
+    "RLT2": [
+      "x9jm"
     ],
     "HT3": [
       "LastChance",
@@ -650,7 +650,6 @@
     ],
     "HT2": [
       "system1117",
-      "x9jm",
       "jogg",
       "Jerryisking",
       "vort3x"
@@ -663,7 +662,8 @@
       "TERRORRR"
     ],
     "RHT2": [
-      "TimmyLoal"
+      "TimmyLoal",
+      "x9jm"
     ],
     "HT3": [
       "revan",
@@ -685,7 +685,7 @@
     ]
   },
   "Void": {
-    "HT2": [
+    "RHT2": [
       "x9jm"
     ],
     "RLT2": [
