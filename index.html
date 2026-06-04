@@ -17,205 +17,15 @@
 <meta property="twitter:image" content="https://mtctiers.github.io/assets/mtctiers.png">
 <meta name="theme-color" content="#a855f7">
 <link rel="stylesheet" href="style.css">
-<style>
-/* ── Nav layout fix ─────────────────────────────────── */
-nav {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    padding: 10px 20px;
-    background: rgba(0,0,0,0.95);
-    border-bottom: 2px solid var(--border);
-    width: 100%;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    backdrop-filter: blur(10px);
-    margin-top: 65px;
-    box-sizing: border-box;
-    gap: 12px;
-}
-.nav-left  { display:flex; align-items:center; gap:8px; justify-content:flex-start; }
-.nav-center { display:flex; gap:22px; justify-content:center; }
-.nav-right { display:flex; align-items:center; gap:8px; justify-content:flex-end; }
-/* override old absolute positioning */
-.nav-center { position:static !important; left:auto !important; transform:none !important; }
-
-/* ── Login modal ──────────────────────────────────── */
-#loginModal { position:fixed; inset:0; background:rgba(0,0,0,0.93); backdrop-filter:blur(14px); z-index:3000; display:none; align-items:center; justify-content:center; }
-#loginModal.open { display:flex; }
-.lc { background:#06060a; border:1.5px solid rgba(0,238,255,0.25); border-radius:16px; padding:38px 34px 30px; width:340px; max-width:calc(100vw - 32px); position:relative; box-shadow:0 0 60px rgba(0,238,255,0.10); animation:lcIn 0.32s cubic-bezier(0.22,1,0.36,1) both; }
-@keyframes lcIn { from{opacity:0;transform:scale(0.9) translateY(16px);filter:blur(8px)} to{opacity:1;transform:scale(1) translateY(0);filter:blur(0)} }
-.lc-close { position:absolute; top:12px; right:14px; background:#111; border:1px solid #222; color:#555; width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.7rem; transition:border-color .2s,color .2s; }
-.lc-close:hover { border-color:var(--purple); color:#fff; }
-.lc-logo { display:flex; flex-direction:column; align-items:center; gap:6px; margin-bottom:26px; }
-.lc-logo img { width:34px; filter:drop-shadow(0 0 8px var(--purple)); animation:swordGlow 2s infinite ease-in-out; }
-.lc-logo-title { font-family:'MultiCraftFont',monospace; font-size:1rem; color:#fff; text-shadow:0 0 10px var(--purple); letter-spacing:2px; }
-.lc-logo-sub { font-family:'MultiCraftFont',monospace; font-size:0.45rem; color:#333; letter-spacing:3px; }
-.lc-label { font-family:'MultiCraftFont',monospace; font-size:0.5rem; color:#444; letter-spacing:2px; display:block; margin-bottom:5px; }
-.lc-input { width:100%; background:#000; border:1px solid rgba(0,238,255,0.15); border-radius:8px; color:#fff; padding:10px 13px; font-family:'MultiCraftFont',monospace; font-size:0.75rem; outline:none; box-sizing:border-box; transition:border-color .2s; letter-spacing:1px; margin-bottom:12px; }
-.lc-input:focus { border-color:var(--purple); }
-.lc-input::placeholder { color:#222; }
-#lcCode { font-size:1rem; letter-spacing:4px; text-align:center; text-transform:uppercase; }
-.lc-btn { width:100%; margin-top:4px; background:transparent; border:1.5px solid rgba(0,238,255,0.3); border-radius:8px; color:var(--theme); font-family:'MultiCraftFont',monospace; font-size:0.65rem; padding:11px; cursor:pointer; letter-spacing:2px; transition:border-color .2s,box-shadow .2s,background .2s; }
-.lc-btn:hover:not(:disabled) { border-color:var(--purple); box-shadow:0 0 18px rgba(0,238,255,0.25); background:rgba(0,238,255,0.05); }
-.lc-btn:disabled { opacity:.4; cursor:not-allowed; }
-
-/* ── Nav badges ───────────────────────────────────── */
-#navUserBadge { display:none; align-items:center; gap:8px; }
-#navUserBadge.vis { display:flex; }
-#navUserName { font-family:'MultiCraftFont',monospace; font-size:0.6rem; color:var(--theme); letter-spacing:1px; }
-.nav-role-badge { font-family:'MultiCraftFont',monospace; font-size:0.4rem; padding:2px 7px; border-radius:20px; border:1px solid; letter-spacing:1px; }
-.nav-role-badge[data-r="owner"]  { color:#ffd700; border-color:#ffd700; background:rgba(255,215,0,0.08); }
-.nav-role-badge[data-r="tester"] { color:#b044ff; border-color:#b044ff; background:rgba(176,68,255,0.08); }
-.nav-role-badge[data-r="player"] { color:var(--theme); border-color:var(--border); background:var(--bg-accent); }
-#loginNavBtn { background:transparent; border:1px solid var(--border); border-radius:6px; color:#444; font-family:'MultiCraftFont',monospace; font-size:0.6rem; padding:6px 13px; cursor:pointer; letter-spacing:1px; white-space:nowrap; transition:border-color .2s,color .2s,box-shadow .2s; }
-#loginNavBtn:hover { border-color:var(--purple); color:#fff; box-shadow:0 0 10px var(--purple-glow); }
-#loginNavBtn.li { color:var(--theme); border-color:var(--border); }
-#loginNavBtn.li:hover { border-color:#ff4444; color:#ff4444; }
-
-/* ── Edit panel ───────────────────────────────────── */
-#profileEditPanel { margin-top:14px; display:none; flex-direction:column; gap:9px; }
-#profileEditPanel.vis { display:flex; }
-#editDropdownToggle { display:flex; align-items:center; justify-content:space-between; margin-top:14px; padding:7px 11px; background:#0a0a10; border:1px solid rgba(0,238,255,0.12); border-radius:7px; cursor:pointer; font-family:'MultiCraftFont',monospace; font-size:0.45rem; color:var(--purple); letter-spacing:2px; transition:border-color .2s; user-select:none; }
-#editDropdownToggle:hover { border-color:var(--purple); }
-#editDropdownToggle .edit-arrow { transition:transform .25s; }
-#editDropdownToggle.open .edit-arrow { transform:rotate(180deg); }
-#editDropdownBody { display:none; flex-direction:column; gap:9px; padding:10px 2px 2px; overflow-y:auto; max-height:340px; }
-#editDropdownBody.vis { display:flex; }
-.pe-group-label { font-family:'MultiCraftFont',monospace; font-size:0.4rem; color:#444; letter-spacing:2px; text-transform:uppercase; margin-top:4px; padding-bottom:4px; border-bottom:1px solid #111; }
-.pe-field-label { font-family:'MultiCraftFont',monospace; font-size:0.42rem; color:#444; letter-spacing:2px; display:block; margin-bottom:4px; }
-.pe-field-label span { color:#2a2a2a; }
-.pe-input { width:100%; background:#000; border:1px solid rgba(0,238,255,0.12); border-radius:6px; color:#fff; padding:8px 11px; font-family:'MultiCraftFont',monospace; font-size:0.62rem; outline:none; box-sizing:border-box; transition:border-color .2s; }
-.pe-input:focus { border-color:var(--purple); }
-.pe-input::placeholder { color:#1e1e1e; }
-.pe-save { background:transparent; border:1px solid rgba(0,238,255,0.2); border-radius:6px; color:var(--theme); font-family:'MultiCraftFont',monospace; font-size:0.55rem; padding:8px; cursor:pointer; letter-spacing:2px; width:100%; transition:border-color .2s; }
-.pe-save:hover { border-color:var(--purple); }
-.pe-msg { font-family:'MultiCraftFont',monospace; font-size:0.48rem; text-align:center; min-height:14px; letter-spacing:1px; }
-.pe-msg.ok { color:var(--theme); }
-.pe-msg.err { color:#ff4444; }
-.lfm-wrap { display:flex; align-items:center; gap:9px; }
-.lfm-wrap input[type=checkbox] { display:none; }
-.lfm-track { width:34px; height:19px; background:#0a0a0a; border:1px solid #222; border-radius:20px; position:relative; cursor:pointer; transition:background .2s,border-color .2s; flex-shrink:0; }
-.lfm-track::after { content:''; position:absolute; top:3px; left:3px; width:11px; height:11px; background:#333; border-radius:50%; transition:transform .2s,background .2s; }
-.lfm-wrap input:checked ~ .lfm-track { background:rgba(0,238,255,0.1); border-color:var(--purple); }
-.lfm-wrap input:checked ~ .lfm-track::after { transform:translateX(15px); background:var(--theme); }
-.lfm-lbl { font-family:'MultiCraftFont',monospace; font-size:0.5rem; color:#444; letter-spacing:1px; }
-.banner-bar { height:5px; border-radius:5px; margin-bottom:5px; transition:background .3s; border:1px solid rgba(255,255,255,0.04); }
-.theme-presets { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:4px; }
-.theme-preset-btn { padding:4px 9px; border-radius:20px; border:1px solid #222; background:#0a0a0a; color:#555; font-family:'MultiCraftFont',monospace; font-size:0.38rem; cursor:pointer; letter-spacing:1px; transition:border-color .15s,color .15s; }
-.theme-preset-btn:hover { border-color:var(--purple); color:#fff; }
-.theme-preset-btn.active { border-color:var(--purple); color:var(--purple); background:rgba(0,238,255,0.06); }
-.theme-row { display:flex; align-items:center; gap:7px; }
-.theme-swatch { width:22px; height:22px; border-radius:4px; border:1px solid #222; flex-shrink:0; }
-.social-entry { display:grid; grid-template-columns:26px 1fr 1fr 22px; gap:5px; align-items:center; background:#0a0a10; border:1px solid #111; border-radius:6px; padding:6px 7px; }
-.social-icon-btn { width:26px; height:26px; border-radius:4px; border:1px solid #222; cursor:pointer; background:#111; display:flex; align-items:center; justify-content:center; font-size:0.55rem; color:#333; flex-shrink:0; overflow:hidden; transition:border-color .2s; }
-.social-icon-btn:hover { border-color:var(--purple); }
-.social-del-btn { background:transparent; border:1px solid #1a1a1a; border-radius:4px; color:#333; cursor:pointer; font-size:0.6rem; width:22px; height:22px; display:flex; align-items:center; justify-content:center; transition:border-color .2s,color .2s; flex-shrink:0; }
-.social-del-btn:hover { border-color:#ff4444; color:#ff4444; }
-.add-social-btn { background:transparent; border:1px dashed rgba(0,238,255,0.15); border-radius:6px; color:#444; font-family:'MultiCraftFont',monospace; font-size:0.42rem; padding:6px; cursor:pointer; letter-spacing:1px; width:100%; transition:border-color .2s,color .2s; }
-.add-social-btn:hover { border-color:var(--purple); color:var(--theme); }
-
-/* ── Profile enhancements ─────────────────────────── */
-.profile-banner-strip { position:absolute; top:0; left:0; right:0; height:5px; border-radius:14px 14px 0 0; pointer-events:none; z-index:2; }
-.profile-pronouns { font-family:'MultiCraftFont',monospace; font-size:0.5rem; color:#555; letter-spacing:1px; margin:2px 0 4px; }
-.profile-description { font-family:'MultiCraftFont',monospace; font-size:0.48rem; color:#666; letter-spacing:0.5px; margin:2px 0 6px; }
-.profile-role-badge { font-family:'MultiCraftFont',monospace; font-size:0.42rem; border-radius:20px; padding:2px 8px; letter-spacing:1px; border:1px solid; }
-.profile-role-badge.owner  { color:#ffd700; border-color:#ffd700; background:rgba(255,215,0,0.07); }
-.profile-role-badge.tester { color:#b044ff; border-color:#b044ff; background:rgba(176,68,255,0.07); }
-.lfm-badge   { font-family:'MultiCraftFont',monospace; font-size:0.42rem; color:#00ff88; border:1px solid #00ff88; border-radius:20px; padding:2px 8px; letter-spacing:1px; background:rgba(0,255,136,0.07); }
-.rival-badge { font-family:'MultiCraftFont',monospace; font-size:0.42rem; color:#ff5555; border:1px solid #ff5555; border-radius:20px; padding:2px 8px; letter-spacing:1px; background:rgba(255,85,85,0.07); }
-.custom-social-row { display:flex; flex-wrap:wrap; gap:5px; margin-top:8px; }
-.custom-social-link { display:flex; align-items:center; gap:5px; font-family:'MultiCraftFont',monospace; font-size:0.48rem; color:#444; border:1px solid #1c1c1c; border-radius:5px; padding:3px 8px; text-decoration:none; transition:color .2s,border-color .2s; }
-.custom-social-link:hover { color:var(--theme); border-color:var(--border); }
-.custom-social-link img { width:13px; height:13px; object-fit:cover; border-radius:2px; }
-
-/* ── Rainbow animated name ────────────────────────── */
-@keyframes rainbowText {
-    0%   { background-position:0% 50% }
-    50%  { background-position:100% 50% }
-    100% { background-position:0% 50% }
-}
-.name-animated {
-    background: linear-gradient(90deg,#ff0000,#ff7700,#ffff00,#00ff00,#00eeff,#0000ff,#8b00ff,#ff0000);
-    background-size: 300% 300%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: rainbowText 3s ease infinite;
-    display: inline;
-}
-
-/* ── Duel popup modal ─────────────────────────────── */
-#duelPopupModal { position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:4000; display:none; align-items:center; justify-content:center; backdrop-filter:blur(14px); }
-#duelPopupModal.open { display:flex; }
-
-/* ── Duel tab ─────────────────────────────────────── */
-.duel-list { display:flex; flex-direction:column; gap:8px; width:100%; max-width:700px; padding:0 12px; box-sizing:border-box; }
-@keyframes duelIn { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
-.duel-row {
-    background:#06060a;
-    border:1px solid rgba(0,238,255,0.08);
-    border-left:3px solid transparent;
-    border-radius:10px;
-    padding:14px 16px;
-    cursor:pointer;
-    transition:border-color .2s,box-shadow .2s,transform .15s;
-    animation:duelIn 0.35s ease-out both;
-    display:flex;
-    flex-direction:column;
-    gap:6px;
-}
-.duel-row:hover { border-color:rgba(0,238,255,0.3); box-shadow:0 0 14px rgba(0,238,255,0.06); transform:translateX(3px); }
-.duel-row.won  { border-left-color:#00ff88; }
-.duel-row.lost { border-left-color:#ff4444; }
-/* Row top: names left, score right */
-.duel-row-top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.duel-names { display:flex; align-items:center; gap:8px; min-width:0; }
-.duel-p1 { font-family:'MultiCraftFont',monospace; font-size:0.7rem; color:#fff; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.duel-p1:hover { color:var(--theme); }
-.duel-vs { font-family:'MultiCraftFont',monospace; font-size:0.4rem; color:#333; flex-shrink:0; }
-.duel-p2 { font-family:'MultiCraftFont',monospace; font-size:0.7rem; color:#777; cursor:pointer; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.duel-p2:hover { color:var(--theme); }
-.duel-score { font-family:'MultiCraftFont',monospace; font-size:0.9rem; white-space:nowrap; flex-shrink:0; }
-.duel-score.won  { color:#00ff88; }
-.duel-score.lost { color:#ff4444; }
-/* Row bottom: description left, date right */
-.duel-row-bottom { display:flex; align-items:center; justify-content:space-between; gap:10px; }
-.duel-desc { font-family:'MultiCraftFont',monospace; font-size:0.42rem; color:#555; letter-spacing:0.5px; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.duel-date { font-family:'MultiCraftFont',monospace; font-size:0.4rem; color:#333; flex-shrink:0; }
-/* Tab header */
-.duel-tab-header { display:flex; align-items:center; justify-content:space-between; width:100%; max-width:700px; padding:0 12px 16px; box-sizing:border-box; }
-.duel-tab-title { font-family:'MultiCraftFont',monospace; font-size:1.1rem; color:var(--theme); text-shadow:0 0 10px rgba(0,238,255,0.4); letter-spacing:2px; }
-.duel-tab-count { font-family:'MultiCraftFont',monospace; font-size:0.5rem; color:#333; }
-
-/* ── Profile duel section ─────────────────────────── */
-.profile-duel-section { margin-top:12px; padding-top:12px; border-top:1px solid rgba(0,238,255,0.08); }
-.profile-duel-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-.profile-duel-label-text { font-family:'MultiCraftFont',monospace; font-size:0.45rem; color:#444; letter-spacing:2px; }
-.profile-duel-viewall { font-family:'MultiCraftFont',monospace; font-size:0.42rem; color:var(--purple); cursor:pointer; letter-spacing:1px; }
-.profile-duel-viewall:hover { text-decoration:underline; }
-/* Single most recent duel card */
-.profile-duel-card { background:#0a0a10; border:1px solid #111; border-radius:7px; padding:10px 12px; cursor:pointer; transition:border-color .2s; }
-.profile-duel-card:hover { border-color:rgba(0,238,255,0.25); }
-.profile-duel-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:4px; }
-.profile-duel-names { font-family:'MultiCraftFont',monospace; font-size:0.58rem; color:#ccc; }
-.profile-duel-names span { color:#555; font-size:0.4rem; margin:0 4px; }
-.profile-duel-score-text { font-family:'MultiCraftFont',monospace; font-size:0.58rem; }
-.profile-duel-bottom { font-family:'MultiCraftFont',monospace; font-size:0.4rem; color:#444; margin-top:2px; }
-</style>
 </head>
 <body>
 <div class="sweep-bg"></div>
-<div id="stars"></div>
-<div id="stars2"></div>
-<div id="stars3"></div>
+<div id="stars"></div><div id="stars2"></div><div id="stars3"></div>
 <header>
     <img src="assets/mtctiers.png" class="title-sword" alt="Logo">
     <h1 class="main-title">MTC TIERS</h1>
 </header>
 
-<!-- NAV: left=user badge, center=links, right=search+login -->
 <nav>
     <div class="nav-left">
         <div id="navUserBadge">
@@ -241,7 +51,6 @@ nav {
 
 <div id="viewLabel">OVERALL</div>
 <div id="kitBar"></div>
-
 <div id="filterBar">
     <span class="filter-label">FILTER BY</span>
     <select class="filter-select" id="filterKit"     onchange="applyFilters()"><option value="">ALL KITS</option></select>
@@ -254,7 +63,6 @@ nav {
     </select>
     <button id="filterResetBtn" onclick="resetFilters()">RESET</button>
 </div>
-
 <div id="topPlayersTitle" style="display:none;font-family:'MultiCraftFont',monospace;font-size:1.8rem;color:var(--gold);text-shadow:0 0 15px var(--gold-glow);text-align:center;width:100%;margin-bottom:10px;animation:blurRise 0.5s ease-out both;">Top Players</div>
 <div id="podiumWrap"></div>
 <div id="displayList"></div>
@@ -265,28 +73,26 @@ nav {
 <div id="infoModal" class="modal-overlay" onclick="this.style.display='none'">
     <div class="modal-content" onclick="event.stopPropagation()">
         <h2 style="font-family:'MultiCraftFont'; color:var(--purple); margin-top:0;">INFORMATION</h2>
-        <div style="text-align:left; font-size:0.85rem; line-height:1.6;">
+        <div style="text-align:left;font-size:0.85rem;line-height:1.6;">
             <p><b style="color:var(--purple)">SERVER CODE:</b> JC5A69FB</p>
             <p><b style="color:var(--purple)">DISCORD:</b> https://discord.gg/v3CgdV6hsT</p>
-            <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
-            <b style="color:var(--gold); font-family:'MultiCraftFont'; font-size:0.75rem;">POINTS SYSTEM:</b>
-            <div style="display:grid; grid-template-columns:1fr 1fr; font-size:0.7rem; margin-top:12px; gap:8px;">
-                <div>HT1 = 50 pts</div><div>LT1 = 40 pts</div>
-                <div>HT2 = 30 pts</div><div>LT2 = 20 pts</div>
-                <div>HT3 = 12 pts</div><div>LT3 = 8 pts</div>
-                <div>HT4 = 5 pts</div> <div>LT4 = 3 pts</div>
-                <div>HT5 = 2 pts</div> <div>LT5 = 1 pt</div>
+            <hr style="border:0;border-top:1px solid #333;margin:15px 0;">
+            <b style="color:var(--gold);font-family:'MultiCraftFont';font-size:0.75rem;">POINTS SYSTEM:</b>
+            <div style="display:grid;grid-template-columns:1fr 1fr;font-size:0.7rem;margin-top:12px;gap:8px;">
+                <div>HT1 = 50 pts</div><div>LT1 = 40 pts</div><div>HT2 = 30 pts</div><div>LT2 = 20 pts</div>
+                <div>HT3 = 12 pts</div><div>LT3 = 8 pts</div><div>HT4 = 5 pts</div><div>LT4 = 3 pts</div>
+                <div>HT5 = 2 pts</div><div>LT5 = 1 pt</div>
             </div>
-            <hr style="border:0; border-top:1px solid #333; margin:15px 0;">
-            <b style="color:var(--gold); font-family:'MultiCraftFont'; font-size:0.75rem;">RANK TITLES:</b>
-            <div style="font-size:0.65rem; margin-top:12px; display:flex; flex-direction:column; gap:6px;">
+            <hr style="border:0;border-top:1px solid #333;margin:15px 0;">
+            <b style="color:var(--gold);font-family:'MultiCraftFont';font-size:0.75rem;">RANK TITLES:</b>
+            <div style="font-size:0.65rem;margin-top:12px;display:flex;flex-direction:column;gap:6px;">
                 <div><span style="color:#ffd700;font-family:'MultiCraftFont';">Combat Grandmaster</span> - #1 or 300+ pts</div>
                 <div><span style="color:#00eeff;font-family:'MultiCraftFont';">Combat Master</span> - Top 3 or 200+ pts</div>
                 <div><span style="color:#ff6a00;font-family:'MultiCraftFont';">Combat Ace</span> - 150+ pts</div>
                 <div><span style="color:#b044ff;font-family:'MultiCraftFont';">Combat Specialist</span> - 50+ pts</div>
                 <div><span style="color:#00ff88;font-family:'MultiCraftFont';">Combat Cadet</span> - 20+ pts</div>
                 <div><span style="color:#ff7f50;font-family:'MultiCraftFont';">Combat Novice</span> - 10+ pts</div>
-                <div><span style="color:#888;   font-family:'MultiCraftFont';">Rookie</span> - Under 10 pts</div>
+                <div><span style="color:#888;font-family:'MultiCraftFont';">Rookie</span> - Under 10 pts</div>
             </div>
         </div>
     </div>
@@ -296,7 +102,7 @@ nav {
 <div id="profileModal" class="modal-overlay" onclick="closeProfileModal()">
     <div class="profile-modal-content" onclick="event.stopPropagation()">
         <button class="profile-close-btn" onclick="closeProfileModal()">✕</button>
-        <button class="profile-copy-btn" id="profileCopyBtn" onclick="copyProfileLink()" title="Copy link">⧉</button>
+        <button class="profile-copy-btn" id="profileCopyBtn" onclick="copyProfileLink()">⧉</button>
         <div class="profile-left">
             <div id="pBadgeRow" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
                 <div id="pRank" class="profile-rank-badge">RANK #--</div>
@@ -341,9 +147,9 @@ nav {
 </div>
 
 <script>
-/* ═══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    CONFIG
-═══════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 const AUTH_API = "https://mtc-backend-production-e0ab.up.railway.app/api";
 
 const KIT_MAP = {
@@ -358,30 +164,29 @@ const KIT_MAP = {
     "Void":              { img:"assets/void.png",              color:"#ff00ff"      },
 };
 const REGION_MAP = {
-    "NA":{ label:"North America", color:"#3498db" },"SA":{ label:"South America", color:"#00ff88" },
-    "EU":{ label:"Europe",        color:"#ff4d4d" },"AS":{ label:"Asia",          color:"#ff8800" },
-    "OC":{ label:"Oceania",       color:"#ff00ff" },"AF":{ label:"Africa",        color:"#00d4ff" },
+    "NA":{ label:"North America",color:"#3498db"},"SA":{ label:"South America",color:"#00ff88"},
+    "EU":{ label:"Europe",color:"#ff4d4d"},"AS":{ label:"Asia",color:"#ff8800"},
+    "OC":{ label:"Oceania",color:"#ff00ff"},"AF":{ label:"Africa",color:"#00d4ff"},
 };
 const DEVICE_MAP = {
-    "MK":{ label:"Mouse & Keyboard", color:"#00ffff" },"MB":{ label:"Mobile",    color:"#ff7f50" },
-    "CT":{ label:"Controller",       color:"#b044ff" },"TP":{ label:"Touchpad",  color:"#ff00aa" },
+    "MK":{ label:"Mouse & Keyboard",color:"#00ffff"},"MB":{ label:"Mobile",color:"#ff7f50"},
+    "CT":{ label:"Controller",color:"#b044ff"},"TP":{ label:"Touchpad",color:"#ff00aa"},
 };
-
 const THEME_PRESETS = {
-    "DEFAULT": { bg:"",                                        border:"",        glow:"",        name:"",        nameStyle:"" },
-    "CYBER":   { bg:"#06060a",                                 border:"#00eeff", glow:"#00eeff", name:"#00eeff", nameStyle:"" },
-    "GOLD":    { bg:"linear-gradient(135deg,#0a0800,#1a1200)", border:"#ffd700", glow:"#ffd700", name:"",        nameStyle:"gradient:#ffd700-#ff8800" },
-    "VOID":    { bg:"linear-gradient(135deg,#0a0010,#1a0030)", border:"#b044ff", glow:"#b044ff", name:"",        nameStyle:"gradient:#b044ff-#ff00ff" },
-    "BLOOD":   { bg:"linear-gradient(135deg,#0d0000,#1a0000)", border:"#ff3333", glow:"#ff3333", name:"#ff6666", nameStyle:"glow:#ff3333" },
-    "OCEAN":   { bg:"linear-gradient(135deg,#00080d,#001a2a)", border:"#0088ff", glow:"#0088ff", name:"",        nameStyle:"gradient:#0088ff-#00eeff" },
-    "FOREST":  { bg:"linear-gradient(135deg,#000a00,#001a00)", border:"#00cc44", glow:"#00cc44", name:"#44ff88", nameStyle:"glow:#00cc44" },
-    "SUNSET":  { bg:"linear-gradient(135deg,#0d0500,#1a0a00)", border:"#ff6a00", glow:"#ff6a00", name:"",        nameStyle:"gradient:#ff6a00-#ffd700" },
-    "RAINBOW": { bg:"#06060a",                                 border:"#ff00ff", glow:"#ff00ff", name:"",        nameStyle:"animated" },
+    "DEFAULT": { bg:"",border:"",glow:"",name:"",nameStyle:"" },
+    "CYBER":   { bg:"#06060a",border:"#00eeff",glow:"#00eeff",name:"#00eeff",nameStyle:"" },
+    "GOLD":    { bg:"linear-gradient(135deg,#0a0800,#1a1200)",border:"#ffd700",glow:"#ffd700",name:"",nameStyle:"gradient:#ffd700-#ff8800" },
+    "VOID":    { bg:"linear-gradient(135deg,#0a0010,#1a0030)",border:"#b044ff",glow:"#b044ff",name:"",nameStyle:"gradient:#b044ff-#ff00ff" },
+    "BLOOD":   { bg:"linear-gradient(135deg,#0d0000,#1a0000)",border:"#ff3333",glow:"#ff3333",name:"#ff6666",nameStyle:"glow:#ff3333" },
+    "OCEAN":   { bg:"linear-gradient(135deg,#00080d,#001a2a)",border:"#0088ff",glow:"#0088ff",name:"",nameStyle:"gradient:#0088ff-#00eeff" },
+    "FOREST":  { bg:"linear-gradient(135deg,#000a00,#001a00)",border:"#00cc44",glow:"#00cc44",name:"#44ff88",nameStyle:"glow:#00cc44" },
+    "SUNSET":  { bg:"linear-gradient(135deg,#0d0500,#1a0a00)",border:"#ff6a00",glow:"#ff6a00",name:"",nameStyle:"gradient:#ff6a00-#ffd700" },
+    "RAINBOW": { bg:"#06060a",border:"#ff00ff",glow:"#ff00ff",name:"",nameStyle:"animated" },
 };
 
-/* ═══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    AUTH
-═══════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 let AUTH = null;
 const TOKEN_KEY  = "mtc_token";
 const saveToken  = t => localStorage.setItem(TOKEN_KEY,t);
@@ -398,16 +203,11 @@ async function authCall(method,path,body){
     if(!res.ok) throw new Error(data.error||`Error ${res.status}`);
     return data;
 }
-
 async function restoreSession(){
     if(!loadToken()) return;
-    try{
-        const d=await authCall("GET","/me");
-        AUTH={name:d.name,role:d.role,profile:d.profile};
-        updateNavAuth();
-    }catch(_){ clearToken(); AUTH=null; }
+    try{ const d=await authCall("GET","/me"); AUTH={name:d.name,role:d.role,profile:d.profile}; updateNavAuth(); }
+    catch(_){ clearToken(); AUTH=null; }
 }
-
 async function doLogin(){
     const name=document.getElementById('lcName').value.trim();
     const code=document.getElementById('lcCode').value.trim();
@@ -423,19 +223,17 @@ async function doLogin(){
     }catch(err){
         let el=document.getElementById('lcErrMsg');
         if(!el){ el=document.createElement('div'); el.id='lcErrMsg'; el.style.cssText='font-family:"MultiCraftFont",monospace;font-size:0.5rem;color:#ff4444;text-align:center;margin-top:8px;letter-spacing:1px;'; document.getElementById('lcSubmit').after(el); }
-        el.textContent=err.message||"Login failed.";
-        setTimeout(()=>{ if(el) el.textContent=""; },3000);
+        el.textContent=err.message||"Login failed."; setTimeout(()=>{ if(el) el.textContent=""; },3000);
     }finally{ btn.disabled=false; btn.textContent="LOGIN"; }
 }
-
 async function doLogout(){
     try{ await authCall("POST","/logout"); }catch(_){}
     clearToken(); AUTH=null; updateNavAuth();
 }
 
-/* ═══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    PROFILE SAVE
-═══════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 async function saveProfileEdits(){
     const btn=document.getElementById('peSave');
     const msg=document.getElementById('peMsg');
@@ -447,22 +245,23 @@ async function saveProfileEdits(){
             const label=row.querySelector('.pe-social-label')?.value.trim()||"";
             const url=row.querySelector('.pe-social-url')?.value.trim()||"";
             const icon=row.dataset.icon||"";
-            socialEntries.push({label,url,icon});
+            // Save entry if it has anything at all
+            if(label||url||icon) socialEntries.push({label,url,icon});
         });
         const parseColor=v=>{ v=(v||"").trim(); if(!v) return ""; if(/^#[0-9a-fA-F]{3,8}([-,]#[0-9a-fA-F]{3,8})+$/.test(v)){ return `linear-gradient(135deg,${v.split(/[-,]/).filter(s=>s.startsWith('#')).join(',')})`; } return v; };
         const d=await authCall("PATCH","/profile",{
-            pronouns:         document.getElementById('pePronouns')?.value.trim()||"",
-            description:      document.getElementById('peDescription')?.value.trim()||"",
-            rival:            document.getElementById('peRival')?.value.trim()||"",
-            banner:           parseColor(document.getElementById('peBanner')?.value||""),
-            lfm_status:       document.getElementById('peLfm')?.checked?1:0,
-            socials:          socialEntries,
-            theme_bg:         parseColor(document.getElementById('peThemeBg')?.value||""),
-            theme_bg_image:   AUTH?.profile?.theme_bg_image||"",
-            theme_border:     document.getElementById('peThemeBorder')?.value.trim()||"",
-            theme_glow:       document.getElementById('peThemeGlow')?.value.trim()||"",
-            theme_name_color: document.getElementById('peThemeNameColor')?.value.trim()||"",
-            theme_name_style: document.getElementById('peThemeNameStyle')?.value||"",
+            pronouns:          document.getElementById('pePronouns')?.value.trim()||"",
+            description:       document.getElementById('peDescription')?.value.trim()||"",
+            rival:             document.getElementById('peRival')?.value.trim()||"",
+            banner:            parseColor(document.getElementById('peBanner')?.value||""),
+            lfm_status:        document.getElementById('peLfm')?.checked?1:0,
+            socials:           socialEntries,
+            theme_bg:          parseColor(document.getElementById('peThemeBg')?.value||""),
+            theme_bg_image:    AUTH?.profile?.theme_bg_image||"",
+            theme_border:      document.getElementById('peThemeBorder')?.value.trim()||"",
+            theme_glow:        document.getElementById('peThemeGlow')?.value.trim()||"",
+            theme_name_color:  document.getElementById('peThemeNameColor')?.value.trim()||"",
+            theme_name_style:  (()=>{ const g=document.getElementById('peThemeNameGlow')?.value.trim()||''; return g?`glow:${g}`:''; })(),
         });
         if(AUTH) AUTH.profile=d.profile;
         const currentName=document.getElementById('pName')?.innerText.trim();
@@ -482,27 +281,60 @@ async function saveProfileEdits(){
 }
 
 async function saveBgImage(b64){
+    if(!AUTH) return;
     try{
         const d=await authCall("PATCH","/profile",{theme_bg_image:b64});
         if(AUTH) AUTH.profile=d.profile;
-        applyProfileTheme(d.profile);
+        const modal=document.querySelector('.profile-modal-content');
+        if(modal&&b64){
+            // Clear 'background' shorthand first — it overrides backgroundImage
+            modal.style.background="";
+            modal.style.backgroundColor="";
+            modal.style.backgroundImage=`url(${b64})`;
+            modal.style.backgroundSize="cover";
+            modal.style.backgroundPosition="center";
+            modal.style.backgroundRepeat="no-repeat";
+        }
         const prev=document.getElementById('bgImgPreview');
         if(prev) prev.style.background=`url(${b64}) center/cover`;
+        // Rebuild panel so delete button appears
+        const currentName=document.getElementById('pName')?.innerText.trim();
+        if(currentName) injectEditPanel(currentName);
+    }catch(e){ console.warn("BG image save failed",e); }
+}
+async function clearBgImage(){
+    if(!AUTH) return;
+    try{
+        const d=await authCall("PATCH","/profile",{theme_bg_image:""});
+        if(AUTH) AUTH.profile=d.profile;
+        const modal=document.querySelector('.profile-modal-content');
+        if(modal){
+            modal.style.background="";
+            modal.style.backgroundColor="";
+            modal.style.backgroundImage="";
+            modal.style.backgroundSize="";
+            modal.style.backgroundPosition="";
+            modal.style.backgroundRepeat="";
+            if(d.profile?.theme_bg) modal.style.background=d.profile.theme_bg;
+        }
+        const prev=document.getElementById('bgImgPreview');
+        if(prev) prev.style.background='#111';
+        const currentName=document.getElementById('pName')?.innerText.trim();
+        if(currentName) injectEditPanel(currentName);
     }catch(e){ console.warn(e); }
 }
 
-/* ═══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    NAV AUTH
-═══════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 function updateNavAuth(){
     const btn=document.getElementById('loginNavBtn');
     const badge=document.getElementById('navUserBadge');
-    const uname=document.getElementById('navUserName');
-    const urole=document.getElementById('navUserRole');
     if(!btn) return;
     if(AUTH){
         btn.textContent="LOGOUT"; btn.classList.add('li');
-        uname.textContent=AUTH.name;
+        document.getElementById('navUserName').textContent=AUTH.name;
+        const urole=document.getElementById('navUserRole');
         urole.textContent=AUTH.role.toUpperCase(); urole.dataset.r=AUTH.role;
         badge.classList.add('vis');
     }else{
@@ -525,19 +357,17 @@ function closeLoginModal(){ document.getElementById('loginModal').classList.remo
 document.getElementById('lcName').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
 document.getElementById('lcCode').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
 
-/* ═══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    THEME
-═══════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 function parseCss(v){
     v=(v||"").trim(); if(!v) return "";
-    if(/^#[0-9a-fA-F]{3,8}([-,]#[0-9a-fA-F]{3,8})+$/.test(v)){
+    if(/^#[0-9a-fA-F]{3,8}([-,]#[0-9a-fA-F]{3,8})+$/.test(v))
         return `linear-gradient(135deg,${v.split(/[-,]/).filter(s=>s.startsWith('#')).join(',')})`;
-    }
     return v;
 }
 
 function applyNameStyle(el, color, style){
-    // Full reset
     el.style.color="";
     el.style.webkitTextFillColor="";
     el.style.webkitBackgroundClip="";
@@ -545,11 +375,9 @@ function applyNameStyle(el, color, style){
     el.style.backgroundImage="";
     el.style.backgroundSize="";
     el.style.textShadow="";
-    el.style.animation="";
     el.classList.remove('name-animated');
 
     if(style==="animated"){
-        // Rainbow — use CSS class so the keyframe runs properly
         el.classList.add('name-animated');
         return;
     }
@@ -561,7 +389,6 @@ function applyNameStyle(el, color, style){
             el.style.webkitBackgroundClip="text";
             el.style.backgroundClip="text";
             el.style.webkitTextFillColor="transparent";
-            // Still apply color as fallback but don't override fill
             return;
         }
     }
@@ -571,7 +398,6 @@ function applyNameStyle(el, color, style){
         el.style.textShadow=`0 0 10px ${gc},0 0 20px ${gc}88`;
         return;
     }
-    // Plain color or gradient color
     if(color){
         const parsed=parseCss(color);
         if(parsed.includes("gradient")){
@@ -590,31 +416,40 @@ function applyProfileTheme(profile){
     const modal=document.querySelector('.profile-modal-content');
     const nameEl=document.getElementById('pName');
     if(!modal||!profile) return;
-    const bgImg  = profile.theme_bg_image||"";
-    const bg     = profile.theme_bg||"";
-    const border = profile.theme_border||"";
-    const glow   = profile.theme_glow||"";
-    const nameC  = profile.theme_name_color||"";
-    const nameStyle = profile.theme_name_style||"";
-    const banner = profile.banner||"";
 
-    // Background: image takes priority
+    const bgImg    = profile.theme_bg_image||"";
+    const bg       = profile.theme_bg||"";
+    const border   = profile.theme_border||"";
+    const glow     = profile.theme_glow||"";
+    const nameC    = profile.theme_name_color||"";
+    const nameStyle= profile.theme_name_style||"";
+    const banner   = profile.banner||"";
+
+    // ── Background: image takes priority over gradient ──
+    // Must set properties individually to avoid conflicts
     if(bgImg){
         modal.style.backgroundImage=`url(${bgImg})`;
         modal.style.backgroundSize="cover";
         modal.style.backgroundPosition="center";
-        modal.style.backgroundColor="";
+        modal.style.backgroundRepeat="no-repeat";
+        modal.style.backgroundColor="transparent";
+        // Clear any gradient that was set before
+        // Can't use shorthand 'background' — it would override backgroundImage
     } else if(bg){
-        modal.style.backgroundImage="";
+        modal.style.backgroundImage="none";
+        modal.style.backgroundColor="";
+        modal.style.backgroundSize="";
+        modal.style.backgroundPosition="";
+        // Set gradient via background shorthand only when no image
         modal.style.background=bg;
     } else {
         modal.style.backgroundImage="";
         modal.style.background="";
+        modal.style.backgroundColor="";
     }
 
     modal.style.borderColor=border||"";
     modal.style.boxShadow=glow?`0 0 40px ${glow}55,0 0 80px ${glow}22`:"";
-
     if(nameEl) applyNameStyle(nameEl, nameC, nameStyle);
 
     if(banner){
@@ -629,20 +464,21 @@ function resetProfileTheme(){
     const nameEl=document.getElementById('pName');
     if(modal){
         modal.style.background=""; modal.style.backgroundImage="";
+        modal.style.backgroundColor=""; modal.style.backgroundSize="";
+        modal.style.backgroundPosition=""; modal.style.backgroundRepeat="";
         modal.style.borderColor=""; modal.style.boxShadow="";
     }
     if(nameEl){
         nameEl.style.color=""; nameEl.style.webkitTextFillColor="";
         nameEl.style.webkitBackgroundClip=""; nameEl.style.backgroundClip="";
         nameEl.style.backgroundImage=""; nameEl.style.backgroundSize="";
-        nameEl.style.textShadow=""; nameEl.style.animation="";
-        nameEl.classList.remove('name-animated');
+        nameEl.style.textShadow=""; nameEl.classList.remove('name-animated');
     }
 }
 
-/* ═══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    EDIT PANEL
-═══════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 function toggleEditDropdown(toggle){
     toggle.classList.toggle('open');
     document.getElementById('editDropdownBody')?.classList.toggle('vis');
@@ -659,7 +495,7 @@ function injectEditPanel(profileName){
     const socialsArr=Array.isArray(p.socials)?p.socials:[];
     let socialsHtml='';
     socialsArr.forEach((s,i)=>{
-        const iconHtml=s.icon?`<img src="${s.icon}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:3px;">`:`<span style="font-size:0.55rem;color:#333;">📷</span>`;
+        const iconHtml=s.icon?`<img src="${s.icon}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:3px;">`:`<span style="font-size:0.5rem;">📷</span>`;
         socialsHtml+=`<div class="social-entry" data-icon="${esc(s.icon||'')}">
             <div class="social-icon-btn" onclick="pickSocialIcon(this)">${iconHtml}</div>
             <input class="pe-input pe-social-label" placeholder="Label (optional)" maxlength="40" value="${esc(s.label||'')}">
@@ -668,8 +504,8 @@ function injectEditPanel(profileName){
         </div>`;
     });
     const presetBtns=Object.keys(THEME_PRESETS).map(k=>`<button class="theme-preset-btn" onclick="applyPreset('${k}',this)">${k}</button>`).join('');
-    const nameStyleVal=p.theme_name_style||"";
-    const knownStyles=['animated','glow:#00eeff','glow:#ffd700','glow:#ff3333','glow:#b044ff','gradient:#00eeff-#b044ff','gradient:#ffd700-#ff6a00','gradient:#ff0080-#7700ff'];
+    const nsv=p.theme_name_style||"";
+    const bgImgExists=!!p.theme_bg_image;
 
     const panel=document.createElement('div');
     panel.id='profileEditPanel'; panel.className='vis';
@@ -700,9 +536,9 @@ function injectEditPanel(profileName){
                 <input class="pe-input" id="peThemeBg" placeholder="#06060a or #0a0800-#1a1200" maxlength="300" value="${esc(toShorthand(p.theme_bg||''))}"></div></div>
             <div><label class="pe-field-label">BACKGROUND IMAGE</label>
                 <div style="display:flex;gap:6px;align-items:center;">
-                    <div id="bgImgPreview" style="width:40px;height:28px;border-radius:4px;border:1px solid #222;background:${p.theme_bg_image?`url(${p.theme_bg_image}) center/cover`:'#111'};flex-shrink:0;"></div>
+                    <div id="bgImgPreview" style="width:40px;height:28px;border-radius:4px;border:1px solid #222;background:${bgImgExists?`url(${p.theme_bg_image}) center/cover`:'#111'};flex-shrink:0;overflow:hidden;"></div>
                     <button class="add-social-btn" style="flex:1;margin:0;" onclick="pickBgImage()">📷 UPLOAD IMAGE</button>
-                    ${p.theme_bg_image?`<button class="social-del-btn" onclick="clearBgImage()">✕</button>`:''}
+                    ${bgImgExists?`<button class="social-del-btn" onclick="clearBgImage()">✕</button>`:''}
                 </div></div>
             <div><label class="pe-field-label">BORDER COLOR</label>
                 <div class="theme-row"><div class="theme-swatch" id="swatchBorder"></div>
@@ -710,23 +546,13 @@ function injectEditPanel(profileName){
             <div><label class="pe-field-label">GLOW COLOR</label>
                 <div class="theme-row"><div class="theme-swatch" id="swatchGlow"></div>
                 <input class="pe-input" id="peThemeGlow" placeholder="#00eeff" maxlength="30" value="${esc(p.theme_glow||'')}"></div></div>
-            <div><label class="pe-field-label">NAME COLOR <span>(#hex or #a-#b for gradient)</span></label>
+            <div><label class="pe-field-label">NAME COLOR <span>(#hex or gradient #a-#b)</span></label>
                 <div class="theme-row"><div class="theme-swatch" id="swatchName"></div>
                 <input class="pe-input" id="peThemeNameColor" placeholder="#ffffff or #ff00ff-#00eeff" maxlength="100" value="${esc(p.theme_name_color||'')}"></div></div>
-            <div><label class="pe-field-label">NAME EFFECT</label>
-                <select class="pe-input" id="peThemeNameStyle" style="cursor:pointer;">
-                    <option value="" ${ !nameStyleVal?'selected':'' }>None</option>
-                    <option value="animated" ${ nameStyleVal==='animated'?'selected':'' }>🌈 Animated Rainbow</option>
-                    <option value="glow:#00eeff" ${ nameStyleVal==='glow:#00eeff'?'selected':'' }>💡 Cyan Glow</option>
-                    <option value="glow:#ffd700" ${ nameStyleVal==='glow:#ffd700'?'selected':'' }>✨ Gold Glow</option>
-                    <option value="glow:#ff3333" ${ nameStyleVal==='glow:#ff3333'?'selected':'' }>🔴 Red Glow</option>
-                    <option value="glow:#b044ff" ${ nameStyleVal==='glow:#b044ff'?'selected':'' }>💜 Purple Glow</option>
-                    <option value="gradient:#00eeff-#b044ff" ${ nameStyleVal==='gradient:#00eeff-#b044ff'?'selected':'' }>🎨 Cyan→Purple</option>
-                    <option value="gradient:#ffd700-#ff6a00" ${ nameStyleVal==='gradient:#ffd700-#ff6a00'?'selected':'' }>🎨 Gold→Orange</option>
-                    <option value="gradient:#ff0080-#7700ff" ${ nameStyleVal==='gradient:#ff0080-#7700ff'?'selected':'' }>🎨 Pink→Violet</option>
-                    <option value="custom" ${ nameStyleVal&&!knownStyles.includes(nameStyleVal)?'selected':'' }>✏ Custom (use name color)</option>
-                </select></div>
-            <div><label class="pe-field-label">BANNER STRIP <span>(#a-#b)</span></label>
+            <div><label class="pe-field-label">NAME GLOW <span>(#hex color, leave blank for none)</span></label>
+                <div class="theme-row"><div class="theme-swatch" id="swatchNameGlow"></div>
+                <input class="pe-input" id="peThemeNameGlow" placeholder="#00eeff" maxlength="30" value="${esc(nsv.startsWith('glow:')?nsv.slice(5):'')}" oninput="syncNameGlowSwatch()"></div></div>
+            <div><label class="pe-field-label">BANNER <span>(#a-#b)</span></label>
                 <div class="banner-bar" id="peBannerPreview"></div>
                 <input class="pe-input" id="peBanner" placeholder="#00eeff-#4122fd-#ff00ff" maxlength="200" value="${esc(toShorthand(p.banner||''))}"></div>
             <button class="pe-save" id="peSave" onclick="saveProfileEdits()">SAVE CHANGES</button>
@@ -734,12 +560,18 @@ function injectEditPanel(profileName){
         </div>`;
     left.appendChild(panel);
 
-    // Live previews
+    // Live swatch + theme preview
     const liveTheme=[
-        {id:'peThemeBg',        sw:'swatchBg',     fn:v=>{ const m=document.querySelector('.profile-modal-content'); if(m){ m.style.backgroundImage=""; m.style.background=parseCss(v)||""; } }},
+        {id:'peThemeBg',        sw:'swatchBg',     fn:v=>{
+            const m=document.querySelector('.profile-modal-content');
+            if(!m) return;
+            // Only apply gradient bg if no image currently set
+            if(AUTH?.profile?.theme_bg_image){ return; }
+            m.style.backgroundImage="none"; m.style.background=parseCss(v)||"";
+        }},
         {id:'peThemeBorder',    sw:'swatchBorder', fn:v=>{ const m=document.querySelector('.profile-modal-content'); if(m) m.style.borderColor=v||""; }},
         {id:'peThemeGlow',      sw:'swatchGlow',   fn:v=>{ const m=document.querySelector('.profile-modal-content'); if(m) m.style.boxShadow=v?`0 0 40px ${v}55,0 0 80px ${v}22`:""; }},
-        {id:'peThemeNameColor', sw:'swatchName',   fn:v=>{ const n=document.getElementById('pName'); const s=document.getElementById('peThemeNameStyle')?.value||""; if(n) applyNameStyle(n,v,s); }},
+        {id:'peThemeNameColor', sw:'swatchName',   fn:v=>{ const n=document.getElementById('pName'); const g=document.getElementById('peThemeNameGlow')?.value.trim()||''; if(n) applyNameStyle(n,v,g?`glow:${g}`:''); }},
     ];
     liveTheme.forEach(({id,sw,fn})=>{
         const inp=document.getElementById(id); const swatch=document.getElementById(sw);
@@ -747,14 +579,18 @@ function injectEditPanel(profileName){
         const update=()=>{ const v=inp.value.trim(); swatch.style.background=parseCss(v)||"#111"; fn(v); };
         update(); inp.addEventListener('input',update);
     });
-    document.getElementById('peThemeNameStyle')?.addEventListener('change',()=>{
-        const c=document.getElementById('peThemeNameColor')?.value.trim()||"";
-        const s=document.getElementById('peThemeNameStyle').value;
-        const n=document.getElementById('pName'); if(n) applyNameStyle(n,c,s);
-    });
+    // NAME GLOW swatch sync (defined here so it's in scope)
+    window.syncNameGlowSwatch=()=>{
+        const gv=document.getElementById('peThemeNameGlow')?.value.trim()||'';
+        const sw=document.getElementById('swatchNameGlow');
+        if(sw) sw.style.background=gv||'#111';
+        const c2=document.getElementById('peThemeNameColor')?.value.trim()||'';
+        const n=document.getElementById('pName');
+        if(n) applyNameStyle(n, c2, gv?`glow:${gv}`:'');
+    };
+    document.getElementById('peThemeNameGlow')?.addEventListener('input', window.syncNameGlowSwatch);
     // Banner preview
-    const bi=document.getElementById('peBanner');
-    const bp=document.getElementById('peBannerPreview');
+    const bi=document.getElementById('peBanner'); const bp=document.getElementById('peBannerPreview');
     const syncBanner=()=>{
         const parsed=parseCss(bi.value);
         bp.style.background=parsed||'transparent';
@@ -763,8 +599,9 @@ function injectEditPanel(profileName){
         if(strip) strip.style.background=parsed||'transparent';
     };
     syncBanner(); bi.addEventListener('input',syncBanner);
-    // Init swatches
     liveTheme.forEach(({id,sw,fn})=>{ const v=document.getElementById(id)?.value.trim(); const s=document.getElementById(sw); if(s) s.style.background=parseCss(v)||"#111"; if(v) fn(v); });
+    // Init glow swatch
+    if(window.syncNameGlowSwatch) window.syncNameGlowSwatch();
 }
 
 function pickBgImage(){
@@ -777,18 +614,11 @@ function pickBgImage(){
     };
     input.click();
 }
-async function clearBgImage(){
-    try{
-        const d=await authCall("PATCH","/profile",{theme_bg_image:""});
-        if(AUTH) AUTH.profile=d.profile;
-        applyProfileTheme(d.profile);
-    }catch(e){ console.warn(e); }
-}
 function addSocialEntry(){
     const c=document.getElementById('socialsContainer');
     if(!c||c.querySelectorAll('.social-entry').length>=8) return;
     const div=document.createElement('div'); div.className='social-entry'; div.dataset.icon='';
-    div.innerHTML=`<div class="social-icon-btn" onclick="pickSocialIcon(this)"><span style="font-size:0.55rem;color:#333;">📷</span></div>
+    div.innerHTML=`<div class="social-icon-btn" onclick="pickSocialIcon(this)"><span style="font-size:0.5rem;">📷</span></div>
         <input class="pe-input pe-social-label" placeholder="Label (optional)" maxlength="40">
         <input class="pe-input pe-social-url" placeholder="URL or text" maxlength="300">
         <button class="social-del-btn" onclick="this.closest('.social-entry').remove()">✕</button>`;
@@ -815,20 +645,19 @@ function applyPreset(name,btn){
     const toSh=v=>{ if(!v) return ''; const m=v.match(/linear-gradient\([^,]+,(#[0-9a-fA-F]{3,8}(?:,#[0-9a-fA-F]{3,8})*)\)/); return m?m[1].replace(/,/g,'-'):v; };
     const set=(id,val)=>{ const el=document.getElementById(id); if(el){ el.value=toSh(val); el.dispatchEvent(new Event('input')); } };
     set('peThemeBg',p.bg); set('peThemeBorder',p.border); set('peThemeGlow',p.glow); set('peThemeNameColor',p.name);
-    const se=document.getElementById('peThemeNameStyle');
-    if(se){ se.value=p.nameStyle||""; se.dispatchEvent(new Event('change')); }
+    const ge=document.getElementById('peThemeNameGlow');
+    if(ge){ ge.value=p.nameStyle&&p.nameStyle.startsWith('glow:')?p.nameStyle.slice(5):''; ge.dispatchEvent(new Event('input')); }
 }
 
-/* ═══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    PROFILE EXTRAS
-═══════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 function clearProfileExtras(){
     document.querySelectorAll('.lfm-badge,.rival-badge,.profile-role-badge,.profile-pronouns,.profile-description,.custom-social-row,.profile-duel-section').forEach(el=>el.remove());
     document.querySelector('.profile-banner-strip')?.remove();
     document.getElementById('profileEditPanel')?.remove();
     resetProfileTheme();
 }
-
 function injectProfileExtras(name,role,profile){
     if(!profile) return;
     const badgeRow=document.getElementById('pBadgeRow');
@@ -842,63 +671,75 @@ function injectProfileExtras(name,role,profile){
     if(profile.lfm_status&&badgeRow){ const b=document.createElement('div'); b.className='lfm-badge'; b.textContent='⚔ Looking For Match'; badgeRow.appendChild(b); }
     if(profile.rival&&badgeRow){ const b=document.createElement('div'); b.className='rival-badge'; b.textContent=`⚡ RIVAL: ${profile.rival}`; badgeRow.appendChild(b); }
     applyProfileTheme(profile);
-    const socials=Array.isArray(profile.socials)?profile.socials.filter(s=>s.url||s.label):[];
+
+    // Socials — show if has icon OR url (label optional)
+    const socials=Array.isArray(profile.socials)?profile.socials.filter(s=>s.icon||s.url):[];
     if(socials.length){
         const row=document.createElement('div'); row.className='custom-social-row';
         socials.forEach(s=>{
             const a=document.createElement('a');
             if(s.url){ a.href=s.url.startsWith('http')?s.url:`https://${s.url}`; a.target='_blank'; a.rel='noopener'; }
             else{ a.href='#'; a.onclick=e=>e.preventDefault(); }
-            a.className='custom-social-link';
-            if(s.icon){ const img=document.createElement('img'); img.src=s.icon; img.alt=''; img.onerror=()=>img.remove(); img.style.cssText='width:13px;height:13px;object-fit:cover;border-radius:2px;'; a.appendChild(img); }
-            if(s.label||s.url){ const txt=document.createElement('span'); txt.textContent=s.label||s.url; a.appendChild(txt); }
+            a.className='custom-social-link custom-social-bare';
+            if(s.icon){
+                const img=document.createElement('img'); img.src=s.icon; img.alt='';
+                img.onerror=()=>img.remove();
+                img.style.cssText='width:13px;height:13px;object-fit:cover;border-radius:2px;';
+                a.appendChild(img);
+            }
+            // Show label if set. If no label but has URL, show URL. If icon-only, show nothing extra.
+            const displayText = s.label || (!s.icon && s.url ? s.url : '');
+            if(displayText){ const txt=document.createElement('span'); txt.textContent=displayText; a.appendChild(txt); }
+            // If entry has no icon AND no label AND no url visible text, skip rendering
+            if(!s.icon && !displayText) return;
             row.appendChild(a);
         });
         const pts=document.getElementById('pPoints');
         if(pts) pts.parentNode.insertBefore(row,pts);
     }
 }
-
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
-/* ═══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    DUEL HELPERS
-═══════════════════════════════════════════════ */
-function duelDesc(d, perspective){
-    // perspective = the player whose POV we're showing
-    const isP1 = d.player1 === perspective;
-    // result is stored from player1's POV
-    const won = isP1 ? d.result==='Won' : d.result==='Lost';
+══════════════════════════════════════════════════════ */
+function duelPerspective(d, playerName){
+    // d.result is always from player1's point of view
+    const isP1 = d.player1===playerName;
+    const won  = isP1 ? d.result==='Won' : d.result==='Lost';
     const myScore  = isP1 ? d.player1_score : d.player2_score;
     const oppScore = isP1 ? d.player2_score : d.player1_score;
     const opponent = isP1 ? d.player2 : d.player1;
-    const verb = won ? 'won' : 'lost';
-    // Kit name — fix: use exact kit from DB (already stored correctly by bot)
-    const kit = d.kit||"";
-    const tier = d.tier||"";
-    let line = `${perspective} ${verb} ${myScore}-${oppScore} against ${opponent}`;
-    if(d.outcome && d.outcome!=='tested'){
-        const subj = isP1 ? d.player1 : d.player2;
-        if(d.outcome==='promoted') line += `\n${subj} has been promoted to ${tier} in ${kit}`;
-        else if(d.outcome==='demoted') line += `\n${subj} has been demoted to ${tier} in ${kit}`;
-        else if(d.outcome==='failed') line += `\n${subj} failed ${tier} in ${kit}`;
-    } else if(kit){
-        line += `\n${kit}${tier?' · '+tier:''}`;
+    return { won, myScore, oppScore, opponent, isP1 };
+}
+
+function duelDescLine(d, playerName){
+    // The outcome ALWAYS belongs to d.player1 (the Discord subject who got tested).
+    // Even when viewing from player2's side, show "player1 was promoted", not player2.
+    const kit  = d.kit==='Unknown'?'':d.kit;
+    const tier = d.tier==='Unknown'?'':d.tier;
+    if(d.outcome&&d.outcome!=='tested'){
+        const subject = d.player1; // always the tested player, never the opponent
+        if(d.outcome==='failed'){
+            return `${subject} failed${tier?' '+tier:''}${kit?' in '+kit:''}`;
+        }
+        const verb = d.outcome==='promoted'?'promoted to':'demoted to';
+        return `${subject} has been ${verb}${tier?' '+tier:''}${kit?' in '+kit:''}`;
     }
-    return { won, myScore, oppScore, opponent, line };
+    return `${kit}${tier?' · '+tier:''}`.trim();
 }
 
 function openDuelPopup(d, perspective){
     const p    = perspective||d.player1;
-    const info = duelDesc(d, p);
+    const info = duelPerspective(d, p);
     const date = new Date(d.timestamp).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-    const outcomeColor = d.outcome==='promoted'?'#00ff88':d.outcome==='demoted'?'#ff4444':d.outcome==='failed'?'#ff8800':'#555';
-    const outcomeClass = d.outcome||'tested';
+    const oc   = d.outcome||'tested';
+    const ocColor = oc==='promoted'?'#00ff88':oc==='demoted'?'#ff4444':oc==='failed'?'#ff8800':'#555';
 
     document.getElementById('duelPopupContent').innerHTML=`
         <div style="font-family:'MultiCraftFont',monospace;text-align:center;">
-            <div style="font-size:0.45rem;color:#444;letter-spacing:2px;margin-bottom:10px;">${d.kit||''} ${d.tier?'· '+d.tier:''}</div>
-            ${d.outcome&&d.outcome!=='tested'?`<div style="font-size:0.5rem;color:${outcomeColor};border:1px solid ${outcomeColor};border-radius:20px;padding:3px 14px;display:inline-block;margin-bottom:12px;letter-spacing:2px;">${d.outcome.toUpperCase()}</div>`:''}
+            <div style="font-size:0.45rem;color:#444;letter-spacing:2px;margin-bottom:10px;">${d.kit||''} ${d.tier&&d.tier!=='Unknown'?'· '+d.tier:''}</div>
+            ${oc!=='tested'?`<div style="font-size:0.5rem;color:${ocColor};border:1px solid ${ocColor};border-radius:20px;padding:3px 14px;display:inline-block;margin-bottom:12px;letter-spacing:2px;">${oc.toUpperCase()}</div>`:''}
             <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:10px;">
                 <span style="font-size:0.8rem;color:#fff;cursor:pointer;" onclick="closeDuelPopup();openProfile('${d.player1}')">${d.player1}</span>
                 <span style="font-size:0.4rem;color:#333;">vs</span>
@@ -911,59 +752,59 @@ function openDuelPopup(d, perspective){
 }
 function closeDuelPopup(){ document.getElementById('duelPopupModal').classList.remove('open'); }
 
-/* ═══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    PROFILE DUEL SECTION
-   Fix: store name on section element so we can clear it
-   Fix: only ONE section, showing most recent duel
-═══════════════════════════════════════════════ */
+   FIX: clear by player name so stale data can't persist
+══════════════════════════════════════════════════════ */
 async function renderProfileDuels(playerName){
-    // Remove any existing section first (fix stale data bug)
+    // Remove ANY existing duel section first
     document.querySelectorAll('.profile-duel-section').forEach(el=>el.remove());
+    window._profileDuelData = null;
 
     const left=document.querySelector('.profile-left');
     if(!left) return;
 
     try{
-        const url=`${AUTH_API.replace('/api','')}/api/duels?player=${encodeURIComponent(playerName)}&limit=1`;
-        const res=await fetch(url);
+        const base=AUTH_API.replace('/api','');
+        const res=await fetch(`${base}/api/duels?player=${encodeURIComponent(playerName)}&limit=1`);
+        if(!res.ok) return;
         const data=await res.json();
         const duels=data.duels||[];
-        if(duels.length===0) return;
+        if(!duels.length) return;
 
         const d    = duels[0];
-        const info = duelDesc(d, playerName);
+        const info = duelPerspective(d, playerName);
         const date = new Date(d.timestamp).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-        const scoreColor = info.won ? '#00ff88' : '#ff4444';
+        const scoreColor = info.won?'#00ff88':'#ff4444';
+        const desc = duelDescLine(d, playerName);
+
+        // Store for popup, tagged with player so we know it's fresh
+        window._profileDuelData = { duel: d, player: playerName };
 
         const section=document.createElement('div');
         section.className='profile-duel-section';
-        section.dataset.player=playerName; // tag with owner so we know it's fresh
-
+        section.dataset.owner=playerName;
         section.innerHTML=`
             <div class="profile-duel-header">
                 <span class="profile-duel-label-text">DUEL HISTORY</span>
                 <span class="profile-duel-viewall" onclick="openProfileDuelAll('${playerName}')">VIEW ALL ▶</span>
             </div>
-            <div class="profile-duel-card" onclick="openDuelPopup(window._lastDuel,'${playerName}')">
+            <div class="profile-duel-card" id="profileDuelCard">
                 <div class="profile-duel-top">
-                    <div class="profile-duel-names">
-                        ${playerName}<span>vs</span>${info.opponent}
-                    </div>
-                    <div class="profile-duel-score-text" style="color:${scoreColor};">
-                        ${info.myScore}-${info.oppScore}
-                    </div>
+                    <div class="profile-duel-names">${playerName}<span>vs</span>${info.opponent}</div>
+                    <div class="profile-duel-score-text" style="color:${scoreColor};">${info.myScore}-${info.oppScore}</div>
                 </div>
-                <div class="profile-duel-bottom">
-                    ${info.won?playerName:info.opponent} won · ${d.kit||''} ${d.tier?d.tier:''} · ${date}
-                </div>
+                <div class="profile-duel-bottom">${desc} · ${date}</div>
             </div>`;
 
-        // Store duel for popup
-        window._lastDuel = d;
+        section.querySelector('#profileDuelCard').onclick = ()=>{
+            if(window._profileDuelData?.player===playerName)
+                openDuelPopup(window._profileDuelData.duel, playerName);
+        };
 
         const pts=document.getElementById('pPoints');
         if(pts) pts.parentNode.insertBefore(section,pts); else left.appendChild(section);
-    }catch(e){ console.warn("Duel history unavailable:",e.message); }
+    }catch(e){ console.warn("Duel history:",e.message); }
 }
 
 function openProfileDuelAll(playerName){
@@ -974,9 +815,9 @@ function openProfileDuelAll(playerName){
     renderDuels(playerName);
 }
 
-/* ═══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    DUELS TAB
-═══════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 async function renderDuels(playerFilter){
     document.getElementById('kitBar').style.display='none';
     document.getElementById('filterBar').style.display='none';
@@ -985,16 +826,13 @@ async function renderDuels(playerFilter){
     const dl=document.getElementById('displayList');
     dl.innerHTML=''; dl.classList.remove('overall-mode');
     const lbl=document.getElementById('viewLabel');
-    lbl.innerText=playerFilter?`${playerFilter}'s Duels`:'Duel History';
+    lbl.innerText=playerFilter?`${playerFilter}'S DUELS`:'DUEL HISTORY';
     lbl.style.color='var(--theme)';
 
-    // Header
     const header=document.createElement('div'); header.className='duel-tab-header';
-    header.innerHTML=`<span class="duel-tab-title">${playerFilter?playerFilter+"'s Duels":'Duel History'}</span><span class="duel-tab-count" id="duelCount">LOADING...</span>`;
+    header.innerHTML=`<span class="duel-tab-title">${playerFilter?playerFilter+"'S DUELS":'DUEL HISTORY'}</span><span class="duel-tab-count" id="duelCount">LOADING...</span>`;
     dl.appendChild(header);
-
-    const list=document.createElement('div'); list.className='duel-list';
-    dl.appendChild(list);
+    const list=document.createElement('div'); list.className='duel-list'; dl.appendChild(list);
 
     try{
         const base=AUTH_API.replace('/api','');
@@ -1004,32 +842,14 @@ async function renderDuels(playerFilter){
         const res=await fetch(url);
         const data=await res.json();
         const duels=data.duels||[];
-
         document.getElementById('duelCount').textContent=`${data.total||duels.length} DUELS`;
-
-        if(duels.length===0){
-            list.innerHTML=`<div class="empty-state" style="margin-top:40px;"><h2>NO DUELS FOUND</h2></div>`;
-            return;
-        }
+        if(!duels.length){ list.innerHTML=`<div class="empty-state" style="margin-top:40px;"><h2>NO DUELS FOUND</h2></div>`; return; }
 
         duels.forEach((d,i)=>{
-            const perspective = playerFilter||d.player1;
-            const info = duelDesc(d, perspective);
-            const date = new Date(d.timestamp).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-            const outcomeColor = d.outcome==='promoted'?'#00ff88':d.outcome==='demoted'?'#ff4444':d.outcome==='failed'?'#ff8800':'#555';
-
-            // Build description line like: "x9jm won 5-0 against TERRORRR"
-            // Second line: outcome if any
-            const descLine1=`${perspective} ${info.won?'won':'lost'} ${info.myScore}-${info.oppScore} against ${info.opponent}`;
-            let descLine2='';
-            if(d.outcome&&d.outcome!=='tested'){
-                const subj=perspective===d.player1?d.player1:d.player2;
-                if(d.outcome==='promoted') descLine2=`${subj} has been promoted to ${d.tier} in ${d.kit}`;
-                else if(d.outcome==='demoted') descLine2=`${subj} has been demoted to ${d.tier} in ${d.kit}`;
-                else if(d.outcome==='failed') descLine2=`${subj} failed ${d.tier} in ${d.kit}`;
-            } else {
-                descLine2=`${d.kit||''}${d.tier?' · '+d.tier:''}`;
-            }
+            const perspective=playerFilter||d.player1;
+            const info=duelPerspective(d, perspective);
+            const date=new Date(d.timestamp).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+            const desc=duelDescLine(d, perspective);
 
             const row=document.createElement('div');
             row.className=`duel-row ${info.won?'won':'lost'}`;
@@ -1044,20 +864,18 @@ async function renderDuels(playerFilter){
                     <span class="duel-score ${info.won?'won':'lost'}">${info.myScore}-${info.oppScore}</span>
                 </div>
                 <div class="duel-row-bottom">
-                    <span class="duel-desc">${descLine2}</span>
+                    <span class="duel-desc">${desc}</span>
                     <span class="duel-date">${date}</span>
                 </div>`;
-            row.onclick=()=>openDuelPopup(d, perspective);
+            row.onclick=()=>openDuelPopup(d,perspective);
             list.appendChild(row);
         });
-    }catch(e){
-        list.innerHTML=`<div class="empty-state" style="margin-top:40px;"><h2>COULD NOT LOAD DUELS</h2></div>`;
-    }
+    }catch(e){ list.innerHTML=`<div class="empty-state" style="margin-top:40px;"><h2>COULD NOT LOAD DUELS</h2></div>`; }
 }
 
-/* ═══════════════════════════════════════════════
+/* ══════════════════════════════════════════════════════
    SITE CORE
-═══════════════════════════════════════════════ */
+══════════════════════════════════════════════════════ */
 let DATA={}, CURRENT_TAB='home', CURRENT_KIT='Overall', SHOW_ALL=false;
 const PREVIEW=2;
 const PTS={"HT1":50,"LT1":40,"HT2":30,"LT2":20,"HT3":12,"LT3":8,"HT4":5,"LT4":3,"HT5":2,"LT5":1};
@@ -1071,8 +889,7 @@ function typeText(el,text,dur=1000){el.textContent='';const chars=text.split('')
 function buildThemeVars(){let css=":root{\n";for(const[c,{color}]of Object.entries(REGION_MAP))css+=`--reg-${c.toLowerCase()}:${color};\n`;for(const[c,{color}]of Object.entries(DEVICE_MAP))css+=`--dev-${c.toLowerCase()}:${color};\n`;css+="}\n";for(const[c]of Object.entries(REGION_MAP)){const v=`var(--reg-${c.toLowerCase()})`;css+=`.tag-reg-${c.toLowerCase()}{color:${v};border-color:${v}!important}\n`;}for(const[c]of Object.entries(DEVICE_MAP)){const v=`var(--dev-${c.toLowerCase()})`;css+=`.tag-dev-${c.toLowerCase()}{color:${v};border-color:${v}!important}\n`;}const el=document.createElement('style');el.textContent=css;document.head.appendChild(el);}
 function playBtnSound(){const a=new Audio('sounds/button.mp3');a.volume=0.5;a.play().catch(()=>{});}
 function getTags(name){const p=DATA.Players?.find(x=>x.name===name)||{region:"?",device:"?"};const reg=REGION_MAP[p.region];const dev=DEVICE_MAP[p.device];return `<div style="margin-top:5px;"><div class="tag-wrap ${reg?'has-hover':''}"><span class="tag tag-reg-${p.region.toLowerCase()}">${p.region}</span>${reg?`<div class="tag-popup">${reg.label}</div>`:''}</div><div class="tag-wrap ${dev?'has-hover':''}"><span class="tag tag-dev-${p.device.toLowerCase()}">${p.device}</span>${dev?`<div class="tag-popup">${dev.label}</div>`:''}</div></div>`;}
-
-async function load(){buildThemeVars();populateFilterDropdowns();try{const r=await fetch(`data/rankings.json?v=${Date.now()}`);DATA=await r.json();let totals={};for(let k in DATA){if(k==="Overall"||k==="Players")continue;for(let t in DATA[k])DATA[k][t].forEach(p=>{totals[p]=(totals[p]||0)+(PTS[t.replace('R','')]||0);});}if(DATA.Players)DATA.Players.forEach(p=>{if(!(p.name in totals))totals[p.name]=0;});DATA["Overall"]=totals;buildKitBar();CURRENT_TAB='home';await renderOverall();}catch(e){console.error("Could not load rankings.json",e);}}
+async function load(){buildThemeVars();populateFilterDropdowns();try{const r=await fetch(`data/rankings.json?v=${Date.now()}`);DATA=await r.json();let totals={};for(let k in DATA){if(k==="Overall"||k==="Players")continue;for(let t in DATA[k])DATA[k][t].forEach(p=>{totals[p]=(totals[p]||0)+(PTS[t.replace('R','')]||0);});}if(DATA.Players)DATA.Players.forEach(p=>{if(!(p.name in totals))totals[p.name]=0;});DATA["Overall"]=totals;buildKitBar();CURRENT_TAB='home';await renderOverall();}catch(e){console.error(e);}}
 function buildKitBar(){const bar=document.getElementById('kitBar');bar.innerHTML="";Object.entries(KIT_MAP).forEach(([name,{img,color}])=>{const btn=document.createElement('button');const active=name==='Overall';btn.className=`kit-btn ${active?'active':''}`;btn.style.setProperty('--kit-active-color',color);btn.style.color=color;btn.style.opacity=active?'1':'0.4';btn.innerHTML=(img?`<img src="${img}" style="width:16px;vertical-align:middle;">`:'') + name.toUpperCase();btn.onclick=()=>{playBtnSound();if(CURRENT_TAB!=='rankings'&&CURRENT_TAB!=='home')return;document.querySelectorAll('.kit-btn').forEach(b=>{b.classList.remove('active');b.style.opacity='0.4';});btn.classList.add('active');btn.style.opacity='1';CURRENT_KIT=name;setUrl({kit:name==='Overall'?'':name,player:''});if(name==='Overall')renderOverall();else renderKit(name);};bar.appendChild(btn);});}
 function populateFilterDropdowns(){const ks=document.getElementById('filterKit');Object.keys(KIT_MAP).forEach(k=>{if(k==='Overall')return;const o=document.createElement('option');o.value=k;o.textContent=k.toUpperCase();ks.appendChild(o);});const rs=document.getElementById('filterRegion');Object.entries(REGION_MAP).forEach(([code,{label}])=>{const o=document.createElement('option');o.value=code;o.textContent=`${code} — ${label}`;rs.appendChild(o);});const ds=document.getElementById('filterDevice');Object.entries(DEVICE_MAP).forEach(([code,{label}])=>{const o=document.createElement('option');o.value=code;o.textContent=`${code} — ${label}`;ds.appendChild(o);});}
 function getFilters(){return{kit:document.getElementById('filterKit').value,region:document.getElementById('filterRegion').value,device:document.getElementById('filterDevice').value,retired:document.getElementById('filterRetired').value};}
@@ -1082,11 +899,8 @@ function toggleShowMore(){switchTab('rankings');}
 function buildFilteredOverall(){const{kit,region,device,retired}=getFilters();let scoredMap={};const playerStatus={};for(let k in DATA){if(k==='Overall'||k==='Players')continue;for(let t in DATA[k]){const isR=t.startsWith('R');DATA[k][t].forEach(name=>{if(!playerStatus[name])playerStatus[name]={active:false,retired:false};if(isR)playerStatus[name].retired=true;else playerStatus[name].active=true;});}}if(!retired){scoredMap={...DATA.Overall};}else{for(let k in DATA){if(k==='Overall'||k==='Players')continue;for(let t in DATA[k]){const isR=t.startsWith('R');if(retired==='active'&&isR)continue;if(retired==='retired'&&!isR)continue;const pts=PTS[t.replace('R','')];if(!pts)continue;DATA[k][t].forEach(name=>{scoredMap[name]=(scoredMap[name]||0)+pts;});}}if(DATA.Players)DATA.Players.forEach(p=>{if(!(p.name in scoredMap))scoredMap[p.name]=0;});}let entries=Object.entries(scoredMap);if(region||device)entries=entries.filter(([name])=>{const p=DATA.Players?.find(x=>x.name===name);if(!p)return false;if(region&&p.region!==region)return false;if(device&&p.device!==device)return false;return true;});if(retired==='active')entries=entries.filter(([name])=>{const s=playerStatus[name];return s&&s.active;});else if(retired==='retired')entries=entries.filter(([name])=>{const s=playerStatus[name];return s&&s.retired&&!s.active;});if(retired)entries=entries.filter(([,pts])=>pts>0);if(kit){const kitScores={};if(DATA[kit]){for(let t in DATA[kit]){const isR=t.startsWith('R');if(retired==='active'&&isR)continue;if(retired==='retired'&&!isR)continue;const pts=PTS[t.replace('R','')];if(!pts)continue;DATA[kit][t].forEach(name=>{if(!kitScores[name]||kitScores[name].pts<pts)kitScores[name]={pts,tier:t};});}}entries=entries.filter(([name])=>kitScores[name]).map(([name])=>[name,kitScores[name].pts,kitScores[name].tier]);entries.sort((a,b)=>b[1]-a[1]);return{entries,kitMode:true,kitName:kit};}entries.sort((a,b)=>b[1]-a[1]);return{entries,kitMode:false,kitName:null};}
 function getRankTitle(pts,rank){if(rank===1||pts>=300)return{title:"Combat Grandmaster",color:"#ffd700"};if(rank<=3||pts>=200)return{title:"Combat Master",color:"#00eeff"};if(pts>=150)return{title:"Combat Ace",color:"#ff6a00"};if(pts>=50)return{title:"Combat Specialist",color:"#b044ff"};if(pts>=20)return{title:"Combat Cadet",color:"#00ff88"};if(pts>=10)return{title:"Combat Novice",color:"#ff7f50"};return{title:"Rookie",color:"#888"};}
 function titleBadgeHtml(pts,rank){const{title,color}=getRankTitle(pts,rank);return `<span style="font-family:'MultiCraftFont',monospace;font-size:0.45rem;color:${color};border:1px solid ${color};border-radius:20px;padding:2px 8px;letter-spacing:1px;background:${color}18;white-space:nowrap;">${title}</span>`;}
-
 async function renderOverall(){if(CURRENT_TAB!=='rankings'&&CURRENT_TAB!=='home')return;const lbl=document.getElementById('viewLabel');const isHome=CURRENT_TAB==='home';lbl.style.display=isHome?'none':'';if(!isHome){lbl.innerText='OVERALL';lbl.style.color=KIT_MAP['Overall'].color;}document.getElementById('filterBar').style.display=isHome?'none':'flex';document.getElementById('topPlayersTitle').style.display=isHome?'block':'none';if(!isHome)document.getElementById('filterKit').style.display='';document.getElementById('kitBar').style.display=(!isHome&&SHOW_ALL)?'flex':'none';const dl=document.getElementById('displayList');dl.innerHTML='';dl.classList.add('overall-mode');const podium=document.getElementById('podiumWrap');podium.innerHTML='';const smBtn=document.getElementById('showMoreBtn');const{entries,kitMode}=buildFilteredOverall();if(entries.length===0){podium.style.display='none';smBtn.style.display='none';dl.innerHTML=`<div class="empty-state"><h2>NO PLAYERS MATCH FILTERS</h2></div>`;return;}if(SHOW_ALL){podium.style.display='none';}else{const top3=entries.slice(0,3);await prewarmSkins(top3.map(e=>e[0]));podium.style.display='flex';for(let i=0;i<top3.length;i++){const[name,pts]=top3[i];const rank=i+1;const rankColors=['var(--gold)','#aaa','#cd7f32'];const{title:pTitle,color:pColor}=getRankTitle(pts,rank);const card=document.createElement('div');card.className=`podium-card rank-${rank}`;card.onclick=()=>{playBtnSound();openProfile(name);};card.innerHTML=`<div class="podium-name">${name}</div><div class="podium-skin-wrap"><img src="${skinSrc(name)}" alt="${name}"></div><div class="podium-platform"><div class="podium-pts-badge" style="border-color:${rankColors[i]};color:${rankColors[i]};">${pts} PTS</div><span class="podium-rank-num">${rank}</span></div><div style="font-family:'MultiCraftFont',monospace;font-size:0.45rem;color:${pColor};border:1px solid ${pColor};border-radius:20px;padding:2px 8px;margin-top:6px;letter-spacing:1px;background:${pColor}18;text-align:center;">${pTitle}</div>`;card.style.animation=`podiumDrop 0.5s cubic-bezier(0.22,1,0.36,1) ${i*0.12}s both`;podium.appendChild(card);}}if(isHome){document.getElementById('topPlayersTitle').style.display='block';const homeList=document.createElement('div');homeList.id='overallList';const homeRows=entries.slice(3,3+PREVIEW);await prewarmSkins(homeRows.map(e=>e[0]));for(let i=0;i<homeRows.length;i++){const[name,pts]=homeRows[i];const rank=i+4;const row=document.createElement('div');row.className='ol-row';row.onclick=()=>{playBtnSound();openProfile(name);};row.style.animationDelay=`${i*0.08}s`;row.innerHTML=`<span class="ol-rank">${rank}</span><div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div><div class="ol-name-block"><div class="ol-name" style="font-family:'MultiCraftFont',monospace;">${name}</div>${getTags(name)}<div style="margin-top:4px;">${titleBadgeHtml(pts,rank)}</div></div><div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>`;homeList.appendChild(row);}dl.appendChild(homeList);if(entries.length>3+PREVIEW){const flDiv=document.createElement('div');flDiv.style.cssText="font-family:'MultiCraftFont',monospace;font-size:0.65rem;color:#555;cursor:pointer;margin-top:10px;margin-bottom:10px;letter-spacing:1px;text-align:center;width:100%;transition:color 0.2s;";flDiv.textContent='FULL LEADERBOARD ▶';flDiv.onmouseenter=()=>flDiv.style.color='var(--purple)';flDiv.onmouseleave=()=>flDiv.style.color='#555';flDiv.onclick=()=>switchTab('rankings');dl.appendChild(flDiv);}document.getElementById('showMoreBtn').style.display='none';return;}const listWrap=document.createElement('div');listWrap.id='overallList';const rowEntries=SHOW_ALL?entries:entries.slice(3,3+PREVIEW);await prewarmSkins(rowEntries.map(e=>e[0]));for(let i=0;i<rowEntries.length;i++){const[name,pts,tier]=rowEntries[i];const rank=SHOW_ALL?i+1:i+4;const isFullLB=SHOW_ALL;const row=document.createElement('div');row.className='ol-row'+(isFullLB?' ol-row-full':'');row.onclick=()=>{playBtnSound();openProfile(name);};if(isFullLB){const p=DATA.Players?.find(x=>x.name===name);const regCode=p?.region||'?';const regColor=REGION_MAP[regCode]?.color||'#555';const devCode=p?.device||'?';const devColor=DEVICE_MAP[devCode]?.color||'#555';let kitIconsHtml='<div class="ol-kit-icons">';Object.entries(KIT_MAP).forEach(([kname,{img,color}])=>{if(kname==='Overall')return;let tierLabel='',tierColor='#2a2a2a';if(DATA[kname]){for(let t in DATA[kname]){if(DATA[kname][t].includes(name)){const isR=t.startsWith('R');tierLabel=isR?t.slice(1):t;tierColor=isR?'#444':color;break;}}}kitIconsHtml+=`<div class="ol-kit-icon" style="border-color:${tierColor};opacity:${tierLabel?'1':'0.25'};"><img src="${img}" style="width:20px;height:20px;image-rendering:pixelated;display:block;"><span class="ol-kit-icon-label" style="color:${tierColor};font-size:0.5rem;">${tierLabel||''}</span></div>`;});kitIconsHtml+='</div>';row.innerHTML=`<span class="ol-rank">${rank}</span><div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div><div class="ol-name-block"><div class="ol-name" style="font-family:'MultiCraftFont',monospace;">${name}</div><div style="margin-top:4px;">${titleBadgeHtml(pts,rank)}</div></div><div class="tag-wrap has-hover" style="position:relative;"><span class="ol-region-badge" style="background:${regColor}22;border:1px solid ${regColor};color:${regColor};cursor:help;">${regCode}</span><div class="tag-popup" style="border-color:${regColor};">${REGION_MAP[regCode]?.label||regCode}</div></div><div class="tag-wrap has-hover" style="position:relative;"><span class="ol-region-badge" style="background:${devColor}22;border:1px solid ${devColor};color:${devColor};cursor:help;">${devCode}</span><div class="tag-popup" style="border-color:${devColor};">${DEVICE_MAP[devCode]?.label||devCode}</div></div>${kitIconsHtml}<div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>`;}else{row.innerHTML=`<span class="ol-rank">${rank}</span><div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div><div class="ol-name-block"><div class="ol-name">${name}</div>${getTags(name)}<div style="margin-top:4px;">${titleBadgeHtml(pts,rank)}</div></div>${kitMode&&tier?`<span class="ol-tier-badge">${tier.startsWith('R')?'Retired '+tier.slice(1):tier}</span>`:''}<div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>`;}row.style.animationDelay=`${i*0.06}s`;listWrap.appendChild(row);}dl.appendChild(listWrap);if(!isHome&&entries.length>3+PREVIEW){smBtn.style.display='block';smBtn.textContent=SHOW_ALL?'▲ SHOW LESS':'FULL LEADERBOARD ▶';}else{smBtn.style.display='none';}}
-
 async function renderKit(kit){if(CURRENT_TAB!=='rankings'&&CURRENT_TAB!=='home')return;const{region,device,retired}=getFilters();const color=KIT_MAP[kit]?.color||'var(--gold)';const lbl=document.getElementById('viewLabel');lbl.innerText=kit.toUpperCase();lbl.style.color=color;document.getElementById('filterBar').style.display='flex';document.getElementById('filterKit').style.display='none';document.getElementById('topPlayersTitle').style.display='none';document.getElementById('podiumWrap').style.display='none';document.getElementById('showMoreBtn').style.display='none';const dl=document.getElementById('displayList');dl.innerHTML='';dl.classList.remove('overall-mode');const kitPlayerStatus={};for(let k in DATA){if(k==='Overall'||k==='Players')continue;for(let t in DATA[k]){const isR=t.startsWith('R');DATA[k][t].forEach(name=>{if(!kitPlayerStatus[name])kitPlayerStatus[name]={active:false,retired:false};if(isR)kitPlayerStatus[name].retired=true;else kitPlayerStatus[name].active=true;});}}function kitPlayerVisible(name){const p=DATA.Players?.find(x=>x.name===name);if(region&&(!p||p.region!==region))return false;if(device&&(!p||p.device!==device))return false;if(retired==='active'){const s=kitPlayerStatus[name];if(!s||!s.active)return false;}else if(retired==='retired'){const s=kitPlayerStatus[name];if(!s||!s.retired||s.active)return false;}return true;}const allKitPlayers=[];if(DATA[kit]){for(let t in DATA[kit])DATA[kit][t].forEach(n=>{if(!allKitPlayers.includes(n))allKitPlayers.push(n);})}await prewarmSkins(allKitPlayers);const kitTop=[];if(DATA[kit]){const tierOrder2=['HT1','RHT1','LT1','RLT1','HT2','RHT2','LT2','RLT2','HT3','RHT3','LT3','RLT3','HT4','RHT4','LT4','RLT4','HT5','RHT5','LT5','RLT5'];for(const t of tierOrder2){if(retired==='active'&&t.startsWith('R'))continue;if(retired==='retired'&&!t.startsWith('R'))continue;if(DATA[kit][t])DATA[kit][t].forEach(n=>{if(kitTop.length<3&&kitPlayerVisible(n))kitTop.push({name:n,tier:t});});if(kitTop.length>=3)break;}}if(kitTop.length>0){const mp=document.createElement('div');mp.id='podiumWrap2';mp.style.cssText='display:flex;justify-content:center;align-items:flex-end;gap:16px;margin-bottom:28px;padding:0 12px;';for(let i=0;i<kitTop.length;i++){const{name,tier}=kitTop[i];const rank=i+1;const rankColors=['var(--gold)','#aaa','#cd7f32'];const card=document.createElement('div');card.className=`podium-card rank-${rank}`;card.onclick=()=>{playBtnSound();openProfile(name);};card.innerHTML=`<div class="podium-name">${name}</div><div class="podium-skin-wrap"><img src="${skinSrc(name)}" alt="${name}"></div><div class="podium-platform"><div class="podium-pts-badge" style="border-color:${rankColors[i]};color:${rankColors[i]};">${tier}</div><span class="podium-rank-num">${rank}</span></div>`;card.style.animation=`podiumDrop 0.5s cubic-bezier(0.22,1,0.36,1) ${i*0.12}s both`;mp.appendChild(card);}dl.appendChild(mp);}const grid=document.createElement('div');grid.style.cssText="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:24px;";let anyPlayers=false;const TIER_ORDER=['HT1','RHT1','LT1','RLT1','HT2','RHT2','LT2','RLT2','HT3','RHT3','LT3','RLT3','HT4','RHT4','LT4','RLT4','HT5','RHT5','LT5','RLT5'];if(DATA[kit]){["T1","T2","T3","T4","T5"].forEach(lvl=>{const lvlNum=lvl.slice(1);const orderedTiers=TIER_ORDER.filter(t=>{const base=t.startsWith('R')?t.slice(1):t;return base.slice(-1)===lvlNum;});let col=`<div style="min-width:200px;"><div style="color:var(--purple);border-bottom:1px solid var(--border);margin-bottom:10px;text-align:center;font-family:'MultiCraftFont';font-size:0.9rem;">${lvl}</div>`;let has=false;orderedTiers.forEach(t=>{if(!DATA[kit][t])return;if(retired==='active'&&t.startsWith('R'))return;if(retired==='retired'&&!t.startsWith('R'))return;DATA[kit][t].forEach(name=>{if(!kitPlayerVisible(name))return;has=true;anyPlayers=true;const isR=t.startsWith('R');const label=isR?'Retired '+t.substring(1):t;const lc=isR?'var(--grey)':'var(--gold)';col+=`<div class="tier-card clickable" style="width:200px;padding:12px;display:flex;align-items:center;gap:10px;" onclick="openProfile('${name}')"><img src="${skinSrc(name)}" alt="${name}" style="width:36px;height:36px;image-rendering:pixelated;object-fit:cover;object-position:top;transform:scale(1.3);transform-origin:top;flex-shrink:0;"><div><div style="font-size:0.9rem;font-weight:bold;">${name}</div>${getTags(name)}<div style="font-size:0.6rem;color:${lc};margin-top:4px;font-weight:bold;">${label}</div></div></div>`;});});if(has){col+=`</div>`;grid.innerHTML+=col;}});}if(!anyPlayers){dl.innerHTML=`<div class="empty-state"><h2>NO RANKED PLAYERS</h2></div>`;return;}dl.appendChild(grid);}
-
 async function switchTab(tab){
     playBtnSound(); CURRENT_TAB=tab;
     document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
@@ -1103,18 +917,16 @@ async function switchTab(tab){
         const ob=[...document.querySelectorAll('.kit-btn')].find(b=>b.textContent.trim()==='OVERALL');
         if(ob){ob.classList.add('active');ob.style.opacity='1';}
         await renderOverall();
-    } else if(tab==='rankings'){
+    }else if(tab==='rankings'){
         setUrl({tab:'rankings',kit:'',player:''});
-        SHOW_ALL=true;
-        document.getElementById('kitBar').style.display='flex';
+        SHOW_ALL=true; document.getElementById('kitBar').style.display='flex';
         document.getElementById('filterBar').style.display='flex';
         document.getElementById('topPlayersTitle').style.display='none';
         dl.innerHTML='';
         if(CURRENT_KIT==='Overall') await renderOverall(); else await renderKit(CURRENT_KIT);
-    } else if(tab==='duels'){
-        setUrl({tab:'duels',kit:'',player:''});
-        await renderDuels();
-    } else {
+    }else if(tab==='duels'){
+        setUrl({tab:'duels',kit:'',player:''}); await renderDuels();
+    }else{
         document.getElementById('kitBar').style.display='none';
         setUrl({tab:tab,kit:'',player:''});
         const lbl=document.getElementById('viewLabel');
@@ -1126,26 +938,22 @@ async function switchTab(tab){
                 const hasProf=(i.name in DATA.Overall);
                 dl.innerHTML+=`<div class="tier-card ${hasProf?'clickable':''}" ${hasProf?`onclick="openProfile('${i.name}')"`:''}><b style="color:var(--purple);font-family:'MultiCraftFont';font-size:1rem;">${i.name}</b>${i.discord?`<div style="color:var(--purple);font-size:0.85rem;font-weight:bold;margin-top:5px;">Discord: ${i.discord}</div>`:''}<p style="font-size:0.75rem;color:#bbb;margin-top:8px;">${i.description||''}</p></div>`;
             });
-        }catch(e){ console.error(`Could not load ${tab}.json`,e); }
+        }catch(e){ console.error(e); }
     }
 }
-
 function closeProfileModal(){
     document.getElementById('profileModal').style.display='none';
     clearProfileExtras();
+    window._profileDuelData=null;
     setUrl({player:''});
 }
-
 function fireConfetti(){const colors=['#ffd700','#fff','var(--theme)','#ff00ff','#00eeff','#ff6a00'];const canvas=document.createElement('canvas');canvas.style.cssText='position:fixed;inset:0;z-index:9999;pointer-events:none;';canvas.width=window.innerWidth;canvas.height=window.innerHeight;document.body.appendChild(canvas);const ctx=canvas.getContext('2d');const pieces=Array.from({length:120},()=>({x:Math.random()*canvas.width,y:-20-Math.random()*200,r:Math.random()*7+3,color:colors[Math.floor(Math.random()*colors.length)],vx:(Math.random()-.5)*4,vy:Math.random()*4+2,spin:Math.random()*.3-.15,angle:Math.random()*Math.PI*2,shape:Math.random()>.5?'rect':'circle',w:Math.random()*10+5,h:Math.random()*5+3,alpha:1}));const start=performance.now();const duration=2800;function draw(now){const elapsed=now-start;ctx.clearRect(0,0,canvas.width,canvas.height);pieces.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.08;p.angle+=p.spin;p.alpha=Math.max(0,1-(elapsed/duration)*1.2);ctx.globalAlpha=p.alpha;ctx.fillStyle=p.color;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.angle);if(p.shape==='rect'){ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);}else{ctx.beginPath();ctx.arc(0,0,p.r,0,Math.PI*2);ctx.fill();}ctx.restore();});ctx.globalAlpha=1;if(elapsed<duration)requestAnimationFrame(draw);else canvas.remove();}requestAnimationFrame(draw);}
-
 async function openProfile(name){
     playBtnSound();
     if(!(name in DATA.Overall)) return;
-
-    // ── FIX: clear ALL duel sections before opening new profile ──
+    // Clear ALL stale duel data before loading new profile
     document.querySelectorAll('.profile-duel-section').forEach(el=>el.remove());
-    window._lastDuel=null;
-
+    window._profileDuelData=null;
     const sorted=Object.entries(DATA.Overall).sort((a,b)=>b[1]-a[1]);
     const rankIdx=sorted.findIndex(x=>x[0]===name); const rankNum=rankIdx+1; const rankPts=DATA.Overall[name];
     const{title:rankTitle,color:rankTitleColor}=getRankTitle(rankPts,rankNum);
@@ -1171,11 +979,9 @@ async function openProfile(name){
         const data=await authCall("GET",`/profile/${encodeURIComponent(name)}`);
         injectProfileExtras(name,data.role,data.profile);
         injectEditPanel(name);
-    }catch(e){ console.warn("Profile extras unavailable:",e.message); }
-    // Load duel history for THIS player only
+    }catch(e){ console.warn("Profile extras:",e.message); }
     renderProfileDuels(name);
 }
-
 async function handleUrlOnLoad(){const p=new URLSearchParams(window.location.search);const player=p.get('player');const kit=p.get('kit');const tab=p.get('tab');if(player&&DATA.Overall&&player in DATA.Overall){openProfile(player);}else if(tab==='rankings'){switchTab('rankings');}else if(tab==='hof'||tab==='testers'){switchTab(tab);}else if(tab==='duels'){switchTab('duels');}else if(kit&&kit!=='Overall'&&KIT_MAP[kit]){CURRENT_KIT=kit;document.querySelectorAll('.kit-btn').forEach(b=>{b.classList.remove('active');b.style.opacity='0.4';});const btn=[...document.querySelectorAll('.kit-btn')].find(b=>b.textContent.trim()===kit.toUpperCase());if(btn){btn.classList.add('active');btn.style.opacity='1';}document.getElementById('filterBar').style.display='none';document.getElementById('showMoreBtn').style.display='none';document.getElementById('kitBar').style.display='flex';await renderKit(kit);}}
 function copyProfileLink(){const url=new URL(window.location.href);url.searchParams.set('player',document.getElementById('pName').innerText.trim());navigator.clipboard.writeText(url.toString()).then(()=>{const btn=document.getElementById('profileCopyBtn');btn.textContent='✓';btn.style.borderColor='var(--purple)';btn.style.color='var(--purple)';setTimeout(()=>{btn.textContent='⧉';btn.style.borderColor='';btn.style.color='';},1500);});}
 function setUrl(params){const u=new URL(window.location.href);Object.entries(params).forEach(([k,v])=>v?u.searchParams.set(k,v):u.searchParams.delete(k));window.history.replaceState({},'',u);}
@@ -1187,9 +993,7 @@ function openInfo(){ playBtnSound(); document.getElementById('infoModal').style.
     await load();
     await handleUrlOnLoad();
 })();
-
 document.addEventListener('click',e=>{ if(!e.target.closest('.search-wrap')) document.getElementById('searchPopup').style.display='none'; });
-
 const canvas=document.createElement('canvas');canvas.style.cssText='position:fixed;inset:0;z-index:0;pointer-events:none;';document.body.prepend(canvas);const ctx=canvas.getContext('2d');canvas.width=window.innerWidth;canvas.height=window.innerHeight;window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});let stars=[];function spawnStar(){return{x:Math.random()*canvas.width,y:-10,size:Math.random()*3+1,speed:Math.random()*8+4,drift:Math.random()*1.5-.75};}setInterval(()=>{for(let i=0;i<6;i++)stars.push(spawnStar());},80);(function animate(){ctx.clearRect(0,0,canvas.width,canvas.height);for(let i=0;i<stars.length;i++){const s=stars[i];ctx.beginPath();ctx.fillStyle='white';ctx.shadowBlur=10;ctx.shadowColor='#00eeff';ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();s.y+=s.speed;s.x+=s.drift;if(s.y>canvas.height+20){stars.splice(i,1);i--;}}requestAnimationFrame(animate);})();
 </script>
 </body>
