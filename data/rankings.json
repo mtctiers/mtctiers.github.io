@@ -597,9 +597,11 @@
       "shadow_master",
       "Solace"
     ],
-    "LT4": [
-      "bluedigit",
+    "HT4": [
       "Atomix"
+    ],
+    "LT4": [
+      "bluedigit"
     ],
     "LT5": [
       "Luther"
