@@ -317,9 +317,7 @@
     ],
     "LT1": [
       "system1117",
-      "sample"
-    ],
-    "RLT1": [
+      "sample",
       "TimmyLoal"
     ],
     "HT2": [
@@ -615,8 +613,7 @@
     "HT2": [
       "Game1K",
       "sample",
-      "jogg",
-      "Bloody_Hell"
+      "jogg"
     ],
     "LT2": [
       "x9jm",
@@ -624,7 +621,8 @@
     ],
     "RHT2": [
       "Vorthexis",
-      "TimmyLoal"
+      "TimmyLoal",
+      "Bloody_Hell"
     ],
     "HT3": [
       "LastChance",
