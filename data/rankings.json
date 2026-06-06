@@ -309,6 +309,11 @@
       "name": "MTCTIERS",
       "region": "MTCTIERS",
       "device": "MTCTIERS"
+    },
+    {
+      "name": "Redistdrext",
+      "region": "AS",
+      "device": "MK"
     }
   ],
   "Emerald": {
