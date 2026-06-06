@@ -314,6 +314,11 @@
       "name": "Redistdrext",
       "region": "AS",
       "device": "MK"
+    },
+    {
+      "name": "MENDOR",
+      "region": "AF",
+      "device": "MK"
     }
   ],
   "Emerald": {
