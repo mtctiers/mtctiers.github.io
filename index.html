@@ -71,10 +71,29 @@
 
 <!-- Info modal -->
 <div id="infoModal" class="modal-overlay" onclick="this.style.display='none'">
-    <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-height:85vh;overflow-y:auto;">
         <h2 style="font-family:'MultiCraftFont'; color:var(--purple); margin-top:0;">INFORMATION</h2>
         <div style="text-align:left;font-size:0.85rem;line-height:1.6;">
-            <p><b style="color:var(--purple)">SERVER CODE:</b> JC5A69FB</p>
+
+            <!-- Live server card -->
+            <div id="serverCard" style="background:#0a0a10;border:1px solid rgba(0,238,255,0.15);border-radius:10px;padding:14px 16px;margin-bottom:18px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <span id="srvName" style="font-family:'MultiCraftFont';font-size:0.85rem;color:#fff;letter-spacing:1px;">LOADING...</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;">
+                    <div style="text-align:center;">
+                        <div id="srvPlayers" style="font-family:'MultiCraftFont';font-size:1.4rem;color:var(--theme);">-</div>
+                        <div style="font-family:'MultiCraftFont';font-size:0.4rem;color:#444;letter-spacing:2px;margin-top:2px;">PLAYERS</div>
+                    </div>
+                    <div style="flex:1;height:1px;background:rgba(0,238,255,0.08);"></div>
+                    <div style="text-align:center;">
+                        <div style="font-family:'MultiCraftFont';font-size:0.75rem;color:var(--gold);letter-spacing:3px;">JC5A69FB</div>
+                        <div style="font-family:'MultiCraftFont';font-size:0.4rem;color:#444;letter-spacing:2px;margin-top:2px;">SERVER CODE</div>
+                    </div>
+                </div>
+                <div id="srvDesc" style="font-family:'MultiCraftFont';font-size:0.5rem;color:#555;line-height:1.8;min-height:18px;letter-spacing:0.3px;"></div>
+            </div>
+
             <p><b style="color:var(--purple)">DISCORD:</b> https://discord.gg/v3CgdV6hsT</p>
             <hr style="border:0;border-top:1px solid #333;margin:15px 0;">
             <b style="color:var(--gold);font-family:'MultiCraftFont';font-size:0.75rem;">POINTS SYSTEM:</b>
@@ -653,7 +672,7 @@ function applyPreset(name,btn){
    PROFILE EXTRAS
 ══════════════════════════════════════════════════════ */
 function clearProfileExtras(){
-    document.querySelectorAll('.lfm-badge,.rival-badge,.profile-role-badge,.profile-pronouns,.profile-description,.custom-social-row,.profile-duel-section').forEach(el=>el.remove());
+    document.querySelectorAll('.lfm-badge,.rival-badge,.profile-role-badge,.profile-pronouns,.profile-description,.custom-social-row,.profile-duel-section,.wl-badge,.wl-row').forEach(el=>el.remove());
     document.querySelector('.profile-banner-strip')?.remove();
     document.getElementById('profileEditPanel')?.remove();
     resetProfileTheme();
@@ -668,9 +687,11 @@ function injectProfileExtras(name,role,profile){
     }
     if(profile.pronouns){ const pr=document.createElement('div'); pr.className='profile-pronouns'; pr.textContent=profile.pronouns; meta.insertBefore(pr,meta.firstChild); }
     if(profile.description){ const ds=document.createElement('div'); ds.className='profile-description'; ds.textContent=profile.description; meta.appendChild(ds); }
-    if(profile.lfm_status&&badgeRow){ const b=document.createElement('div'); b.className='lfm-badge'; b.textContent='⚔ Looking For Match'; badgeRow.appendChild(b); }
+    // LFM badge removed from public view to keep badge row clean
     if(profile.rival&&badgeRow){ const b=document.createElement('div'); b.className='rival-badge'; b.textContent=`⚡ RIVAL: ${profile.rival}`; badgeRow.appendChild(b); }
     applyProfileTheme(profile);
+    // W/L ratio — goes in its own row below badges, not inside badge row
+    fetchWLRatio(name);
 
     // Socials — show if has icon OR url (label optional)
     const socials=Array.isArray(profile.socials)?profile.socials.filter(s=>s.icon||s.url):[];
@@ -698,6 +719,48 @@ function injectProfileExtras(name,role,profile){
         if(pts) pts.parentNode.insertBefore(row,pts);
     }
 }
+async function fetchWLRatio(playerName){
+    try{
+        const base=AUTH_API.replace('/api','');
+        // Fetch ALL duels for this player using pagination
+        let allDuels=[], offset=0, total=null;
+        while(total===null||allDuels.length<total){
+            const res=await fetch(`${base}/api/duels?player=${encodeURIComponent(playerName)}&limit=200&offset=${offset}`);
+            const data=await res.json();
+            const batch=data.duels||[];
+            allDuels=allDuels.concat(batch);
+            if(total===null) total=data.total||batch.length;
+            if(batch.length<200) break;
+            offset+=200;
+        }
+        if(!allDuels.length) return;
+        let wins=0, losses=0;
+        allDuels.forEach(d=>{
+            // Skip duels with broken/missing fields
+            if(!d.player1||!d.player2||!d.result) return;
+            const isP1=d.player1===playerName;
+            const won=isP1?d.result==='Won':d.result==='Lost';
+            if(won) wins++; else losses++;
+        });
+        // Check modal is still showing this player
+        const modal=document.getElementById('profileModal');
+        if(!modal||modal.dataset.openPlayer!==playerName) return;
+        // Insert as own row below pBadgeRow
+        const badgeRow=document.getElementById('pBadgeRow');
+        if(!badgeRow) return;
+        const row=document.createElement('div');
+        row.className='wl-row';
+        row.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:8px;margin-top:-4px;';
+        const b=document.createElement('div');
+        b.className='wl-badge';
+        b.dataset.player=playerName;
+        b.style.cssText='font-family:"MultiCraftFont",monospace;font-size:0.42rem;border:1px solid #222;border-radius:20px;padding:2px 8px;letter-spacing:1px;background:rgba(255,255,255,0.04);white-space:nowrap;';
+        b.innerHTML=`<span style="color:#00ff88;">${wins}W</span><span style="color:#333;margin:0 3px;">/</span><span style="color:#ff4444;">${losses}L</span>`;
+        row.appendChild(b);
+        badgeRow.insertAdjacentElement('afterend', row);
+    }catch(_){}
+}
+
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
 
 /* ══════════════════════════════════════════════════════
@@ -942,7 +1005,9 @@ async function switchTab(tab){
     }
 }
 function closeProfileModal(){
-    document.getElementById('profileModal').style.display='none';
+    const _cm=document.getElementById('profileModal');
+    _cm.style.display='none';
+    _cm.dataset.openPlayer='';
     clearProfileExtras();
     window._profileDuelData=null;
     setUrl({player:''});
@@ -974,7 +1039,9 @@ async function openProfile(name){
     const skinWrap=document.getElementById('pSkin'); const skinImg=document.getElementById('pSkinImg');
     hasSkin(name).then(()=>{ skinImg.src=skinSrc(name); skinWrap.style.display='flex'; });
     setUrl({player:name});
-    document.getElementById('profileModal').style.display='flex';
+    const _pModal=document.getElementById('profileModal');
+    _pModal.style.display='flex';
+    _pModal.dataset.openPlayer=name; // track which player is open for W/L
     try{
         const data=await authCall("GET",`/profile/${encodeURIComponent(name)}`);
         injectProfileExtras(name,data.role,data.profile);
@@ -986,7 +1053,66 @@ async function handleUrlOnLoad(){const p=new URLSearchParams(window.location.sea
 function copyProfileLink(){const url=new URL(window.location.href);url.searchParams.set('player',document.getElementById('pName').innerText.trim());navigator.clipboard.writeText(url.toString()).then(()=>{const btn=document.getElementById('profileCopyBtn');btn.textContent='✓';btn.style.borderColor='var(--purple)';btn.style.color='var(--purple)';setTimeout(()=>{btn.textContent='⧉';btn.style.borderColor='';btn.style.color='';},1500);});}
 function setUrl(params){const u=new URL(window.location.href);Object.entries(params).forEach(([k,v])=>v?u.searchParams.set(k,v):u.searchParams.delete(k));window.history.replaceState({},'',u);}
 function handleSearch(val){const pop=document.getElementById('searchPopup');if(!val){pop.style.display='none';return;}const matches=Object.keys(DATA.Overall||{}).filter(n=>n.toLowerCase().includes(val.toLowerCase())).slice(0,5);pop.innerHTML=matches.map(m=>`<div class="search-item" onclick="openProfile('${m}');document.getElementById('searchPopup').style.display='none';"><b>${m}</b><span style="color:var(--purple);font-size:0.5rem;">VIEW PROFILE</span></div>`).join('')||'';pop.style.display=matches.length?'block':'none';}
-function openInfo(){ playBtnSound(); document.getElementById('infoModal').style.display='flex'; }
+// Proxy URL stored as base64
+const _MP = atob("aHR0cHM6Ly9tdWx0aWNyYWZ0LXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHAvcHJveHkvZmluZC1uZWFyYnktc2VydmVycw==");
+const MTC_SERVER_ID = "JC5A69FB";
+const SRV_REFRESH_MS = 15000;
+var _srvInterval = null;
+
+function typeTextEl(el, text, speed){
+    speed = speed || 14;
+    el.textContent='';
+    var i=0;
+    var tick=setInterval(function(){ el.textContent+=text[i++]; if(i>=text.length) clearInterval(tick); }, speed);
+}
+
+async function fetchServerInfo(){
+    var nameEl    = document.getElementById('srvName');
+    var playersEl = document.getElementById('srvPlayers');
+    var descEl    = document.getElementById('srvDesc');
+    if(!nameEl) return;
+    try{
+        var res = await fetch(_MP, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({ favorites: MTC_SERVER_ID })
+        });
+        var data = await res.json();
+        var srv = data && data.favorites && data.favorites[MTC_SERVER_ID];
+        if(!srv){ nameEl.textContent='SERVER UNAVAILABLE'; return; }
+        nameEl.textContent = srv.server_name || 'COMBAT CLUB';
+        var cur = srv.connected_players != null ? srv.connected_players : 0;
+        var max = srv.max_players || 50;
+        if(playersEl) playersEl.textContent = cur + '/' + max;
+        // Description typing anim only on first open
+        if(descEl && !descEl.dataset.loaded){
+            descEl.dataset.loaded = '1';
+            var desc = (srv.description || '').replace(/\n+/g,' · ').trim();
+            if(desc) typeTextEl(descEl, desc, 12);
+        }
+    }catch(e){
+        if(nameEl) nameEl.textContent='COULD NOT LOAD';
+        console.warn('Server info:', e.message);
+    }
+}
+
+function openInfo(){
+    playBtnSound();
+    document.getElementById('infoModal').style.display='flex';
+    var nameEl    = document.getElementById('srvName');
+    var playersEl = document.getElementById('srvPlayers');
+    var descEl    = document.getElementById('srvDesc');
+    if(nameEl)    nameEl.textContent    = 'LOADING...';
+    if(playersEl) playersEl.textContent = '-';
+    if(descEl)    { descEl.textContent=''; descEl.dataset.loaded=''; }
+    fetchServerInfo();
+    if(_srvInterval) clearInterval(_srvInterval);
+    _srvInterval = setInterval(fetchServerInfo, SRV_REFRESH_MS);
+}
+
+document.getElementById('infoModal').addEventListener('click', function(){
+    if(_srvInterval){ clearInterval(_srvInterval); _srvInterval=null; }
+});
 
 (async()=>{
     await restoreSession();

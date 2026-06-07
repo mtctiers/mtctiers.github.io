@@ -155,15 +155,15 @@ nav {
 .modal-content { background:#010102; border:2px solid var(--purple); border-radius:12px; padding:30px; width:440px; max-width:calc(100vw - 32px); text-align:center; animation:cyberZoom 0.4s cubic-bezier(0.22,1,0.36,1) forwards; box-shadow:0 0 40px rgba(var(--theme-rgb),0.3); }
 
 /* ── Profile modal ──────────────────────────────────── */
-.profile-modal-content { background:#06060a; border:1.5px solid var(--border); border-radius:14px; padding:0; width:620px; max-width:calc(100vw - 32px); display:flex; flex-direction:row; overflow:visible; position:relative; box-shadow:0 0 40px rgba(var(--theme-rgb),0.2); animation:cyberZoom 0.35s cubic-bezier(0.22,1,0.36,1) forwards; }
+.profile-modal-content { background:#06060a; border:1.5px solid var(--border); border-radius:14px; padding:0; width:680px; max-width:calc(100vw - 32px); max-height:88vh; display:flex; flex-direction:row; overflow:hidden; position:relative; box-shadow:0 0 40px rgba(var(--theme-rgb),0.2); animation:cyberZoom 0.35s cubic-bezier(0.22,1,0.36,1) forwards; }
 .profile-close-btn { position:absolute; top:12px; right:14px; background:#111; border:1px solid #333; color:#888; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.7rem; z-index:10; transition:border-color .2s,color .2s; }
 .profile-close-btn:hover { border-color:var(--purple); color:#fff; }
 .profile-copy-btn { position:absolute; bottom:12px; right:14px; background:#111; border:1px solid #333; color:#888; border-radius:50%; width:28px; height:28px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.75rem; z-index:10; transition:border-color .2s,color .2s; }
 .profile-copy-btn:hover { border-color:var(--purple); color:#fff; }
-.profile-left { padding:28px 24px 28px 28px; display:flex; flex-direction:column; align-items:flex-start; min-width:210px; border-right:1px solid rgba(var(--theme-rgb),0.15); flex-shrink:0; overflow-y:auto; max-height:82vh; }
+.profile-left { padding:28px 24px 28px 28px; display:flex; flex-direction:column; align-items:flex-start; min-width:210px; max-width:240px; border-right:1px solid rgba(var(--theme-rgb),0.15); flex-shrink:0; overflow-y:auto; max-height:82vh; }
 .profile-right { flex:1; padding:28px 22px; display:flex; flex-direction:column; overflow-y:auto; max-height:82vh; }
 .profile-rank-badge { font-family:'MultiCraftFont'; font-size:0.6rem; color:var(--gold); background:rgba(255,215,0,0.08); border:1px solid rgba(255,215,0,0.35); border-radius:20px; padding:3px 10px; letter-spacing:1px; }
-.profile-name { font-family:'MultiCraftFont'; color:#fff; margin:0 0 10px 0; font-size:1.9rem; line-height:1.1; word-break:break-word; }
+.profile-name { font-family:'MultiCraftFont'; color:#fff; margin:0 0 10px 0; font-size:1.6rem; line-height:1.1; word-break:break-all; overflow-wrap:anywhere; max-width:100%; }
 .profile-elo { font-family:'MultiCraftFont'; font-size:2rem; color:var(--gold); margin-top:auto; padding-top:16px; }
 .profile-elo-label { font-size:0.75rem; color:#888; letter-spacing:2px; }
 .profile-kits-label { font-family:'MultiCraftFont'; font-size:0.6rem; color:#555; letter-spacing:2px; margin-bottom:16px; }
@@ -364,3 +364,6 @@ nav {
     #filterBar { width:100%; padding:0 12px; box-sizing:border-box; }
     .modal-content { width:calc(100% - 32px); padding:20px 16px; max-height:85vh; overflow-y:auto; }
 }
+
+.wl-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+.wl-badge { font-family:'MultiCraftFont',monospace; font-size:0.42rem; border:1px solid #222; border-radius:20px; padding:2px 8px; letter-spacing:1px; background:rgba(255,255,255,0.04); white-space:nowrap; }
