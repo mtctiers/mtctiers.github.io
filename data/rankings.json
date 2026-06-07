@@ -319,6 +319,11 @@
       "name": "MENDOR",
       "region": "AF",
       "device": "MK"
+    },
+    {
+      "name": "ziadlive",
+      "region": "AF",
+      "device": "Unknown"
     }
   ],
   "Emerald": {
