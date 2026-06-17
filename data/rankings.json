@@ -451,7 +451,8 @@
       "Game1K"
     ],
     "LT1": [
-      "system1117"
+      "system1117",
+      "jogg"
     ],
     "RLT1": [
       "DivyamGamerYT",
@@ -476,7 +477,6 @@
       "SHADE",
       "Terminator",
       "Possessed_YT",
-      "jogg",
       "Normal",
       "Bloody_Hell",
       "MENDOR"
@@ -707,8 +707,7 @@
       "Kaeye"
     ],
     "RHT3": [
-      "skibidi1234",
-      "Solace"
+      "skibidi1234"
     ],
     "HT4": [
       "Husky_Multicraft"
@@ -718,6 +717,9 @@
     ],
     "LT5": [
       "Atomix"
+    ],
+    "RRHT3": [
+      "Solace"
     ]
   },
   "Void": {
