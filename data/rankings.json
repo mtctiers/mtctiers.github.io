@@ -281,11 +281,6 @@
       "device": "MB"
     },
     {
-      "name": "NoT_HuMaN",
-      "region": "AS",
-      "device": "MK"
-    },
-    {
       "name": "Ron_",
       "region": "Unknown",
       "device": "MK"
@@ -350,14 +345,14 @@
       "RayValidd",
       "Redistdrext",
       "ziadlive",
-      "LastChance"
+      "LastChance",
+      "Vorthexis"
     ],
     "RHT2": [
       "DivyamGamerYT"
     ],
     "RLT2": [
-      "LifoMC",
-      "Vorthexis"
+      "LifoMC"
     ],
     "HT3": [
       "CJSHORT",
@@ -367,11 +362,13 @@
       "MENDOR"
     ],
     "LT3": [
-      "vort3x",
-      "Solace"
+      "vort3x"
     ],
     "RHT3": [
       "Bloody_Hell"
+    ],
+    "RLT3": [
+      "Solace"
     ],
     "HT4": [
       "FarXD",
@@ -422,14 +419,14 @@
       "revan"
     ],
     "LT3": [
-      "Husky_Multicraft",
-      "Solace"
+      "Husky_Multicraft"
     ],
     "RHT3": [
       "DivyamGamerYT"
     ],
     "RLT3": [
-      "Bloody_Hell"
+      "Bloody_Hell",
+      "Solace"
     ],
     "HT4": [
       "CosmicallyXVII",
@@ -462,11 +459,11 @@
       "Ayush_maan234",
       "sample",
       "vort3x",
-      "NoT_HuMaN",
       "TERRORRR",
       "x9jm",
       "MrDaRkYT",
-      "Oden_Sama"
+      "Oden_Sama",
+      "Dream_MultiCraft"
     ],
     "LT2": [
       "M0rt7uxMC",
@@ -489,16 +486,17 @@
       "Jerryisking",
       "Husky_Multicraft",
       "CJSHORT",
-      "Solace",
       "RayValidd",
       "Rangee"
     ],
     "LT3": [
       "Herobrine",
       "Kaeye",
-      "Dream_MultiCraft",
       "revan",
       "Redistdrext"
+    ],
+    "RHT3": [
+      "Solace"
     ],
     "HT4": [
       "shadow_master",
@@ -618,7 +616,9 @@
     ],
     "LT3": [
       "Kaeye",
-      "shadow_master",
+      "shadow_master"
+    ],
+    "RLT3": [
       "Solace"
     ],
     "HT4": [
@@ -691,14 +691,14 @@
     ],
     "HT3": [
       "revan",
-      "shadow_master",
-      "Solace"
+      "shadow_master"
     ],
     "LT3": [
       "Kaeye"
     ],
     "RHT3": [
-      "skibidi1234"
+      "skibidi1234",
+      "Solace"
     ],
     "HT4": [
       "Husky_Multicraft"
@@ -713,6 +713,9 @@
   "Void": {
     "HT2": [
       "x9jm"
+    ],
+    "LT2": [
+      "LastChance"
     ],
     "RLT2": [
       "TimmyLoal"
