@@ -357,7 +357,6 @@
     "HT3": [
       "CJSHORT",
       "CosmicallyXVII",
-      "Mane",
       "Husky_Multicraft",
       "MENDOR"
     ],
@@ -365,7 +364,8 @@
       "vort3x"
     ],
     "RHT3": [
-      "Bloody_Hell"
+      "Bloody_Hell",
+      "Mane"
     ],
     "RLT3": [
       "Solace"
@@ -512,11 +512,13 @@
       "xenoXD"
     ],
     "LT4": [
-      "Mane",
       "chi-na",
       "-R3ZN-",
       "Ron_",
       "sazoryy"
+    ],
+    "RLT4": [
+      "Mane"
     ],
     "HT5": [
       "FarXD",
