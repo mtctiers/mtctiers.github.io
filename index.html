@@ -75,14 +75,14 @@
         <h2 style="font-family:'MultiCraftFont'; color:var(--purple); margin-top:0;">INFORMATION</h2>
         <div style="text-align:left;font-size:0.85rem;line-height:1.6;">
 
-            <!-- Live server card -->
-            <div id="serverCard" style="background:#0a0a10;border:1px solid rgba(0,238,255,0.15);border-radius:10px;padding:14px 16px;margin-bottom:18px;">
+            <!-- Live server cards -->
+            <div id="serverCard-JC5A69FB" class="server-card" data-code="JC5A69FB" style="background:#0a0a10;border:1px solid rgba(0,238,255,0.15);border-radius:10px;padding:14px 16px;margin-bottom:12px;">
                 <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-                    <span id="srvName" style="font-family:'MultiCraftFont';font-size:0.85rem;color:#fff;letter-spacing:1px;">LOADING...</span>
+                    <span class="srvName" style="font-family:'MultiCraftFont';font-size:0.85rem;color:#fff;letter-spacing:1px;">LOADING...</span>
                 </div>
                 <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;">
                     <div style="text-align:center;">
-                        <div id="srvPlayers" style="font-family:'MultiCraftFont';font-size:1.4rem;color:var(--theme);">-</div>
+                        <div class="srvPlayers" style="font-family:'MultiCraftFont';font-size:1.4rem;color:var(--theme);">-</div>
                         <div style="font-family:'MultiCraftFont';font-size:0.4rem;color:#444;letter-spacing:2px;margin-top:2px;">PLAYERS</div>
                     </div>
                     <div style="flex:1;height:1px;background:rgba(0,238,255,0.08);"></div>
@@ -91,7 +91,31 @@
                         <div style="font-family:'MultiCraftFont';font-size:0.4rem;color:#444;letter-spacing:2px;margin-top:2px;">SERVER CODE</div>
                     </div>
                 </div>
-                <div id="srvDesc" style="font-family:'MultiCraftFont';font-size:0.5rem;color:#555;line-height:1.8;min-height:18px;letter-spacing:0.3px;"></div>
+                <div class="srvDesc" style="font-family:'MultiCraftFont';font-size:0.5rem;color:#555;line-height:1.8;min-height:18px;letter-spacing:0.3px;margin-bottom:10px;"></div>
+                <table class="srvTable" style="width:100%;border-collapse:collapse;display:none;">
+                    <tbody class="srvTableBody"></tbody>
+                </table>
+            </div>
+
+            <div id="serverCard-OPL5OBPM" class="server-card" data-code="OPL5OBPM" style="background:#0a0a10;border:1px solid rgba(0,238,255,0.15);border-radius:10px;padding:14px 16px;margin-bottom:18px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+                    <span class="srvName" style="font-family:'MultiCraftFont';font-size:0.85rem;color:#fff;letter-spacing:1px;">LOADING...</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;">
+                    <div style="text-align:center;">
+                        <div class="srvPlayers" style="font-family:'MultiCraftFont';font-size:1.4rem;color:var(--theme);">-</div>
+                        <div style="font-family:'MultiCraftFont';font-size:0.4rem;color:#444;letter-spacing:2px;margin-top:2px;">PLAYERS</div>
+                    </div>
+                    <div style="flex:1;height:1px;background:rgba(0,238,255,0.08);"></div>
+                    <div style="text-align:center;">
+                        <div style="font-family:'MultiCraftFont';font-size:0.75rem;color:var(--gold);letter-spacing:3px;">OPL5OBPM</div>
+                        <div style="font-family:'MultiCraftFont';font-size:0.4rem;color:#444;letter-spacing:2px;margin-top:2px;">SERVER CODE</div>
+                    </div>
+                </div>
+                <div class="srvDesc" style="font-family:'MultiCraftFont';font-size:0.5rem;color:#555;line-height:1.8;min-height:18px;letter-spacing:0.3px;margin-bottom:10px;"></div>
+                <table class="srvTable" style="width:100%;border-collapse:collapse;display:none;">
+                    <tbody class="srvTableBody"></tbody>
+                </table>
             </div>
 
             <p><b style="color:var(--purple)">DISCORD:</b> https://discord.gg/v3CgdV6hsT</p>
@@ -280,12 +304,16 @@ async function saveProfileEdits(){
             theme_border:      document.getElementById('peThemeBorder')?.value.trim()||"",
             theme_glow:        document.getElementById('peThemeGlow')?.value.trim()||"",
             theme_name_color:  document.getElementById('peThemeNameColor')?.value.trim()||"",
-            theme_name_style:  (()=>{ const g=document.getElementById('peThemeNameGlow')?.value.trim()||''; return g?`glow:${g}`:''; })(),
+            theme_name_style:  document.getElementById('_peNameStylePreset')?.value||'',
+            theme_name_glow:   document.getElementById('peThemeNameGlow')?.value.trim()||'',
+            custom_colors:     window._customColors||{},
+            profile_layout:    window._profileLayout||[],
         });
         if(AUTH) AUTH.profile=d.profile;
         const currentName=document.getElementById('pName')?.innerText.trim();
         if(currentName&&document.getElementById('profileModal').style.display!=='none'){
             clearProfileExtras();
+            applyRankTitleBadge(currentName);
             applyProfileTheme(d.profile);
             injectProfileExtras(currentName,AUTH.role,d.profile);
             injectEditPanel(currentName);
@@ -386,7 +414,7 @@ function parseCss(v){
     return v;
 }
 
-function applyNameStyle(el, color, style){
+function applyNameStyle(el, color, style, glowHex){
     el.style.color="";
     el.style.webkitTextFillColor="";
     el.style.webkitBackgroundClip="";
@@ -394,41 +422,70 @@ function applyNameStyle(el, color, style){
     el.style.backgroundImage="";
     el.style.backgroundSize="";
     el.style.textShadow="";
+    el.style.filter="";
     el.classList.remove('name-animated');
+
+    // glowHex may also be packed into style as "glow:#hex" for backwards compat
+    if(!glowHex && style&&style.startsWith("glow:")){
+        glowHex = style.slice(5);
+        style = "";
+    }
+
+    const applyGlow = ()=>{
+        if(!glowHex) return;
+        // Normalize 3-digit hex to 6-digit so alpha suffixes (e.g. "55") stay valid
+        let g = glowHex;
+        if(/^#[0-9a-fA-F]{3}$/.test(g)){
+            g = '#' + g.slice(1).split('').map(ch=>ch+ch).join('');
+        }
+        // textShadow works for plain-color text. For gradient/animated (transparent fill)
+        // use a drop-shadow filter so the glow still shows around the glyphs.
+        // Lower-opacity, smaller blur so the glow reads as a halo, not a fill —
+        // a strong 0-offset shadow at full opacity can visually look like the
+        // text itself turned that color.
+        if(el.style.webkitTextFillColor==='transparent'){
+            el.style.filter = `drop-shadow(0 0 4px ${g}99) drop-shadow(0 0 9px ${g}55)`;
+        } else {
+            const base = el.style.textShadow ? el.style.textShadow+',' : '';
+            el.style.textShadow = `${base}0 0 6px ${g}99,0 0 14px ${g}4d`;
+        }
+    };
 
     if(style==="animated"){
         el.classList.add('name-animated');
+        applyGlow();
         return;
     }
     if(style&&style.startsWith("gradient:")){
         const stops=style.slice(9).split(/[-,]/).filter(s=>s.startsWith('#'));
         if(stops.length>=2){
             el.style.backgroundImage=`linear-gradient(90deg,${stops.join(',')})`;
-            el.style.backgroundSize="100%";
+            el.style.backgroundSize="100% 100%";
             el.style.webkitBackgroundClip="text";
             el.style.backgroundClip="text";
             el.style.webkitTextFillColor="transparent";
+            applyGlow();
             return;
         }
-    }
-    if(style&&style.startsWith("glow:")){
-        const gc=style.slice(5);
-        el.style.color=color||gc;
-        el.style.textShadow=`0 0 10px ${gc},0 0 20px ${gc}88`;
-        return;
     }
     if(color){
         const parsed=parseCss(color);
         if(parsed.includes("gradient")){
-            el.style.backgroundImage=parsed;
-            el.style.backgroundSize="100%";
+            // Rebuild as a clean left-to-right gradient sized exactly to the
+            // text box, otherwise only the first color tends to show.
+            const stops=(color.match(/#[0-9a-fA-F]{3,8}/g)||[]);
+            el.style.backgroundImage = stops.length>=2 ? `linear-gradient(90deg,${stops.join(',')})` : parsed;
+            el.style.backgroundSize="100% 100%";
             el.style.webkitBackgroundClip="text";
             el.style.backgroundClip="text";
             el.style.webkitTextFillColor="transparent";
+            applyGlow();
+            return;
         }else{
             el.style.color=color;
         }
     }
+    applyGlow();
 }
 
 function applyProfileTheme(profile){
@@ -469,7 +526,7 @@ function applyProfileTheme(profile){
 
     modal.style.borderColor=border||"";
     modal.style.boxShadow=glow?`0 0 40px ${glow}55,0 0 80px ${glow}22`:"";
-    if(nameEl) applyNameStyle(nameEl, nameC, nameStyle);
+    if(nameEl) applyNameStyle(nameEl, nameC, nameStyle, profile.theme_name_glow||'');
 
     if(banner){
         let strip=document.querySelector('.profile-banner-strip');
@@ -501,6 +558,269 @@ function resetProfileTheme(){
 function toggleEditDropdown(toggle){
     toggle.classList.toggle('open');
     document.getElementById('editDropdownBody')?.classList.toggle('vis');
+}
+
+/* ── PROFILE LAYOUT DRAG & DROP ─────────────────────────────────
+   Sections: badges, name, meta, skin, points, kits, socials, duelHistory, description
+   Each section is a draggable block inside profile-left or profile-right.
+   Layout is saved as [{id, side}] array in profile_layout.
+*/
+const LAYOUT_SECTIONS = {
+    badges:      { label:'🏷 Rank & Badges'   },
+    name:        { label:'✏ Name',  noDelete:true },
+    meta:        { label:'🌍 Region & Device' },
+    pronouns:    { label:'💬 Pronouns'         },
+    description: { label:'📝 Status'            },
+    skin:        { label:'🎨 Skin'              },
+    points:      { label:'⭐ Points'            },
+    socials:     { label:'🔗 Socials'           },
+    rival:       { label:'⚡ Rival'             },
+    duelHistory: { label:'⚔ Duel History'      },
+    kits:        { label:'🎯 Kit Rankings', noDelete:true },
+};
+
+function getLayoutEl(id){
+    switch(id){
+        case 'badges':      return document.getElementById('pBadgeRow');
+        case 'name':        return document.getElementById('pName');
+        case 'meta':        return document.getElementById('pMeta');
+        case 'pronouns':    return document.querySelector('.profile-pronouns');
+        case 'description': return document.querySelector('.profile-description');
+        case 'skin':        return document.getElementById('pSkin');
+        case 'points':      return document.getElementById('pPoints');
+        case 'socials':     return document.querySelector('.custom-social-row');
+        case 'rival':       return document.querySelector('.rival-badge');
+        case 'duelHistory': return document.querySelector('.profile-duel-section');
+        case 'kits':        {
+            // wrap right column content in a moveable div
+            const r=document.querySelector('.profile-right');
+            return r?._freeEl || r;
+        }
+        default: return null;
+    }
+}
+
+// ── Pencil button ─────────────────────────────────────────────────
+function injectLayoutEditor(profileName){
+    document.querySelector('.profile-edit-mode-btn')?.remove();
+    if(!AUTH||AUTH.name!==profileName) return;
+    const modal=document.querySelector('.profile-modal-content');
+    if(!modal) return;
+    const btn=document.createElement('button');
+    btn.className='profile-edit-mode-btn';
+    btn.title='Edit Layout';
+    btn.innerHTML='✏';
+    btn.style.cssText='position:absolute;top:46px;right:14px;background:#111;border:1px solid #333;color:#555;border-radius:50%;width:28px;height:28px;cursor:pointer;z-index:30;font-size:0.85rem;display:flex;align-items:center;justify-content:center;transition:border-color .2s,color .2s;';
+    btn.onmouseenter=()=>{if(!window._editMode){btn.style.borderColor='var(--purple)';btn.style.color='#fff';}};
+    btn.onmouseleave=()=>{if(!window._editMode){btn.style.borderColor='#333';btn.style.color='#555';}};
+    btn.onclick=()=>window._editMode?exitEditMode(profileName,true):enterEditMode(profileName);
+    modal.appendChild(btn);
+}
+
+// ── Enter edit mode — Google Slides style free drag ───────────────
+function enterEditMode(profileName){
+    if(window._editMode) return;
+    const modal=document.querySelector('.profile-modal-content');
+    if(!modal) return;
+    window._editMode=true;
+    modal.classList.add('edit-mode-active');
+
+    // Snapshot modal rect for coordinate reference
+    const mr=modal.getBoundingClientRect();
+    window._editModalRect=mr;
+
+    const pencilBtn=modal.querySelector('.profile-edit-mode-btn');
+    if(pencilBtn){pencilBtn.innerHTML='✓';pencilBtn.style.borderColor='#00ff88';pencilBtn.style.color='#00ff88';}
+
+    // Load saved positions
+    const savedPositions = (AUTH?.profile?.profile_layout)||[];
+    const posMap={};
+    savedPositions.forEach(p=>{ if(p.x!=null) posMap[p.id]={x:p.x,y:p.y,hidden:p.hidden}; });
+
+    // Make modal position:relative so absolute children work inside it
+    modal.style.position='relative';
+    modal.style.overflow='visible';
+
+    // Wrap every section into a free-floating card
+    Object.entries(LAYOUT_SECTIONS).forEach(([id,def])=>{
+        const el=getLayoutEl(id);
+        if(!el||el.closest('.free-card')) return;
+
+        // Create card
+        const card=document.createElement('div');
+        card.className='free-card';
+        card.dataset.sectionId=id;
+
+        // Position: use saved, or compute from current layout
+        const elRect=el.getBoundingClientRect();
+        const savedPos=posMap[id];
+        let x = savedPos ? savedPos.x : (elRect.left - mr.left);
+        let y = savedPos ? savedPos.y : (elRect.top  - mr.top);
+        card.style.cssText=`position:absolute;left:${x}px;top:${y}px;min-width:40px;z-index:20;`;
+
+        if(savedPos?.hidden) card.style.display='none';
+
+        // Header bar (drag handle)
+        const header=document.createElement('div');
+        header.className='free-card-header';
+        header.innerHTML=`<span class="free-card-label">${def.label}</span>`;
+        if(!def.noDelete){
+            const x2=document.createElement('button');
+            x2.className='free-card-close';
+            x2.innerHTML='✕';
+            x2.onclick=()=>{ card.style.display='none'; card.dataset.hidden='1'; refreshEditToolbar(); };
+            header.appendChild(x2);
+        }
+
+        // Move el into card
+        el.parentNode.insertBefore(card, el);
+        card.appendChild(header);
+        card.appendChild(el);
+        modal.appendChild(card); // move to modal as direct child for absolute positioning
+
+        // Drag logic
+        let startX,startY,startLeft,startTop;
+        header.addEventListener('mousedown', e=>{
+            if(e.target===header.querySelector('.free-card-close')) return;
+            e.preventDefault();
+            startX=e.clientX; startY=e.clientY;
+            startLeft=parseInt(card.style.left)||0;
+            startTop =parseInt(card.style.top) ||0;
+            card.style.zIndex=100;
+            const onMove=ev=>{
+                card.style.left=(startLeft+(ev.clientX-startX))+'px';
+                card.style.top =(startTop +(ev.clientY-startY))+'px';
+            };
+            const onUp=()=>{
+                card.style.zIndex=20;
+                document.removeEventListener('mousemove',onMove);
+                document.removeEventListener('mouseup',onUp);
+            };
+            document.addEventListener('mousemove',onMove);
+            document.addEventListener('mouseup',onUp);
+        });
+    });
+
+    buildEditToolbar(profileName);
+}
+
+function buildEditToolbar(profileName){
+    document.getElementById('editToolbar')?.remove();
+    const modal=document.querySelector('.profile-modal-content');
+    if(!modal) return;
+    const bar=document.createElement('div');
+    bar.id='editToolbar'; bar.className='edit-toolbar';
+    bar.innerHTML=`
+        <div class="edit-toolbar-row">
+            <span class="edit-toolbar-label">✏ DRAG CARDS FREELY · ✕ to hide · + to restore</span>
+            <button class="edit-toolbar-btn reset" id="editResetBtn">RESET</button>
+            <button class="edit-toolbar-btn done"  id="editDoneBtn">SAVE &amp; EXIT</button>
+        </div>
+        <div id="editToolbox" class="edit-toolbox"></div>`;
+    modal.appendChild(bar);
+    document.getElementById('editResetBtn').onclick=()=>resetLayoutToDefault(profileName);
+    document.getElementById('editDoneBtn').onclick =()=>exitEditMode(profileName,true);
+    refreshEditToolbar();
+}
+
+function refreshEditToolbar(){
+    const box=document.getElementById('editToolbox'); if(!box) return;
+    box.innerHTML='';
+    document.querySelectorAll('.free-card').forEach(card=>{
+        const id=card.dataset.sectionId;
+        const def=LAYOUT_SECTIONS[id]; if(!def||def.noDelete) return;
+        if(card.style.display==='none'||card.dataset.hidden==='1'){
+            const chip=document.createElement('button');
+            chip.className='edit-chip';
+            chip.textContent='+ '+def.label;
+            chip.onclick=()=>{
+                card.style.display='';
+                card.dataset.hidden='';
+                // Place near center of modal
+                const mr=document.querySelector('.profile-modal-content').getBoundingClientRect();
+                card.style.left=Math.max(10,mr.width/2-80)+'px';
+                card.style.top =Math.max(10,mr.height/2-40)+'px';
+                refreshEditToolbar();
+            };
+            box.appendChild(chip);
+        }
+    });
+    if(!box.children.length){
+        const e=document.createElement('span'); e.className='edit-chip empty';
+        e.textContent='All sections visible'; box.appendChild(e);
+    }
+}
+
+function resetLayoutToDefault(profileName){
+    if(!confirm('Reset to default positions?')) return;
+    document.querySelectorAll('.free-card').forEach(card=>{
+        card.style.display='';
+        card.dataset.hidden='';
+    });
+    exitEditMode(profileName, false);
+    // Re-enter with blank layout so positions are recalculated from DOM
+    if(AUTH?.profile) AUTH.profile.profile_layout=[];
+    setTimeout(()=>enterEditMode(profileName),50);
+}
+
+async function exitEditMode(profileName, save){
+    const modal=document.querySelector('.profile-modal-content');
+    if(!modal) return;
+
+    // Build layout from card positions
+    const layout=[];
+    document.querySelectorAll('.free-card').forEach(card=>{
+        layout.push({
+            id:     card.dataset.sectionId,
+            x:      parseInt(card.style.left)||0,
+            y:      parseInt(card.style.top) ||0,
+            hidden: card.dataset.hidden==='1' || card.style.display==='none',
+        });
+    });
+
+    // Move elements back to their natural parents, remove cards
+    document.querySelectorAll('.free-card').forEach(card=>{
+        const id=card.dataset.sectionId;
+        const el=card.querySelector(':scope>*:not(.free-card-header)');
+        if(el) card.parentNode.insertBefore(el, card);
+        card.remove();
+    });
+
+    document.getElementById('editToolbar')?.remove();
+    modal.classList.remove('edit-mode-active');
+    modal.style.overflow='';
+    const btn=modal.querySelector('.profile-edit-mode-btn');
+    if(btn){btn.innerHTML='✏';btn.style.borderColor='#333';btn.style.color='#555';}
+    window._editMode=false;
+
+    if(save){
+        try{
+            const d=await authCall("PATCH","/profile",{profile_layout:layout});
+            if(AUTH) AUTH.profile=d.profile;
+        }catch(e){ console.warn("Layout save failed:",e); }
+    }
+
+    // Apply saved positions in normal view
+    applyProfileLayout(layout);
+}
+
+function applyProfileLayout(layout){
+    if(!layout||!layout.length) return;
+    const modal=document.querySelector('.profile-modal-content');
+    if(!modal) return;
+    layout.forEach(item=>{
+        if(!item.x&&!item.y&&!item.hidden) return; // no saved position, leave as-is
+        const el=getLayoutEl(item.id);
+        if(!el) return;
+        if(item.hidden){ el.style.display='none'; return; }
+        el.style.display='';
+        // In normal (non-edit) view, just position relatively
+        if(item.x||item.y){
+            el.style.position='relative';
+            el.style.top =(item.y||0)+'px';
+            el.style.left=(item.x||0)+'px';
+        }
+    });
 }
 
 function injectEditPanel(profileName){
@@ -570,10 +890,14 @@ function injectEditPanel(profileName){
                 <input class="pe-input" id="peThemeNameColor" placeholder="#ffffff or #ff00ff-#00eeff" maxlength="100" value="${esc(p.theme_name_color||'')}"></div></div>
             <div><label class="pe-field-label">NAME GLOW <span>(#hex color, leave blank for none)</span></label>
                 <div class="theme-row"><div class="theme-swatch" id="swatchNameGlow"></div>
-                <input class="pe-input" id="peThemeNameGlow" placeholder="#00eeff" maxlength="30" value="${esc(nsv.startsWith('glow:')?nsv.slice(5):'')}" oninput="syncNameGlowSwatch()"></div></div>
+                <input class="pe-input" id="peThemeNameGlow" placeholder="#00eeff" maxlength="30" value="${esc(p.theme_name_glow||'')}" oninput="syncNameGlowSwatch()"></div></div>
+            <input type="hidden" id="_peNameStylePreset" value="${esc(nsv.startsWith('glow:')?'':nsv)}">
             <div><label class="pe-field-label">BANNER <span>(#a-#b)</span></label>
                 <div class="banner-bar" id="peBannerPreview"></div>
                 <input class="pe-input" id="peBanner" placeholder="#00eeff-#4122fd-#ff00ff" maxlength="200" value="${esc(toShorthand(p.banner||''))}"></div>
+            <div class="pe-group-label">CUSTOM COLORS</div>
+            <div style="font-family:'MultiCraftFont',monospace;font-size:0.38rem;color:#333;margin-bottom:6px;letter-spacing:1px;">Leave blank to use defaults. Accepts #hex.</div>
+            <div id="colorPickersContainer"></div>
             <button class="pe-save" id="peSave" onclick="saveProfileEdits()">SAVE CHANGES</button>
             <div class="pe-msg" id="peMsg"></div>
         </div>`;
@@ -590,7 +914,7 @@ function injectEditPanel(profileName){
         }},
         {id:'peThemeBorder',    sw:'swatchBorder', fn:v=>{ const m=document.querySelector('.profile-modal-content'); if(m) m.style.borderColor=v||""; }},
         {id:'peThemeGlow',      sw:'swatchGlow',   fn:v=>{ const m=document.querySelector('.profile-modal-content'); if(m) m.style.boxShadow=v?`0 0 40px ${v}55,0 0 80px ${v}22`:""; }},
-        {id:'peThemeNameColor', sw:'swatchName',   fn:v=>{ const n=document.getElementById('pName'); const g=document.getElementById('peThemeNameGlow')?.value.trim()||''; if(n) applyNameStyle(n,v,g?`glow:${g}`:''); }},
+        {id:'peThemeNameColor', sw:'swatchName',   fn:v=>{ const n=document.getElementById('pName'); const st=document.getElementById('_peNameStylePreset')?.value||''; const g=document.getElementById('peThemeNameGlow')?.value.trim()||''; if(n) applyNameStyle(n,v,st,g); }},
     ];
     liveTheme.forEach(({id,sw,fn})=>{
         const inp=document.getElementById(id); const swatch=document.getElementById(sw);
@@ -604,8 +928,9 @@ function injectEditPanel(profileName){
         const sw=document.getElementById('swatchNameGlow');
         if(sw) sw.style.background=gv||'#111';
         const c2=document.getElementById('peThemeNameColor')?.value.trim()||'';
+        const st=document.getElementById('_peNameStylePreset')?.value||'';
         const n=document.getElementById('pName');
-        if(n) applyNameStyle(n, c2, gv?`glow:${gv}`:'');
+        if(n) applyNameStyle(n, c2, st, gv);
     };
     document.getElementById('peThemeNameGlow')?.addEventListener('input', window.syncNameGlowSwatch);
     // Banner preview
@@ -621,6 +946,8 @@ function injectEditPanel(profileName){
     liveTheme.forEach(({id,sw,fn})=>{ const v=document.getElementById(id)?.value.trim(); const s=document.getElementById(sw); if(s) s.style.background=parseCss(v)||"#111"; if(v) fn(v); });
     // Init glow swatch
     if(window.syncNameGlowSwatch) window.syncNameGlowSwatch();
+    // Build color pickers
+    buildColorPickers(p.custom_colors||{});
 }
 
 function pickBgImage(){
@@ -663,9 +990,24 @@ function applyPreset(name,btn){
     const p=THEME_PRESETS[name]; if(!p) return;
     const toSh=v=>{ if(!v) return ''; const m=v.match(/linear-gradient\([^,]+,(#[0-9a-fA-F]{3,8}(?:,#[0-9a-fA-F]{3,8})*)\)/); return m?m[1].replace(/,/g,'-'):v; };
     const set=(id,val)=>{ const el=document.getElementById(id); if(el){ el.value=toSh(val); el.dispatchEvent(new Event('input')); } };
+
+    // Set the hidden preset-style field FIRST so that when peThemeNameColor's
+    // 'input' handler fires below, it reads the NEW style — not the previous
+    // preset's leftover value (this was the cause of "sometimes won't change").
+    const presetInput=document.getElementById('_peNameStylePreset');
+    if(presetInput) presetInput.value = p.nameStyle||'';
+
     set('peThemeBg',p.bg); set('peThemeBorder',p.border); set('peThemeGlow',p.glow); set('peThemeNameColor',p.name);
-    const ge=document.getElementById('peThemeNameGlow');
-    if(ge){ ge.value=p.nameStyle&&p.nameStyle.startsWith('glow:')?p.nameStyle.slice(5):''; ge.dispatchEvent(new Event('input')); }
+
+    // Final guaranteed re-sync combining color + style + glow together.
+    // Direct call (not just the swatch sync) ensures the preview ALWAYS
+    // updates even if an 'input' listener above didn't fire in time.
+    if(window.syncNameGlowSwatch) window.syncNameGlowSwatch();
+    const _n=document.getElementById('pName');
+    const _c=document.getElementById('peThemeNameColor')?.value.trim()||'';
+    const _g=document.getElementById('peThemeNameGlow')?.value.trim()||'';
+    const _s=document.getElementById('_peNameStylePreset')?.value||'';
+    if(_n) applyNameStyle(_n,_c,_s,_g);
 }
 
 /* ══════════════════════════════════════════════════════
@@ -675,7 +1017,10 @@ function clearProfileExtras(){
     document.querySelectorAll('.lfm-badge,.rival-badge,.profile-role-badge,.profile-pronouns,.profile-description,.custom-social-row,.profile-duel-section,.wl-badge,.wl-row').forEach(el=>el.remove());
     document.querySelector('.profile-banner-strip')?.remove();
     document.getElementById('profileEditPanel')?.remove();
+    document.getElementById('profileLayoutEditor')?.remove();
+    document.querySelector('.profile-toolbox')?.remove();
     resetProfileTheme();
+    resetCustomColors();
 }
 function injectProfileExtras(name,role,profile){
     if(!profile) return;
@@ -690,7 +1035,9 @@ function injectProfileExtras(name,role,profile){
     // LFM badge removed from public view to keep badge row clean
     if(profile.rival&&badgeRow){ const b=document.createElement('div'); b.className='rival-badge'; b.textContent=`⚡ RIVAL: ${profile.rival}`; badgeRow.appendChild(b); }
     applyProfileTheme(profile);
-    // W/L ratio — goes in its own row below badges, not inside badge row
+    // Apply custom colors
+    if(profile.custom_colors) applyCustomColors(profile.custom_colors);
+    // W/L ratio
     fetchWLRatio(name);
 
     // Socials — show if has icon OR url (label optional)
@@ -719,6 +1066,163 @@ function injectProfileExtras(name,role,profile){
         if(pts) pts.parentNode.insertBefore(row,pts);
     }
 }
+// Profile cache for rankings hover
+const _profileCache = {};
+async function getProfileCached(name){
+    if(_profileCache[name]) return _profileCache[name];
+    try{
+        const d = await authCall("GET", `/profile/${encodeURIComponent(name)}`);
+        _profileCache[name] = d;
+        return d;
+    }catch(_){ return null; }
+}
+
+function attachRowHover(row, name){
+    let _hoverTimeout = null;
+    row.addEventListener('mouseenter', ()=>{
+        _hoverTimeout = setTimeout(async()=>{
+            const d = await getProfileCached(name);
+            if(!d||!d.profile) return;
+            const p = d.profile;
+            // Apply bg
+            if(p.theme_bg_image){
+                row.style.backgroundImage = `url(${p.theme_bg_image})`;
+                row.style.backgroundSize = 'cover';
+                row.style.backgroundPosition = 'center';
+            } else if(p.theme_bg){
+                row.style.background = p.theme_bg;
+            }
+            // Apply border
+            if(p.theme_border) row.style.borderColor = p.theme_border;
+            if(p.theme_glow) row.style.boxShadow = `0 0 18px ${p.theme_glow}55`;
+            // Apply name color/effect/glow to the .ol-name inside this row —
+            // mirrors applyProfileTheme exactly so hover matches the profile page
+            const nameEl = row.querySelector('.ol-name');
+            if(nameEl&&(p.theme_name_color||p.theme_name_style||p.theme_name_glow)){
+                applyNameStyle(nameEl, p.theme_name_color||'', p.theme_name_style||'', p.theme_name_glow||'');
+            }
+            // Custom colors - kit accent on kit icons, retired uses retiredTier
+            if(p.custom_colors){
+                const cc = p.custom_colors;
+                row.querySelectorAll('.ol-kit-icon').forEach(icon=>{
+                    const label = icon.querySelector('.ol-kit-icon-label');
+                    if(!label||!label.textContent) return;
+                    // Retired icons are drawn with border-color:#444 (rgb(68,68,68))
+                    const bc = icon.style.borderColor;
+                    const isRetired = bc==='#444'||bc==='rgb(68, 68, 68)';
+                    if(isRetired && cc.retiredTier){
+                        icon.style.borderColor=cc.retiredTier;
+                        label.style.color=cc.retiredTier;
+                        return;
+                    }
+                    // find kit name from img src
+                    const img = icon.querySelector('img');
+                    const src = img?.src||'';
+                    const kitName = Object.keys(KIT_MAP).find(k=>k!=='Overall'&&src.includes(k.toLowerCase().replace(/ /g,'_').replace(/ /g,'_')));
+                    const kitId = kitName?'kit_'+kitName.replace(/ /g,'_'):'';
+                    const col = (kitId&&cc[kitId])||cc.kitAccent;
+                    if(col){ icon.style.borderColor=col; label.style.color=col; }
+                });
+                // name color override
+                if(cc.nameGradientA&&cc.nameGradientB&&nameEl){
+                    nameEl.style.backgroundImage=`linear-gradient(90deg,${cc.nameGradientA},${cc.nameGradientB})`;
+                    nameEl.style.webkitBackgroundClip='text';
+                    nameEl.style.backgroundClip='text';
+                    nameEl.style.webkitTextFillColor='transparent';
+                }
+            }
+        }, 80); // small delay to avoid fetch on fast scroll
+    });
+    row.addEventListener('mouseleave', ()=>{
+        if(_hoverTimeout) clearTimeout(_hoverTimeout);
+        // Reset row styles
+        row.style.background='';
+        row.style.backgroundImage='';
+        row.style.borderColor='';
+        row.style.boxShadow='';
+        const nameEl = row.querySelector('.ol-name');
+        if(nameEl){
+            nameEl.style.backgroundImage='';
+            nameEl.style.webkitBackgroundClip='';
+            nameEl.style.backgroundClip='';
+            nameEl.style.webkitTextFillColor='';
+            nameEl.style.color='';
+            nameEl.style.textShadow='';
+            nameEl.style.filter='';
+            nameEl.classList.remove('name-animated');
+        }
+    });
+}
+
+// Tier ranking for peak-tier comparison (lower index = better)
+const TIER_RANK_ORDER = ['HT1','LT1','HT2','LT2','HT3','LT3','HT4','LT4','HT5','LT5'];
+function tierRank(t){
+    if(!t) return 999;
+    const base = t.startsWith('R') ? t.slice(1) : t;
+    const idx = TIER_RANK_ORDER.indexOf(base);
+    return idx===-1 ? 999 : idx;
+}
+
+// Compute each kit's PEAK (best-ever) tier from full duel history
+async function computePeakTiers(playerName){
+    const peaks={};
+    try{
+        const base=AUTH_API.replace('/api','');
+        let allDuels=[], offset=0, total=null;
+        while(total===null||allDuels.length<total){
+            const res=await fetch(`${base}/api/duels?player=${encodeURIComponent(playerName)}&limit=200&offset=${offset}`);
+            const data=await res.json();
+            const batch=data.duels||[];
+            allDuels=allDuels.concat(batch);
+            if(total===null) total=data.total||batch.length;
+            if(batch.length<200) break;
+            offset+=200;
+        }
+        allDuels.forEach(d=>{
+            if(d.player1!==playerName) return;
+            if(d.outcome!=='promoted') return;
+            if(!d.kit||d.kit==='Unknown') return;
+            if(!d.tier||d.tier==='Unknown') return;
+            const clean = d.tier.replace(/^R/,'');
+            const r = tierRank(clean);
+            if(r===999) return;
+            if(peaks[d.kit]===undefined || r < tierRank(peaks[d.kit])) peaks[d.kit]=clean;
+        });
+    }catch(_){}
+    return peaks;
+}
+
+// Inject "PEAK: X" into each kit-popup (only visible on hover via CSS)
+async function applyPeakTiers(playerName){
+    const peaks = await computePeakTiers(playerName);
+    if(!Object.keys(peaks).length) return;
+    const modal=document.getElementById('profileModal');
+    if(!modal||modal.dataset.openPlayer!==playerName) return;
+
+    document.querySelectorAll('#pTiers .p-kit-item').forEach(item=>{
+        const popup = item.querySelector('.kit-popup');
+        if(!popup) return;
+        const spans = popup.querySelectorAll('span');
+        const currentSpan = spans[0];
+        const kitSpan     = spans[1];
+        if(!currentSpan||!kitSpan) return;
+        const kitName = kitSpan.textContent.trim();
+        const peak = peaks[kitName];
+        if(!peak) return;
+
+        const currentText = currentSpan.textContent.replace('Retired ','').trim();
+        const isUnranked  = currentText==='UNRANKED';
+        if(isUnranked || tierRank(peak) < tierRank(currentText)){
+            popup.querySelector('.kit-peak-line')?.remove();
+            const peakLine=document.createElement('div');
+            peakLine.className='kit-peak-line';
+            peakLine.style.cssText='margin-top:4px;padding-top:4px;border-top:1px solid rgba(255,215,0,0.15);color:var(--gold);font-size:0.5rem;';
+            peakLine.textContent=`PEAK: ${peak}`;
+            popup.appendChild(peakLine);
+        }
+    });
+}
+
 async function fetchWLRatio(playerName){
     try{
         const base=AUTH_API.replace('/api','');
@@ -748,17 +1252,122 @@ async function fetchWLRatio(playerName){
         // Insert as own row below pBadgeRow
         const badgeRow=document.getElementById('pBadgeRow');
         if(!badgeRow) return;
-        const row=document.createElement('div');
-        row.className='wl-row';
-        row.style.cssText='display:flex;align-items:center;gap:6px;margin-bottom:8px;margin-top:-4px;';
         const b=document.createElement('div');
         b.className='wl-badge';
         b.dataset.player=playerName;
         b.style.cssText='font-family:"MultiCraftFont",monospace;font-size:0.42rem;border:1px solid #222;border-radius:20px;padding:2px 8px;letter-spacing:1px;background:rgba(255,255,255,0.04);white-space:nowrap;';
         b.innerHTML=`<span style="color:#00ff88;">${wins}W</span><span style="color:#333;margin:0 3px;">/</span><span style="color:#ff4444;">${losses}L</span>`;
-        row.appendChild(b);
-        badgeRow.insertAdjacentElement('afterend', row);
+        badgeRow.appendChild(b);
     }catch(_){}
+}
+
+// ── Custom color definitions ──────────────────────────────────────
+const COLOR_SLOTS = [
+    // id, label, where it applies
+    {id:'rankBadge',      label:'RANK BADGE'},
+    {id:'titleBadge',     label:'TITLE BADGE'},
+    {id:'roleBadge',      label:'ROLE BADGE'},
+    {id:'rivalBadge',     label:'RIVAL BADGE'},
+    {id:'wlBadge',        label:'W/L BADGE'},
+    {id:'nameGradientA',  label:'NAME GRADIENT START'},
+    {id:'nameGradientB',  label:'NAME GRADIENT END'},
+    {id:'pts',            label:'POINTS NUMBER'},
+    {id:'kitAccent',      label:'ALL KIT CIRCLES (accent)'},
+    {id:'retiredTier',    label:'RETIRED TIER COLOR'},
+    // Per-kit overrides
+    ...Object.keys(KIT_MAP).filter(k=>k!=='Overall').map(k=>({id:'kit_'+k.replace(/ /g,'_'), label:k.toUpperCase()+' CIRCLE'})),
+];
+
+function buildColorPickers(colors){
+    window._customColors = Object.assign({}, colors);
+    const container = document.getElementById('colorPickersContainer');
+    if(!container) return;
+    container.innerHTML='';
+    COLOR_SLOTS.forEach(slot=>{
+        const row=document.createElement('div');
+        row.style.cssText='display:flex;align-items:center;gap:7px;margin-bottom:5px;';
+        const swatch=document.createElement('div');
+        swatch.style.cssText='width:18px;height:18px;border-radius:3px;border:1px solid #222;flex-shrink:0;';
+        const val=colors[slot.id]||'';
+        swatch.style.background=val||'#111';
+        const inp=document.createElement('input');
+        inp.className='pe-input';
+        inp.style.cssText='flex:1;padding:5px 8px;font-size:0.55rem;';
+        inp.placeholder=slot.label+' (#hex)';
+        inp.maxLength=30;
+        inp.value=val;
+        inp.addEventListener('input',()=>{
+            const v=inp.value.trim();
+            swatch.style.background=v||'#111';
+            if(v) window._customColors[slot.id]=v;
+            else delete window._customColors[slot.id];
+            // Live preview on open profile
+            applyCustomColors(window._customColors);
+        });
+        row.appendChild(swatch);
+        row.appendChild(inp);
+        container.appendChild(row);
+    });
+}
+
+function applyCustomColors(colors){
+    if(!colors) return;
+    const cc=colors;
+    // Rank badge
+    const rank=document.getElementById('pRank');
+    if(rank&&cc.rankBadge){ rank.style.color=cc.rankBadge; rank.style.borderColor=cc.rankBadge+'88'; rank.style.background=cc.rankBadge+'18'; }
+    // Title badge
+    const title=document.getElementById('pTitleBadge');
+    if(title&&cc.titleBadge){ title.style.color=cc.titleBadge; title.style.borderColor=cc.titleBadge; title.style.background=cc.titleBadge+'18'; }
+    // Role badge
+    document.querySelectorAll('.profile-role-badge').forEach(b=>{ if(cc.roleBadge){ b.style.color=cc.roleBadge; b.style.borderColor=cc.roleBadge; b.style.background=cc.roleBadge+'18'; } });
+    // Rival badge
+    document.querySelectorAll('.rival-badge').forEach(b=>{ if(cc.rivalBadge){ b.style.color=cc.rivalBadge; b.style.borderColor=cc.rivalBadge; b.style.background=cc.rivalBadge+'18'; } });
+    // W/L badge
+    document.querySelectorAll('.wl-badge').forEach(b=>{ if(cc.wlBadge){ b.style.borderColor=cc.wlBadge+'44'; } });
+    // Points
+    const pts=document.getElementById('pPoints');
+    if(pts&&cc.pts) pts.style.color=cc.pts;
+    // Kit circles — per-kit overrides take priority over accent, retired uses retiredTier
+    document.querySelectorAll('.p-kit-item').forEach(item=>{
+        const tierLabel=item.querySelector('.p-kit-tier-label');
+        const circle=item.querySelector('.p-kit-circle');
+        if(!tierLabel||!circle) return;
+        // Get kit name + current tier text from popup
+        const spans=item.querySelectorAll('.kit-popup span');
+        const currentSpan=spans[0];
+        const kitSpan=spans[1];
+        const kitName=kitSpan?kitSpan.textContent:'';
+        const isRetired = currentSpan && currentSpan.textContent.startsWith('Retired');
+        const kitId='kit_'+kitName.replace(/ /g,'_');
+
+        if(isRetired && cc.retiredTier){
+            circle.style.borderColor=cc.retiredTier;
+            tierLabel.style.color=cc.retiredTier;
+            if(currentSpan) currentSpan.style.color=cc.retiredTier;
+            if(item.querySelector('.kit-popup')) item.querySelector('.kit-popup').style.borderColor=cc.retiredTier;
+            return;
+        }
+
+        const col=cc[kitId]||cc.kitAccent;
+        if(col&&circle.style.opacity!=='0.3'){
+            circle.style.borderColor=col;
+            tierLabel.style.color=col;
+        }
+    });
+}
+
+function resetCustomColors(){
+    // pRank/pTitleBadge are NOT reset here — applyRankTitleBadge() always
+    // re-sets them to the correct rank-based colors right after this runs,
+    // then applyCustomColors() layers any custom override on top.
+    document.querySelectorAll('.profile-role-badge,.rival-badge,.wl-badge').forEach(b=>{ b.style.color=''; b.style.borderColor=''; b.style.background=''; });
+    const pts=document.getElementById('pPoints');
+    if(pts) pts.style.color='';
+    document.querySelectorAll('.p-kit-circle').forEach(c=>{ c.style.borderColor=''; });
+    document.querySelectorAll('.p-kit-tier-label').forEach(t=>{ t.style.color=''; });
+    document.querySelectorAll('.kit-popup').forEach(p=>{ p.style.borderColor=''; });
+    document.querySelectorAll('.kit-popup span').forEach(s=>{ s.style.color=''; });
 }
 
 function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
@@ -962,7 +1571,16 @@ function toggleShowMore(){switchTab('rankings');}
 function buildFilteredOverall(){const{kit,region,device,retired}=getFilters();let scoredMap={};const playerStatus={};for(let k in DATA){if(k==='Overall'||k==='Players')continue;for(let t in DATA[k]){const isR=t.startsWith('R');DATA[k][t].forEach(name=>{if(!playerStatus[name])playerStatus[name]={active:false,retired:false};if(isR)playerStatus[name].retired=true;else playerStatus[name].active=true;});}}if(!retired){scoredMap={...DATA.Overall};}else{for(let k in DATA){if(k==='Overall'||k==='Players')continue;for(let t in DATA[k]){const isR=t.startsWith('R');if(retired==='active'&&isR)continue;if(retired==='retired'&&!isR)continue;const pts=PTS[t.replace('R','')];if(!pts)continue;DATA[k][t].forEach(name=>{scoredMap[name]=(scoredMap[name]||0)+pts;});}}if(DATA.Players)DATA.Players.forEach(p=>{if(!(p.name in scoredMap))scoredMap[p.name]=0;});}let entries=Object.entries(scoredMap);if(region||device)entries=entries.filter(([name])=>{const p=DATA.Players?.find(x=>x.name===name);if(!p)return false;if(region&&p.region!==region)return false;if(device&&p.device!==device)return false;return true;});if(retired==='active')entries=entries.filter(([name])=>{const s=playerStatus[name];return s&&s.active;});else if(retired==='retired')entries=entries.filter(([name])=>{const s=playerStatus[name];return s&&s.retired&&!s.active;});if(retired)entries=entries.filter(([,pts])=>pts>0);if(kit){const kitScores={};if(DATA[kit]){for(let t in DATA[kit]){const isR=t.startsWith('R');if(retired==='active'&&isR)continue;if(retired==='retired'&&!isR)continue;const pts=PTS[t.replace('R','')];if(!pts)continue;DATA[kit][t].forEach(name=>{if(!kitScores[name]||kitScores[name].pts<pts)kitScores[name]={pts,tier:t};});}}entries=entries.filter(([name])=>kitScores[name]).map(([name])=>[name,kitScores[name].pts,kitScores[name].tier]);entries.sort((a,b)=>b[1]-a[1]);return{entries,kitMode:true,kitName:kit};}entries.sort((a,b)=>b[1]-a[1]);return{entries,kitMode:false,kitName:null};}
 function getRankTitle(pts,rank){if(rank===1||pts>=300)return{title:"Combat Grandmaster",color:"#ffd700"};if(rank<=3||pts>=200)return{title:"Combat Master",color:"#00eeff"};if(pts>=150)return{title:"Combat Ace",color:"#ff6a00"};if(pts>=50)return{title:"Combat Specialist",color:"#b044ff"};if(pts>=20)return{title:"Combat Cadet",color:"#00ff88"};if(pts>=10)return{title:"Combat Novice",color:"#ff7f50"};return{title:"Rookie",color:"#888"};}
 function titleBadgeHtml(pts,rank){const{title,color}=getRankTitle(pts,rank);return `<span style="font-family:'MultiCraftFont',monospace;font-size:0.45rem;color:${color};border:1px solid ${color};border-radius:20px;padding:2px 8px;letter-spacing:1px;background:${color}18;white-space:nowrap;">${title}</span>`;}
-async function renderOverall(){if(CURRENT_TAB!=='rankings'&&CURRENT_TAB!=='home')return;const lbl=document.getElementById('viewLabel');const isHome=CURRENT_TAB==='home';lbl.style.display=isHome?'none':'';if(!isHome){lbl.innerText='OVERALL';lbl.style.color=KIT_MAP['Overall'].color;}document.getElementById('filterBar').style.display=isHome?'none':'flex';document.getElementById('topPlayersTitle').style.display=isHome?'block':'none';if(!isHome)document.getElementById('filterKit').style.display='';document.getElementById('kitBar').style.display=(!isHome&&SHOW_ALL)?'flex':'none';const dl=document.getElementById('displayList');dl.innerHTML='';dl.classList.add('overall-mode');const podium=document.getElementById('podiumWrap');podium.innerHTML='';const smBtn=document.getElementById('showMoreBtn');const{entries,kitMode}=buildFilteredOverall();if(entries.length===0){podium.style.display='none';smBtn.style.display='none';dl.innerHTML=`<div class="empty-state"><h2>NO PLAYERS MATCH FILTERS</h2></div>`;return;}if(SHOW_ALL){podium.style.display='none';}else{const top3=entries.slice(0,3);await prewarmSkins(top3.map(e=>e[0]));podium.style.display='flex';for(let i=0;i<top3.length;i++){const[name,pts]=top3[i];const rank=i+1;const rankColors=['var(--gold)','#aaa','#cd7f32'];const{title:pTitle,color:pColor}=getRankTitle(pts,rank);const card=document.createElement('div');card.className=`podium-card rank-${rank}`;card.onclick=()=>{playBtnSound();openProfile(name);};card.innerHTML=`<div class="podium-name">${name}</div><div class="podium-skin-wrap"><img src="${skinSrc(name)}" alt="${name}"></div><div class="podium-platform"><div class="podium-pts-badge" style="border-color:${rankColors[i]};color:${rankColors[i]};">${pts} PTS</div><span class="podium-rank-num">${rank}</span></div><div style="font-family:'MultiCraftFont',monospace;font-size:0.45rem;color:${pColor};border:1px solid ${pColor};border-radius:20px;padding:2px 8px;margin-top:6px;letter-spacing:1px;background:${pColor}18;text-align:center;">${pTitle}</div>`;card.style.animation=`podiumDrop 0.5s cubic-bezier(0.22,1,0.36,1) ${i*0.12}s both`;podium.appendChild(card);}}if(isHome){document.getElementById('topPlayersTitle').style.display='block';const homeList=document.createElement('div');homeList.id='overallList';const homeRows=entries.slice(3,3+PREVIEW);await prewarmSkins(homeRows.map(e=>e[0]));for(let i=0;i<homeRows.length;i++){const[name,pts]=homeRows[i];const rank=i+4;const row=document.createElement('div');row.className='ol-row';row.onclick=()=>{playBtnSound();openProfile(name);};row.style.animationDelay=`${i*0.08}s`;row.innerHTML=`<span class="ol-rank">${rank}</span><div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div><div class="ol-name-block"><div class="ol-name" style="font-family:'MultiCraftFont',monospace;">${name}</div>${getTags(name)}<div style="margin-top:4px;">${titleBadgeHtml(pts,rank)}</div></div><div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>`;homeList.appendChild(row);}dl.appendChild(homeList);if(entries.length>3+PREVIEW){const flDiv=document.createElement('div');flDiv.style.cssText="font-family:'MultiCraftFont',monospace;font-size:0.65rem;color:#555;cursor:pointer;margin-top:10px;margin-bottom:10px;letter-spacing:1px;text-align:center;width:100%;transition:color 0.2s;";flDiv.textContent='FULL LEADERBOARD ▶';flDiv.onmouseenter=()=>flDiv.style.color='var(--purple)';flDiv.onmouseleave=()=>flDiv.style.color='#555';flDiv.onclick=()=>switchTab('rankings');dl.appendChild(flDiv);}document.getElementById('showMoreBtn').style.display='none';return;}const listWrap=document.createElement('div');listWrap.id='overallList';const rowEntries=SHOW_ALL?entries:entries.slice(3,3+PREVIEW);await prewarmSkins(rowEntries.map(e=>e[0]));for(let i=0;i<rowEntries.length;i++){const[name,pts,tier]=rowEntries[i];const rank=SHOW_ALL?i+1:i+4;const isFullLB=SHOW_ALL;const row=document.createElement('div');row.className='ol-row'+(isFullLB?' ol-row-full':'');row.onclick=()=>{playBtnSound();openProfile(name);};if(isFullLB){const p=DATA.Players?.find(x=>x.name===name);const regCode=p?.region||'?';const regColor=REGION_MAP[regCode]?.color||'#555';const devCode=p?.device||'?';const devColor=DEVICE_MAP[devCode]?.color||'#555';let kitIconsHtml='<div class="ol-kit-icons">';Object.entries(KIT_MAP).forEach(([kname,{img,color}])=>{if(kname==='Overall')return;let tierLabel='',tierColor='#2a2a2a';if(DATA[kname]){for(let t in DATA[kname]){if(DATA[kname][t].includes(name)){const isR=t.startsWith('R');tierLabel=isR?t.slice(1):t;tierColor=isR?'#444':color;break;}}}kitIconsHtml+=`<div class="ol-kit-icon" style="border-color:${tierColor};opacity:${tierLabel?'1':'0.25'};"><img src="${img}" style="width:20px;height:20px;image-rendering:pixelated;display:block;"><span class="ol-kit-icon-label" style="color:${tierColor};font-size:0.5rem;">${tierLabel||''}</span></div>`;});kitIconsHtml+='</div>';row.innerHTML=`<span class="ol-rank">${rank}</span><div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div><div class="ol-name-block"><div class="ol-name" style="font-family:'MultiCraftFont',monospace;">${name}</div><div style="margin-top:4px;">${titleBadgeHtml(pts,rank)}</div></div><div class="tag-wrap has-hover" style="position:relative;"><span class="ol-region-badge" style="background:${regColor}22;border:1px solid ${regColor};color:${regColor};cursor:help;">${regCode}</span><div class="tag-popup" style="border-color:${regColor};">${REGION_MAP[regCode]?.label||regCode}</div></div><div class="tag-wrap has-hover" style="position:relative;"><span class="ol-region-badge" style="background:${devColor}22;border:1px solid ${devColor};color:${devColor};cursor:help;">${devCode}</span><div class="tag-popup" style="border-color:${devColor};">${DEVICE_MAP[devCode]?.label||devCode}</div></div>${kitIconsHtml}<div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>`;}else{row.innerHTML=`<span class="ol-rank">${rank}</span><div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div><div class="ol-name-block"><div class="ol-name">${name}</div>${getTags(name)}<div style="margin-top:4px;">${titleBadgeHtml(pts,rank)}</div></div>${kitMode&&tier?`<span class="ol-tier-badge">${tier.startsWith('R')?'Retired '+tier.slice(1):tier}</span>`:''}<div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>`;}row.style.animationDelay=`${i*0.06}s`;listWrap.appendChild(row);}dl.appendChild(listWrap);if(!isHome&&entries.length>3+PREVIEW){smBtn.style.display='block';smBtn.textContent=SHOW_ALL?'▲ SHOW LESS':'FULL LEADERBOARD ▶';}else{smBtn.style.display='none';}}
+function applyRankTitleBadge(name){
+    const sorted=Object.entries(DATA.Overall).sort((a,b)=>b[1]-a[1]);
+    const rankIdx=sorted.findIndex(x=>x[0]===name); const rankNum=rankIdx+1; const rankPts=DATA.Overall[name];
+    const{title:rankTitle,color:rankTitleColor}=getRankTitle(rankPts,rankNum);
+    document.getElementById('pRank').innerText="RANK #"+rankNum;
+    const titleBadge=document.getElementById('pTitleBadge');
+    titleBadge.textContent=rankTitle; titleBadge.style.color=rankTitleColor; titleBadge.style.borderColor=rankTitleColor; titleBadge.style.background=rankTitleColor+'18';
+}
+async function renderOverall(){if(CURRENT_TAB!=='rankings'&&CURRENT_TAB!=='home')return;const lbl=document.getElementById('viewLabel');const isHome=CURRENT_TAB==='home';lbl.style.display=isHome?'none':'';if(!isHome){lbl.innerText='OVERALL';lbl.style.color=KIT_MAP['Overall'].color;}document.getElementById('filterBar').style.display=isHome?'none':'flex';document.getElementById('topPlayersTitle').style.display=isHome?'block':'none';if(!isHome)document.getElementById('filterKit').style.display='';document.getElementById('kitBar').style.display=(!isHome&&SHOW_ALL)?'flex':'none';const dl=document.getElementById('displayList');dl.innerHTML='';dl.classList.add('overall-mode');const podium=document.getElementById('podiumWrap');podium.innerHTML='';const smBtn=document.getElementById('showMoreBtn');const{entries,kitMode}=buildFilteredOverall();if(entries.length===0){podium.style.display='none';smBtn.style.display='none';dl.innerHTML=`<div class="empty-state"><h2>NO PLAYERS MATCH FILTERS</h2></div>`;return;}if(SHOW_ALL){podium.style.display='none';}else{const top3=entries.slice(0,3);await prewarmSkins(top3.map(e=>e[0]));podium.style.display='flex';for(let i=0;i<top3.length;i++){const[name,pts]=top3[i];const rank=i+1;const rankColors=['var(--gold)','#aaa','#cd7f32'];const{title:pTitle,color:pColor}=getRankTitle(pts,rank);const card=document.createElement('div');card.className=`podium-card rank-${rank}`;card.onclick=()=>{playBtnSound();openProfile(name);};card.innerHTML=`<div class="podium-name">${name}</div><div class="podium-skin-wrap"><img src="${skinSrc(name)}" alt="${name}"></div><div class="podium-platform"><div class="podium-pts-badge" style="border-color:${rankColors[i]};color:${rankColors[i]};">${pts} PTS</div><span class="podium-rank-num">${rank}</span></div><div style="font-family:'MultiCraftFont',monospace;font-size:0.45rem;color:${pColor};border:1px solid ${pColor};border-radius:20px;padding:2px 8px;margin-top:6px;letter-spacing:1px;background:${pColor}18;text-align:center;">${pTitle}</div>`;card.style.animation=`podiumDrop 0.5s cubic-bezier(0.22,1,0.36,1) ${i*0.12}s both`;podium.appendChild(card);}}if(isHome){document.getElementById('topPlayersTitle').style.display='block';const homeList=document.createElement('div');homeList.id='overallList';const homeRows=entries.slice(3,3+PREVIEW);await prewarmSkins(homeRows.map(e=>e[0]));for(let i=0;i<homeRows.length;i++){const[name,pts]=homeRows[i];const rank=i+4;const row=document.createElement('div');row.className='ol-row';row.onclick=()=>{playBtnSound();openProfile(name);};row.style.animationDelay=`${i*0.08}s`;row.innerHTML=`<span class="ol-rank">${rank}</span><div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div><div class="ol-name-block"><div class="ol-name" style="font-family:'MultiCraftFont',monospace;">${name}</div>${getTags(name)}<div style="margin-top:4px;">${titleBadgeHtml(pts,rank)}</div></div><div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>`;attachRowHover(row, name);homeList.appendChild(row);}dl.appendChild(homeList);if(entries.length>3+PREVIEW){const flDiv=document.createElement('div');flDiv.style.cssText="font-family:'MultiCraftFont',monospace;font-size:0.65rem;color:#555;cursor:pointer;margin-top:10px;margin-bottom:10px;letter-spacing:1px;text-align:center;width:100%;transition:color 0.2s;";flDiv.textContent='FULL LEADERBOARD ▶';flDiv.onmouseenter=()=>flDiv.style.color='var(--purple)';flDiv.onmouseleave=()=>flDiv.style.color='#555';flDiv.onclick=()=>switchTab('rankings');dl.appendChild(flDiv);}document.getElementById('showMoreBtn').style.display='none';return;}const listWrap=document.createElement('div');listWrap.id='overallList';const rowEntries=SHOW_ALL?entries:entries.slice(3,3+PREVIEW);await prewarmSkins(rowEntries.map(e=>e[0]));for(let i=0;i<rowEntries.length;i++){const[name,pts,tier]=rowEntries[i];const rank=SHOW_ALL?i+1:i+4;const isFullLB=SHOW_ALL;const row=document.createElement('div');row.className='ol-row'+(isFullLB?' ol-row-full':'');row.onclick=()=>{playBtnSound();openProfile(name);};if(isFullLB){const p=DATA.Players?.find(x=>x.name===name);const regCode=p?.region||'?';const regColor=REGION_MAP[regCode]?.color||'#555';const devCode=p?.device||'?';const devColor=DEVICE_MAP[devCode]?.color||'#555';let kitIconsHtml='<div class="ol-kit-icons">';Object.entries(KIT_MAP).forEach(([kname,{img,color}])=>{if(kname==='Overall')return;let tierLabel='',tierColor='#2a2a2a';if(DATA[kname]){for(let t in DATA[kname]){if(DATA[kname][t].includes(name)){const isR=t.startsWith('R');tierLabel=isR?t.slice(1):t;tierColor=isR?'#444':color;break;}}}kitIconsHtml+=`<div class="ol-kit-icon" style="border-color:${tierColor};opacity:${tierLabel?'1':'0.25'};"><img src="${img}" style="width:20px;height:20px;image-rendering:pixelated;display:block;"><span class="ol-kit-icon-label" style="color:${tierColor};font-size:0.5rem;">${tierLabel||''}</span></div>`;});kitIconsHtml+='</div>';row.innerHTML=`<span class="ol-rank">${rank}</span><div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div><div class="ol-name-block"><div class="ol-name" style="font-family:'MultiCraftFont',monospace;">${name}</div><div style="margin-top:4px;">${titleBadgeHtml(pts,rank)}</div></div><div class="tag-wrap has-hover" style="position:relative;"><span class="ol-region-badge" style="background:${regColor}22;border:1px solid ${regColor};color:${regColor};cursor:help;">${regCode}</span><div class="tag-popup" style="border-color:${regColor};">${REGION_MAP[regCode]?.label||regCode}</div></div><div class="tag-wrap has-hover" style="position:relative;"><span class="ol-region-badge" style="background:${devColor}22;border:1px solid ${devColor};color:${devColor};cursor:help;">${devCode}</span><div class="tag-popup" style="border-color:${devColor};">${DEVICE_MAP[devCode]?.label||devCode}</div></div>${kitIconsHtml}<div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>`;}else{row.innerHTML=`<span class="ol-rank">${rank}</span><div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div><div class="ol-name-block"><div class="ol-name">${name}</div>${getTags(name)}<div style="margin-top:4px;">${titleBadgeHtml(pts,rank)}</div></div>${kitMode&&tier?`<span class="ol-tier-badge">${tier.startsWith('R')?'Retired '+tier.slice(1):tier}</span>`:''}<div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>`;}attachRowHover(row, name);
+        row.style.animationDelay=`${i*0.06}s`;listWrap.appendChild(row);}dl.appendChild(listWrap);if(!isHome&&entries.length>3+PREVIEW){smBtn.style.display='block';smBtn.textContent=SHOW_ALL?'▲ SHOW LESS':'FULL LEADERBOARD ▶';}else{smBtn.style.display='none';}}
 async function renderKit(kit){if(CURRENT_TAB!=='rankings'&&CURRENT_TAB!=='home')return;const{region,device,retired}=getFilters();const color=KIT_MAP[kit]?.color||'var(--gold)';const lbl=document.getElementById('viewLabel');lbl.innerText=kit.toUpperCase();lbl.style.color=color;document.getElementById('filterBar').style.display='flex';document.getElementById('filterKit').style.display='none';document.getElementById('topPlayersTitle').style.display='none';document.getElementById('podiumWrap').style.display='none';document.getElementById('showMoreBtn').style.display='none';const dl=document.getElementById('displayList');dl.innerHTML='';dl.classList.remove('overall-mode');const kitPlayerStatus={};for(let k in DATA){if(k==='Overall'||k==='Players')continue;for(let t in DATA[k]){const isR=t.startsWith('R');DATA[k][t].forEach(name=>{if(!kitPlayerStatus[name])kitPlayerStatus[name]={active:false,retired:false};if(isR)kitPlayerStatus[name].retired=true;else kitPlayerStatus[name].active=true;});}}function kitPlayerVisible(name){const p=DATA.Players?.find(x=>x.name===name);if(region&&(!p||p.region!==region))return false;if(device&&(!p||p.device!==device))return false;if(retired==='active'){const s=kitPlayerStatus[name];if(!s||!s.active)return false;}else if(retired==='retired'){const s=kitPlayerStatus[name];if(!s||!s.retired||s.active)return false;}return true;}const allKitPlayers=[];if(DATA[kit]){for(let t in DATA[kit])DATA[kit][t].forEach(n=>{if(!allKitPlayers.includes(n))allKitPlayers.push(n);})}await prewarmSkins(allKitPlayers);const kitTop=[];if(DATA[kit]){const tierOrder2=['HT1','RHT1','LT1','RLT1','HT2','RHT2','LT2','RLT2','HT3','RHT3','LT3','RLT3','HT4','RHT4','LT4','RLT4','HT5','RHT5','LT5','RLT5'];for(const t of tierOrder2){if(retired==='active'&&t.startsWith('R'))continue;if(retired==='retired'&&!t.startsWith('R'))continue;if(DATA[kit][t])DATA[kit][t].forEach(n=>{if(kitTop.length<3&&kitPlayerVisible(n))kitTop.push({name:n,tier:t});});if(kitTop.length>=3)break;}}if(kitTop.length>0){const mp=document.createElement('div');mp.id='podiumWrap2';mp.style.cssText='display:flex;justify-content:center;align-items:flex-end;gap:16px;margin-bottom:28px;padding:0 12px;';for(let i=0;i<kitTop.length;i++){const{name,tier}=kitTop[i];const rank=i+1;const rankColors=['var(--gold)','#aaa','#cd7f32'];const card=document.createElement('div');card.className=`podium-card rank-${rank}`;card.onclick=()=>{playBtnSound();openProfile(name);};card.innerHTML=`<div class="podium-name">${name}</div><div class="podium-skin-wrap"><img src="${skinSrc(name)}" alt="${name}"></div><div class="podium-platform"><div class="podium-pts-badge" style="border-color:${rankColors[i]};color:${rankColors[i]};">${tier}</div><span class="podium-rank-num">${rank}</span></div>`;card.style.animation=`podiumDrop 0.5s cubic-bezier(0.22,1,0.36,1) ${i*0.12}s both`;mp.appendChild(card);}dl.appendChild(mp);}const grid=document.createElement('div');grid.style.cssText="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:24px;";let anyPlayers=false;const TIER_ORDER=['HT1','RHT1','LT1','RLT1','HT2','RHT2','LT2','RLT2','HT3','RHT3','LT3','RLT3','HT4','RHT4','LT4','RLT4','HT5','RHT5','LT5','RLT5'];if(DATA[kit]){["T1","T2","T3","T4","T5"].forEach(lvl=>{const lvlNum=lvl.slice(1);const orderedTiers=TIER_ORDER.filter(t=>{const base=t.startsWith('R')?t.slice(1):t;return base.slice(-1)===lvlNum;});let col=`<div style="min-width:200px;"><div style="color:var(--purple);border-bottom:1px solid var(--border);margin-bottom:10px;text-align:center;font-family:'MultiCraftFont';font-size:0.9rem;">${lvl}</div>`;let has=false;orderedTiers.forEach(t=>{if(!DATA[kit][t])return;if(retired==='active'&&t.startsWith('R'))return;if(retired==='retired'&&!t.startsWith('R'))return;DATA[kit][t].forEach(name=>{if(!kitPlayerVisible(name))return;has=true;anyPlayers=true;const isR=t.startsWith('R');const label=isR?'Retired '+t.substring(1):t;const lc=isR?'var(--grey)':'var(--gold)';col+=`<div class="tier-card clickable" style="width:200px;padding:12px;display:flex;align-items:center;gap:10px;" onclick="openProfile('${name}')"><img src="${skinSrc(name)}" alt="${name}" style="width:36px;height:36px;image-rendering:pixelated;object-fit:cover;object-position:top;transform:scale(1.3);transform-origin:top;flex-shrink:0;"><div><div style="font-size:0.9rem;font-weight:bold;">${name}</div>${getTags(name)}<div style="font-size:0.6rem;color:${lc};margin-top:4px;font-weight:bold;">${label}</div></div></div>`;});});if(has){col+=`</div>`;grid.innerHTML+=col;}});}if(!anyPlayers){dl.innerHTML=`<div class="empty-state"><h2>NO RANKED PLAYERS</h2></div>`;return;}dl.appendChild(grid);}
 async function switchTab(tab){
     playBtnSound(); CURRENT_TAB=tab;
@@ -1019,13 +1637,9 @@ async function openProfile(name){
     // Clear ALL stale duel data before loading new profile
     document.querySelectorAll('.profile-duel-section').forEach(el=>el.remove());
     window._profileDuelData=null;
-    const sorted=Object.entries(DATA.Overall).sort((a,b)=>b[1]-a[1]);
-    const rankIdx=sorted.findIndex(x=>x[0]===name); const rankNum=rankIdx+1; const rankPts=DATA.Overall[name];
-    const{title:rankTitle,color:rankTitleColor}=getRankTitle(rankPts,rankNum);
-    document.getElementById('pRank').innerText="RANK #"+rankNum;
-    const titleBadge=document.getElementById('pTitleBadge');
-    titleBadge.textContent=rankTitle; titleBadge.style.color=rankTitleColor; titleBadge.style.borderColor=rankTitleColor; titleBadge.style.background=rankTitleColor+'18';
+    // Clear extras FIRST so rank/title colors set below don't get wiped
     clearProfileExtras();
+    applyRankTitleBadge(name);
     typeText(document.getElementById('pName'),name,1000);
     document.getElementById('pMeta').innerHTML=getTags(name);
     const targetPts=DATA.Overall[name]; const pPoints=document.getElementById('pPoints');
@@ -1045,9 +1659,21 @@ async function openProfile(name){
     try{
         const data=await authCall("GET",`/profile/${encodeURIComponent(name)}`);
         injectProfileExtras(name,data.role,data.profile);
+        // Apply saved layout (must be after extras so elements exist)
+        // Apply layout after all extras settle (socials/rival/duels etc)
+        setTimeout(()=>applyProfileLayout(data.profile?.profile_layout||[]), 300);
         injectEditPanel(name);
+        injectLayoutEditor(name);
     }catch(e){ console.warn("Profile extras:",e.message); }
-    renderProfileDuels(name);
+    // Re-apply layout after duel section loads
+    renderProfileDuels(name).then(()=>{
+        const layout=AUTH?.profile?.profile_layout;
+        if(layout&&layout.length) setTimeout(()=>applyProfileLayout(layout),100);
+    }).catch(()=>{});
+    applyPeakTiers(name);
+    // Final safeguard: re-apply rank/title badge colors AFTER all extras
+    // (custom colors, layout moves) in case anything reset them
+    applyRankTitleBadge(name);
 }
 async function handleUrlOnLoad(){const p=new URLSearchParams(window.location.search);const player=p.get('player');const kit=p.get('kit');const tab=p.get('tab');if(player&&DATA.Overall&&player in DATA.Overall){openProfile(player);}else if(tab==='rankings'){switchTab('rankings');}else if(tab==='hof'||tab==='testers'){switchTab(tab);}else if(tab==='duels'){switchTab('duels');}else if(kit&&kit!=='Overall'&&KIT_MAP[kit]){CURRENT_KIT=kit;document.querySelectorAll('.kit-btn').forEach(b=>{b.classList.remove('active');b.style.opacity='0.4';});const btn=[...document.querySelectorAll('.kit-btn')].find(b=>b.textContent.trim()===kit.toUpperCase());if(btn){btn.classList.add('active');btn.style.opacity='1';}document.getElementById('filterBar').style.display='none';document.getElementById('showMoreBtn').style.display='none';document.getElementById('kitBar').style.display='flex';await renderKit(kit);}}
 function copyProfileLink(){const url=new URL(window.location.href);url.searchParams.set('player',document.getElementById('pName').innerText.trim());navigator.clipboard.writeText(url.toString()).then(()=>{const btn=document.getElementById('profileCopyBtn');btn.textContent='✓';btn.style.borderColor='var(--purple)';btn.style.color='var(--purple)';setTimeout(()=>{btn.textContent='⧉';btn.style.borderColor='';btn.style.color='';},1500);});}
@@ -1055,8 +1681,8 @@ function setUrl(params){const u=new URL(window.location.href);Object.entries(par
 function handleSearch(val){const pop=document.getElementById('searchPopup');if(!val){pop.style.display='none';return;}const matches=Object.keys(DATA.Overall||{}).filter(n=>n.toLowerCase().includes(val.toLowerCase())).slice(0,5);pop.innerHTML=matches.map(m=>`<div class="search-item" onclick="openProfile('${m}');document.getElementById('searchPopup').style.display='none';"><b>${m}</b><span style="color:var(--purple);font-size:0.5rem;">VIEW PROFILE</span></div>`).join('')||'';pop.style.display=matches.length?'block':'none';}
 // Proxy URL stored as base64
 const _MP = atob("aHR0cHM6Ly9tdWx0aWNyYWZ0LXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHAvcHJveHkvZmluZC1uZWFyYnktc2VydmVycw==");
-const MTC_SERVER_ID = "JC5A69FB";
-const SRV_REFRESH_MS = 15000;
+const MTC_SERVER_CODES = ["JC5A69FB","OPL5OBPM"];
+const SRV_REFRESH_MS = 15000; // refresh every 15s
 var _srvInterval = null;
 
 function typeTextEl(el, text, speed){
@@ -1066,32 +1692,72 @@ function typeTextEl(el, text, speed){
     var tick=setInterval(function(){ el.textContent+=text[i++]; if(i>=text.length) clearInterval(tick); }, speed);
 }
 
-async function fetchServerInfo(){
-    var nameEl    = document.getElementById('srvName');
-    var playersEl = document.getElementById('srvPlayers');
-    var descEl    = document.getElementById('srvDesc');
-    if(!nameEl) return;
+async function fetchServerInfo(retryCount){
+    retryCount = retryCount || 0;
+    var cards = document.querySelectorAll('.server-card');
+    if(!cards.length) return;
     try{
         var res = await fetch(_MP, {
             method:'POST',
             headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({ favorites: MTC_SERVER_ID })
+            body: JSON.stringify({ favorites: MTC_SERVER_CODES.join(',') })
         });
+        if(!res.ok) throw new Error('HTTP '+res.status);
         var data = await res.json();
-        var srv = data && data.favorites && data.favorites[MTC_SERVER_ID];
-        if(!srv){ nameEl.textContent='SERVER UNAVAILABLE'; return; }
-        nameEl.textContent = srv.server_name || 'COMBAT CLUB';
-        var cur = srv.connected_players != null ? srv.connected_players : 0;
-        var max = srv.max_players || 50;
-        if(playersEl) playersEl.textContent = cur + '/' + max;
-        // Description typing anim only on first open
-        if(descEl && !descEl.dataset.loaded){
-            descEl.dataset.loaded = '1';
-            var desc = (srv.description || '').replace(/\n+/g,' · ').trim();
-            if(desc) typeTextEl(descEl, desc, 12);
+        var favorites = (data && data.favorites) || {};
+
+        var anyFound = false;
+        cards.forEach(function(card){
+            var code = card.dataset.code;
+            var srv  = favorites[code];
+            var nameEl    = card.querySelector('.srvName');
+            var playersEl = card.querySelector('.srvPlayers');
+            var descEl    = card.querySelector('.srvDesc');
+            var table     = card.querySelector('.srvTable');
+            var tbody     = card.querySelector('.srvTableBody');
+            if(!srv){
+                // Keep last known good data — don't overwrite name with an error
+                // unless we've NEVER loaded this card successfully
+                if(!nameEl.dataset.loadedOnce) nameEl.textContent = 'UNAVAILABLE';
+                return;
+            }
+            anyFound = true;
+            nameEl.dataset.loadedOnce = '1';
+            nameEl.textContent = srv.server_name || code;
+            var cur = srv.connected_players != null ? srv.connected_players : 0;
+            var max = srv.max_players || 50;
+            if(playersEl) playersEl.textContent = cur + '/' + max;
+            if(descEl && !descEl.dataset.loaded){
+                var desc = (srv.description || '').replace(/\n+/g,' · ').trim();
+                if(desc){ descEl.dataset.loaded = '1'; typeTextEl(descEl, desc, 12); }
+            }
+            if(table && tbody){
+                table.style.display = 'table';
+                var rows = [
+                    ['PVP',     srv.pvp ? '✓ Enabled' : '✗ Disabled'],
+                    ['REGION',  srv.country_code || '?'],
+                    ['PREMIUM', srv.premium ? '✓ Yes' : 'No'],
+                    ['DISCORD', srv.url || '—'],
+                ];
+                tbody.innerHTML = rows.map(function(r){
+                    return '<tr>' +
+                        '<td style="font-family:MultiCraftFont,monospace;font-size:0.4rem;color:#444;letter-spacing:1px;padding:3px 6px 3px 0;border-bottom:1px solid #0d0d0d;">' + r[0] + '</td>' +
+                        '<td style="font-family:MultiCraftFont,monospace;font-size:0.4rem;color:#888;padding:3px 0;border-bottom:1px solid #0d0d0d;">' + r[1] + '</td>' +
+                        '</tr>';
+                }).join('');
+            }
+        });
+
+        // Retry quickly if NOTHING was found yet (proxy cold start)
+        if(!anyFound && retryCount < 3){
+            setTimeout(()=>fetchServerInfo(retryCount+1), 1000);
         }
     }catch(e){
-        if(nameEl) nameEl.textContent='COULD NOT LOAD';
+        if(retryCount < 3){ setTimeout(()=>fetchServerInfo(retryCount+1), 1000); return; }
+        cards.forEach(function(card){
+            var nameEl = card.querySelector('.srvName');
+            if(nameEl && !nameEl.dataset.loadedOnce) nameEl.textContent='COULD NOT LOAD';
+        });
         console.warn('Server info:', e.message);
     }
 }
@@ -1099,12 +1765,16 @@ async function fetchServerInfo(){
 function openInfo(){
     playBtnSound();
     document.getElementById('infoModal').style.display='flex';
-    var nameEl    = document.getElementById('srvName');
-    var playersEl = document.getElementById('srvPlayers');
-    var descEl    = document.getElementById('srvDesc');
-    if(nameEl)    nameEl.textContent    = 'LOADING...';
-    if(playersEl) playersEl.textContent = '-';
-    if(descEl)    { descEl.textContent=''; descEl.dataset.loaded=''; }
+    document.querySelectorAll('.server-card').forEach(function(card){
+        var nameEl    = card.querySelector('.srvName');
+        var playersEl = card.querySelector('.srvPlayers');
+        var descEl    = card.querySelector('.srvDesc');
+        var table     = card.querySelector('.srvTable');
+        if(!nameEl.dataset.loadedOnce) nameEl.textContent = 'LOADING...';
+        if(playersEl) playersEl.textContent = playersEl.textContent==='-'?'-':playersEl.textContent;
+        if(descEl && !descEl.dataset.loaded) descEl.textContent='';
+        if(table && table.style.display!=='table') table.style.display='none';
+    });
     fetchServerInfo();
     if(_srvInterval) clearInterval(_srvInterval);
     _srvInterval = setInterval(fetchServerInfo, SRV_REFRESH_MS);
@@ -1120,7 +1790,21 @@ document.getElementById('infoModal').addEventListener('click', function(){
     await handleUrlOnLoad();
 })();
 document.addEventListener('click',e=>{ if(!e.target.closest('.search-wrap')) document.getElementById('searchPopup').style.display='none'; });
-const canvas=document.createElement('canvas');canvas.style.cssText='position:fixed;inset:0;z-index:0;pointer-events:none;';document.body.prepend(canvas);const ctx=canvas.getContext('2d');canvas.width=window.innerWidth;canvas.height=window.innerHeight;window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});let stars=[];function spawnStar(){return{x:Math.random()*canvas.width,y:-10,size:Math.random()*3+1,speed:Math.random()*8+4,drift:Math.random()*1.5-.75};}setInterval(()=>{for(let i=0;i<6;i++)stars.push(spawnStar());},80);(function animate(){ctx.clearRect(0,0,canvas.width,canvas.height);for(let i=0;i<stars.length;i++){const s=stars[i];ctx.beginPath();ctx.fillStyle='white';ctx.shadowBlur=10;ctx.shadowColor='#00eeff';ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();s.y+=s.speed;s.x+=s.drift;if(s.y>canvas.height+20){stars.splice(i,1);i--;}}requestAnimationFrame(animate);})();
+const canvas=document.createElement('canvas');canvas.style.cssText='position:fixed;inset:0;z-index:0;pointer-events:none;';document.body.prepend(canvas);const ctx=canvas.getContext('2d');canvas.width=window.innerWidth;canvas.height=window.innerHeight;window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});let stars=[];function spawnStar(){return{x:Math.random()*canvas.width,y:-10,size:Math.random()*3+1,speed:Math.random()*8+4,drift:Math.random()*1.5-.75};}
+// Pause star spawning when tab is hidden to prevent explosion on refocus
+let _starPaused=false;
+document.addEventListener('visibilitychange',()=>{
+    if(document.hidden){ _starPaused=true; }
+    else { _starPaused=false; stars=[]; } // clear accumulated stars on return
+});
+setInterval(()=>{ if(!_starPaused) for(let i=0;i<6;i++) stars.push(spawnStar()); },80);
+(function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(!_starPaused){
+        for(let i=0;i<stars.length;i++){const s=stars[i];ctx.beginPath();ctx.fillStyle='white';ctx.shadowBlur=10;ctx.shadowColor='#00eeff';ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();s.y+=s.speed;s.x+=s.drift;if(s.y>canvas.height+20){stars.splice(i,1);i--;}}
+    }
+    requestAnimationFrame(animate);
+})();
 </script>
 </body>
 </html>
