@@ -319,6 +319,11 @@
       "name": "ziadlive",
       "region": "AF",
       "device": "MK"
+    },
+    {
+      "name": "Fortress",
+      "region": "Unknown",
+      "device": "Unknown"
     }
   ],
   "Emerald": {
@@ -346,7 +351,6 @@
       "RayValidd",
       "Redistdrext",
       "ziadlive",
-      "LastChance",
       "Vorthexis"
     ],
     "RHT2": [
@@ -360,7 +364,8 @@
       "CJSHORT",
       "CosmicallyXVII",
       "Husky_Multicraft",
-      "MENDOR"
+      "MENDOR",
+      "LastChance"
     ],
     "LT3": [
       "vort3x"
