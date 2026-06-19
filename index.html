@@ -288,7 +288,6 @@ async function saveProfileEdits(){
             const label=row.querySelector('.pe-social-label')?.value.trim()||"";
             const url=row.querySelector('.pe-social-url')?.value.trim()||"";
             const icon=row.dataset.icon||"";
-            // Save entry if it has anything at all
             if(label||url||icon) socialEntries.push({label,url,icon});
         });
         const parseColor=v=>{ v=(v||"").trim(); if(!v) return ""; if(/^#[0-9a-fA-F]{3,8}([-,]#[0-9a-fA-F]{3,8})+$/.test(v)){ return `linear-gradient(135deg,${v.split(/[-,]/).filter(s=>s.startsWith('#')).join(',')})`; } return v; };
@@ -307,7 +306,6 @@ async function saveProfileEdits(){
             theme_name_style:  document.getElementById('_peNameStylePreset')?.value||'',
             theme_name_glow:   document.getElementById('peThemeNameGlow')?.value.trim()||'',
             custom_colors:     window._customColors||{},
-            profile_layout:    window._profileLayout||[],
         });
         if(AUTH) AUTH.profile=d.profile;
         const currentName=document.getElementById('pName')?.innerText.trim();
@@ -334,7 +332,6 @@ async function saveBgImage(b64){
         if(AUTH) AUTH.profile=d.profile;
         const modal=document.querySelector('.profile-modal-content');
         if(modal&&b64){
-            // Clear 'background' shorthand first — it overrides backgroundImage
             modal.style.background="";
             modal.style.backgroundColor="";
             modal.style.backgroundImage=`url(${b64})`;
@@ -344,7 +341,6 @@ async function saveBgImage(b64){
         }
         const prev=document.getElementById('bgImgPreview');
         if(prev) prev.style.background=`url(${b64}) center/cover`;
-        // Rebuild panel so delete button appears
         const currentName=document.getElementById('pName')?.innerText.trim();
         if(currentName) injectEditPanel(currentName);
     }catch(e){ console.warn("BG image save failed",e); }
@@ -425,7 +421,6 @@ function applyNameStyle(el, color, style, glowHex){
     el.style.filter="";
     el.classList.remove('name-animated');
 
-    // glowHex may also be packed into style as "glow:#hex" for backwards compat
     if(!glowHex && style&&style.startsWith("glow:")){
         glowHex = style.slice(5);
         style = "";
@@ -433,16 +428,10 @@ function applyNameStyle(el, color, style, glowHex){
 
     const applyGlow = ()=>{
         if(!glowHex) return;
-        // Normalize 3-digit hex to 6-digit so alpha suffixes (e.g. "55") stay valid
         let g = glowHex;
         if(/^#[0-9a-fA-F]{3}$/.test(g)){
             g = '#' + g.slice(1).split('').map(ch=>ch+ch).join('');
         }
-        // textShadow works for plain-color text. For gradient/animated (transparent fill)
-        // use a drop-shadow filter so the glow still shows around the glyphs.
-        // Lower-opacity, smaller blur so the glow reads as a halo, not a fill —
-        // a strong 0-offset shadow at full opacity can visually look like the
-        // text itself turned that color.
         if(el.style.webkitTextFillColor==='transparent'){
             el.style.filter = `drop-shadow(0 0 4px ${g}99) drop-shadow(0 0 9px ${g}55)`;
         } else {
@@ -471,8 +460,6 @@ function applyNameStyle(el, color, style, glowHex){
     if(color){
         const parsed=parseCss(color);
         if(parsed.includes("gradient")){
-            // Rebuild as a clean left-to-right gradient sized exactly to the
-            // text box, otherwise only the first color tends to show.
             const stops=(color.match(/#[0-9a-fA-F]{3,8}/g)||[]);
             el.style.backgroundImage = stops.length>=2 ? `linear-gradient(90deg,${stops.join(',')})` : parsed;
             el.style.backgroundSize="100% 100%";
@@ -501,22 +488,17 @@ function applyProfileTheme(profile){
     const nameStyle= profile.theme_name_style||"";
     const banner   = profile.banner||"";
 
-    // ── Background: image takes priority over gradient ──
-    // Must set properties individually to avoid conflicts
     if(bgImg){
         modal.style.backgroundImage=`url(${bgImg})`;
         modal.style.backgroundSize="cover";
         modal.style.backgroundPosition="center";
         modal.style.backgroundRepeat="no-repeat";
         modal.style.backgroundColor="transparent";
-        // Clear any gradient that was set before
-        // Can't use shorthand 'background' — it would override backgroundImage
     } else if(bg){
         modal.style.backgroundImage="none";
         modal.style.backgroundColor="";
         modal.style.backgroundSize="";
         modal.style.backgroundPosition="";
-        // Set gradient via background shorthand only when no image
         modal.style.background=bg;
     } else {
         modal.style.backgroundImage="";
@@ -558,269 +540,6 @@ function resetProfileTheme(){
 function toggleEditDropdown(toggle){
     toggle.classList.toggle('open');
     document.getElementById('editDropdownBody')?.classList.toggle('vis');
-}
-
-/* ── PROFILE LAYOUT DRAG & DROP ─────────────────────────────────
-   Sections: badges, name, meta, skin, points, kits, socials, duelHistory, description
-   Each section is a draggable block inside profile-left or profile-right.
-   Layout is saved as [{id, side}] array in profile_layout.
-*/
-const LAYOUT_SECTIONS = {
-    badges:      { label:'🏷 Rank & Badges'   },
-    name:        { label:'✏ Name',  noDelete:true },
-    meta:        { label:'🌍 Region & Device' },
-    pronouns:    { label:'💬 Pronouns'         },
-    description: { label:'📝 Status'            },
-    skin:        { label:'🎨 Skin'              },
-    points:      { label:'⭐ Points'            },
-    socials:     { label:'🔗 Socials'           },
-    rival:       { label:'⚡ Rival'             },
-    duelHistory: { label:'⚔ Duel History'      },
-    kits:        { label:'🎯 Kit Rankings', noDelete:true },
-};
-
-function getLayoutEl(id){
-    switch(id){
-        case 'badges':      return document.getElementById('pBadgeRow');
-        case 'name':        return document.getElementById('pName');
-        case 'meta':        return document.getElementById('pMeta');
-        case 'pronouns':    return document.querySelector('.profile-pronouns');
-        case 'description': return document.querySelector('.profile-description');
-        case 'skin':        return document.getElementById('pSkin');
-        case 'points':      return document.getElementById('pPoints');
-        case 'socials':     return document.querySelector('.custom-social-row');
-        case 'rival':       return document.querySelector('.rival-badge');
-        case 'duelHistory': return document.querySelector('.profile-duel-section');
-        case 'kits':        {
-            // wrap right column content in a moveable div
-            const r=document.querySelector('.profile-right');
-            return r?._freeEl || r;
-        }
-        default: return null;
-    }
-}
-
-// ── Pencil button ─────────────────────────────────────────────────
-function injectLayoutEditor(profileName){
-    document.querySelector('.profile-edit-mode-btn')?.remove();
-    if(!AUTH||AUTH.name!==profileName) return;
-    const modal=document.querySelector('.profile-modal-content');
-    if(!modal) return;
-    const btn=document.createElement('button');
-    btn.className='profile-edit-mode-btn';
-    btn.title='Edit Layout';
-    btn.innerHTML='✏';
-    btn.style.cssText='position:absolute;top:46px;right:14px;background:#111;border:1px solid #333;color:#555;border-radius:50%;width:28px;height:28px;cursor:pointer;z-index:30;font-size:0.85rem;display:flex;align-items:center;justify-content:center;transition:border-color .2s,color .2s;';
-    btn.onmouseenter=()=>{if(!window._editMode){btn.style.borderColor='var(--purple)';btn.style.color='#fff';}};
-    btn.onmouseleave=()=>{if(!window._editMode){btn.style.borderColor='#333';btn.style.color='#555';}};
-    btn.onclick=()=>window._editMode?exitEditMode(profileName,true):enterEditMode(profileName);
-    modal.appendChild(btn);
-}
-
-// ── Enter edit mode — Google Slides style free drag ───────────────
-function enterEditMode(profileName){
-    if(window._editMode) return;
-    const modal=document.querySelector('.profile-modal-content');
-    if(!modal) return;
-    window._editMode=true;
-    modal.classList.add('edit-mode-active');
-
-    // Snapshot modal rect for coordinate reference
-    const mr=modal.getBoundingClientRect();
-    window._editModalRect=mr;
-
-    const pencilBtn=modal.querySelector('.profile-edit-mode-btn');
-    if(pencilBtn){pencilBtn.innerHTML='✓';pencilBtn.style.borderColor='#00ff88';pencilBtn.style.color='#00ff88';}
-
-    // Load saved positions
-    const savedPositions = (AUTH?.profile?.profile_layout)||[];
-    const posMap={};
-    savedPositions.forEach(p=>{ if(p.x!=null) posMap[p.id]={x:p.x,y:p.y,hidden:p.hidden}; });
-
-    // Make modal position:relative so absolute children work inside it
-    modal.style.position='relative';
-    modal.style.overflow='visible';
-
-    // Wrap every section into a free-floating card
-    Object.entries(LAYOUT_SECTIONS).forEach(([id,def])=>{
-        const el=getLayoutEl(id);
-        if(!el||el.closest('.free-card')) return;
-
-        // Create card
-        const card=document.createElement('div');
-        card.className='free-card';
-        card.dataset.sectionId=id;
-
-        // Position: use saved, or compute from current layout
-        const elRect=el.getBoundingClientRect();
-        const savedPos=posMap[id];
-        let x = savedPos ? savedPos.x : (elRect.left - mr.left);
-        let y = savedPos ? savedPos.y : (elRect.top  - mr.top);
-        card.style.cssText=`position:absolute;left:${x}px;top:${y}px;min-width:40px;z-index:20;`;
-
-        if(savedPos?.hidden) card.style.display='none';
-
-        // Header bar (drag handle)
-        const header=document.createElement('div');
-        header.className='free-card-header';
-        header.innerHTML=`<span class="free-card-label">${def.label}</span>`;
-        if(!def.noDelete){
-            const x2=document.createElement('button');
-            x2.className='free-card-close';
-            x2.innerHTML='✕';
-            x2.onclick=()=>{ card.style.display='none'; card.dataset.hidden='1'; refreshEditToolbar(); };
-            header.appendChild(x2);
-        }
-
-        // Move el into card
-        el.parentNode.insertBefore(card, el);
-        card.appendChild(header);
-        card.appendChild(el);
-        modal.appendChild(card); // move to modal as direct child for absolute positioning
-
-        // Drag logic
-        let startX,startY,startLeft,startTop;
-        header.addEventListener('mousedown', e=>{
-            if(e.target===header.querySelector('.free-card-close')) return;
-            e.preventDefault();
-            startX=e.clientX; startY=e.clientY;
-            startLeft=parseInt(card.style.left)||0;
-            startTop =parseInt(card.style.top) ||0;
-            card.style.zIndex=100;
-            const onMove=ev=>{
-                card.style.left=(startLeft+(ev.clientX-startX))+'px';
-                card.style.top =(startTop +(ev.clientY-startY))+'px';
-            };
-            const onUp=()=>{
-                card.style.zIndex=20;
-                document.removeEventListener('mousemove',onMove);
-                document.removeEventListener('mouseup',onUp);
-            };
-            document.addEventListener('mousemove',onMove);
-            document.addEventListener('mouseup',onUp);
-        });
-    });
-
-    buildEditToolbar(profileName);
-}
-
-function buildEditToolbar(profileName){
-    document.getElementById('editToolbar')?.remove();
-    const modal=document.querySelector('.profile-modal-content');
-    if(!modal) return;
-    const bar=document.createElement('div');
-    bar.id='editToolbar'; bar.className='edit-toolbar';
-    bar.innerHTML=`
-        <div class="edit-toolbar-row">
-            <span class="edit-toolbar-label">✏ DRAG CARDS FREELY · ✕ to hide · + to restore</span>
-            <button class="edit-toolbar-btn reset" id="editResetBtn">RESET</button>
-            <button class="edit-toolbar-btn done"  id="editDoneBtn">SAVE &amp; EXIT</button>
-        </div>
-        <div id="editToolbox" class="edit-toolbox"></div>`;
-    modal.appendChild(bar);
-    document.getElementById('editResetBtn').onclick=()=>resetLayoutToDefault(profileName);
-    document.getElementById('editDoneBtn').onclick =()=>exitEditMode(profileName,true);
-    refreshEditToolbar();
-}
-
-function refreshEditToolbar(){
-    const box=document.getElementById('editToolbox'); if(!box) return;
-    box.innerHTML='';
-    document.querySelectorAll('.free-card').forEach(card=>{
-        const id=card.dataset.sectionId;
-        const def=LAYOUT_SECTIONS[id]; if(!def||def.noDelete) return;
-        if(card.style.display==='none'||card.dataset.hidden==='1'){
-            const chip=document.createElement('button');
-            chip.className='edit-chip';
-            chip.textContent='+ '+def.label;
-            chip.onclick=()=>{
-                card.style.display='';
-                card.dataset.hidden='';
-                // Place near center of modal
-                const mr=document.querySelector('.profile-modal-content').getBoundingClientRect();
-                card.style.left=Math.max(10,mr.width/2-80)+'px';
-                card.style.top =Math.max(10,mr.height/2-40)+'px';
-                refreshEditToolbar();
-            };
-            box.appendChild(chip);
-        }
-    });
-    if(!box.children.length){
-        const e=document.createElement('span'); e.className='edit-chip empty';
-        e.textContent='All sections visible'; box.appendChild(e);
-    }
-}
-
-function resetLayoutToDefault(profileName){
-    if(!confirm('Reset to default positions?')) return;
-    document.querySelectorAll('.free-card').forEach(card=>{
-        card.style.display='';
-        card.dataset.hidden='';
-    });
-    exitEditMode(profileName, false);
-    // Re-enter with blank layout so positions are recalculated from DOM
-    if(AUTH?.profile) AUTH.profile.profile_layout=[];
-    setTimeout(()=>enterEditMode(profileName),50);
-}
-
-async function exitEditMode(profileName, save){
-    const modal=document.querySelector('.profile-modal-content');
-    if(!modal) return;
-
-    // Build layout from card positions
-    const layout=[];
-    document.querySelectorAll('.free-card').forEach(card=>{
-        layout.push({
-            id:     card.dataset.sectionId,
-            x:      parseInt(card.style.left)||0,
-            y:      parseInt(card.style.top) ||0,
-            hidden: card.dataset.hidden==='1' || card.style.display==='none',
-        });
-    });
-
-    // Move elements back to their natural parents, remove cards
-    document.querySelectorAll('.free-card').forEach(card=>{
-        const id=card.dataset.sectionId;
-        const el=card.querySelector(':scope>*:not(.free-card-header)');
-        if(el) card.parentNode.insertBefore(el, card);
-        card.remove();
-    });
-
-    document.getElementById('editToolbar')?.remove();
-    modal.classList.remove('edit-mode-active');
-    modal.style.overflow='';
-    const btn=modal.querySelector('.profile-edit-mode-btn');
-    if(btn){btn.innerHTML='✏';btn.style.borderColor='#333';btn.style.color='#555';}
-    window._editMode=false;
-
-    if(save){
-        try{
-            const d=await authCall("PATCH","/profile",{profile_layout:layout});
-            if(AUTH) AUTH.profile=d.profile;
-        }catch(e){ console.warn("Layout save failed:",e); }
-    }
-
-    // Apply saved positions in normal view
-    applyProfileLayout(layout);
-}
-
-function applyProfileLayout(layout){
-    if(!layout||!layout.length) return;
-    const modal=document.querySelector('.profile-modal-content');
-    if(!modal) return;
-    layout.forEach(item=>{
-        if(!item.x&&!item.y&&!item.hidden) return; // no saved position, leave as-is
-        const el=getLayoutEl(item.id);
-        if(!el) return;
-        if(item.hidden){ el.style.display='none'; return; }
-        el.style.display='';
-        // In normal (non-edit) view, just position relatively
-        if(item.x||item.y){
-            el.style.position='relative';
-            el.style.top =(item.y||0)+'px';
-            el.style.left=(item.x||0)+'px';
-        }
-    });
 }
 
 function injectEditPanel(profileName){
@@ -908,7 +627,6 @@ function injectEditPanel(profileName){
         {id:'peThemeBg',        sw:'swatchBg',     fn:v=>{
             const m=document.querySelector('.profile-modal-content');
             if(!m) return;
-            // Only apply gradient bg if no image currently set
             if(AUTH?.profile?.theme_bg_image){ return; }
             m.style.backgroundImage="none"; m.style.background=parseCss(v)||"";
         }},
@@ -922,7 +640,6 @@ function injectEditPanel(profileName){
         const update=()=>{ const v=inp.value.trim(); swatch.style.background=parseCss(v)||"#111"; fn(v); };
         update(); inp.addEventListener('input',update);
     });
-    // NAME GLOW swatch sync (defined here so it's in scope)
     window.syncNameGlowSwatch=()=>{
         const gv=document.getElementById('peThemeNameGlow')?.value.trim()||'';
         const sw=document.getElementById('swatchNameGlow');
@@ -933,7 +650,6 @@ function injectEditPanel(profileName){
         if(n) applyNameStyle(n, c2, st, gv);
     };
     document.getElementById('peThemeNameGlow')?.addEventListener('input', window.syncNameGlowSwatch);
-    // Banner preview
     const bi=document.getElementById('peBanner'); const bp=document.getElementById('peBannerPreview');
     const syncBanner=()=>{
         const parsed=parseCss(bi.value);
@@ -944,9 +660,7 @@ function injectEditPanel(profileName){
     };
     syncBanner(); bi.addEventListener('input',syncBanner);
     liveTheme.forEach(({id,sw,fn})=>{ const v=document.getElementById(id)?.value.trim(); const s=document.getElementById(sw); if(s) s.style.background=parseCss(v)||"#111"; if(v) fn(v); });
-    // Init glow swatch
     if(window.syncNameGlowSwatch) window.syncNameGlowSwatch();
-    // Build color pickers
     buildColorPickers(p.custom_colors||{});
 }
 
@@ -991,17 +705,11 @@ function applyPreset(name,btn){
     const toSh=v=>{ if(!v) return ''; const m=v.match(/linear-gradient\([^,]+,(#[0-9a-fA-F]{3,8}(?:,#[0-9a-fA-F]{3,8})*)\)/); return m?m[1].replace(/,/g,'-'):v; };
     const set=(id,val)=>{ const el=document.getElementById(id); if(el){ el.value=toSh(val); el.dispatchEvent(new Event('input')); } };
 
-    // Set the hidden preset-style field FIRST so that when peThemeNameColor's
-    // 'input' handler fires below, it reads the NEW style — not the previous
-    // preset's leftover value (this was the cause of "sometimes won't change").
     const presetInput=document.getElementById('_peNameStylePreset');
     if(presetInput) presetInput.value = p.nameStyle||'';
 
     set('peThemeBg',p.bg); set('peThemeBorder',p.border); set('peThemeGlow',p.glow); set('peThemeNameColor',p.name);
 
-    // Final guaranteed re-sync combining color + style + glow together.
-    // Direct call (not just the swatch sync) ensures the preview ALWAYS
-    // updates even if an 'input' listener above didn't fire in time.
     if(window.syncNameGlowSwatch) window.syncNameGlowSwatch();
     const _n=document.getElementById('pName');
     const _c=document.getElementById('peThemeNameColor')?.value.trim()||'';
@@ -1017,7 +725,6 @@ function clearProfileExtras(){
     document.querySelectorAll('.lfm-badge,.rival-badge,.profile-role-badge,.profile-pronouns,.profile-description,.custom-social-row,.profile-duel-section,.wl-badge,.wl-row').forEach(el=>el.remove());
     document.querySelector('.profile-banner-strip')?.remove();
     document.getElementById('profileEditPanel')?.remove();
-    document.getElementById('profileLayoutEditor')?.remove();
     document.querySelector('.profile-toolbox')?.remove();
     resetProfileTheme();
     resetCustomColors();
@@ -1032,15 +739,11 @@ function injectProfileExtras(name,role,profile){
     }
     if(profile.pronouns){ const pr=document.createElement('div'); pr.className='profile-pronouns'; pr.textContent=profile.pronouns; meta.insertBefore(pr,meta.firstChild); }
     if(profile.description){ const ds=document.createElement('div'); ds.className='profile-description'; ds.textContent=profile.description; meta.appendChild(ds); }
-    // LFM badge removed from public view to keep badge row clean
     if(profile.rival&&badgeRow){ const b=document.createElement('div'); b.className='rival-badge'; b.textContent=`⚡ RIVAL: ${profile.rival}`; badgeRow.appendChild(b); }
     applyProfileTheme(profile);
-    // Apply custom colors
     if(profile.custom_colors) applyCustomColors(profile.custom_colors);
-    // W/L ratio
     fetchWLRatio(name);
 
-    // Socials — show if has icon OR url (label optional)
     const socials=Array.isArray(profile.socials)?profile.socials.filter(s=>s.icon||s.url):[];
     if(socials.length){
         const row=document.createElement('div'); row.className='custom-social-row';
@@ -1055,10 +758,8 @@ function injectProfileExtras(name,role,profile){
                 img.style.cssText='width:13px;height:13px;object-fit:cover;border-radius:2px;';
                 a.appendChild(img);
             }
-            // Show label if set. If no label but has URL, show URL. If icon-only, show nothing extra.
             const displayText = s.label || (!s.icon && s.url ? s.url : '');
             if(displayText){ const txt=document.createElement('span'); txt.textContent=displayText; a.appendChild(txt); }
-            // If entry has no icon AND no label AND no url visible text, skip rendering
             if(!s.icon && !displayText) return;
             row.appendChild(a);
         });
@@ -1084,7 +785,6 @@ function attachRowHover(row, name){
             const d = await getProfileCached(name);
             if(!d||!d.profile) return;
             const p = d.profile;
-            // Apply bg
             if(p.theme_bg_image){
                 row.style.backgroundImage = `url(${p.theme_bg_image})`;
                 row.style.backgroundSize = 'cover';
@@ -1092,22 +792,17 @@ function attachRowHover(row, name){
             } else if(p.theme_bg){
                 row.style.background = p.theme_bg;
             }
-            // Apply border
             if(p.theme_border) row.style.borderColor = p.theme_border;
             if(p.theme_glow) row.style.boxShadow = `0 0 18px ${p.theme_glow}55`;
-            // Apply name color/effect/glow to the .ol-name inside this row —
-            // mirrors applyProfileTheme exactly so hover matches the profile page
             const nameEl = row.querySelector('.ol-name');
             if(nameEl&&(p.theme_name_color||p.theme_name_style||p.theme_name_glow)){
                 applyNameStyle(nameEl, p.theme_name_color||'', p.theme_name_style||'', p.theme_name_glow||'');
             }
-            // Custom colors - kit accent on kit icons, retired uses retiredTier
             if(p.custom_colors){
                 const cc = p.custom_colors;
                 row.querySelectorAll('.ol-kit-icon').forEach(icon=>{
                     const label = icon.querySelector('.ol-kit-icon-label');
                     if(!label||!label.textContent) return;
-                    // Retired icons are drawn with border-color:#444 (rgb(68,68,68))
                     const bc = icon.style.borderColor;
                     const isRetired = bc==='#444'||bc==='rgb(68, 68, 68)';
                     if(isRetired && cc.retiredTier){
@@ -1115,7 +810,6 @@ function attachRowHover(row, name){
                         label.style.color=cc.retiredTier;
                         return;
                     }
-                    // find kit name from img src
                     const img = icon.querySelector('img');
                     const src = img?.src||'';
                     const kitName = Object.keys(KIT_MAP).find(k=>k!=='Overall'&&src.includes(k.toLowerCase().replace(/ /g,'_').replace(/ /g,'_')));
@@ -1123,7 +817,6 @@ function attachRowHover(row, name){
                     const col = (kitId&&cc[kitId])||cc.kitAccent;
                     if(col){ icon.style.borderColor=col; label.style.color=col; }
                 });
-                // name color override
                 if(cc.nameGradientA&&cc.nameGradientB&&nameEl){
                     nameEl.style.backgroundImage=`linear-gradient(90deg,${cc.nameGradientA},${cc.nameGradientB})`;
                     nameEl.style.webkitBackgroundClip='text';
@@ -1131,11 +824,10 @@ function attachRowHover(row, name){
                     nameEl.style.webkitTextFillColor='transparent';
                 }
             }
-        }, 80); // small delay to avoid fetch on fast scroll
+        }, 80);
     });
     row.addEventListener('mouseleave', ()=>{
         if(_hoverTimeout) clearTimeout(_hoverTimeout);
-        // Reset row styles
         row.style.background='';
         row.style.backgroundImage='';
         row.style.borderColor='';
@@ -1192,7 +884,7 @@ async function computePeakTiers(playerName){
     return peaks;
 }
 
-// Inject "PEAK: X" into each kit-popup (only visible on hover via CSS)
+// Inject "PEAK: X" into each kit-popup
 async function applyPeakTiers(playerName){
     const peaks = await computePeakTiers(playerName);
     if(!Object.keys(peaks).length) return;
@@ -1226,7 +918,6 @@ async function applyPeakTiers(playerName){
 async function fetchWLRatio(playerName){
     try{
         const base=AUTH_API.replace('/api','');
-        // Fetch ALL duels for this player using pagination
         let allDuels=[], offset=0, total=null;
         while(total===null||allDuels.length<total){
             const res=await fetch(`${base}/api/duels?player=${encodeURIComponent(playerName)}&limit=200&offset=${offset}`);
@@ -1240,16 +931,13 @@ async function fetchWLRatio(playerName){
         if(!allDuels.length) return;
         let wins=0, losses=0;
         allDuels.forEach(d=>{
-            // Skip duels with broken/missing fields
             if(!d.player1||!d.player2||!d.result) return;
             const isP1=d.player1===playerName;
             const won=isP1?d.result==='Won':d.result==='Lost';
             if(won) wins++; else losses++;
         });
-        // Check modal is still showing this player
         const modal=document.getElementById('profileModal');
         if(!modal||modal.dataset.openPlayer!==playerName) return;
-        // Insert as own row below pBadgeRow
         const badgeRow=document.getElementById('pBadgeRow');
         if(!badgeRow) return;
         const b=document.createElement('div');
@@ -1263,7 +951,6 @@ async function fetchWLRatio(playerName){
 
 // ── Custom color definitions ──────────────────────────────────────
 const COLOR_SLOTS = [
-    // id, label, where it applies
     {id:'rankBadge',      label:'RANK BADGE'},
     {id:'titleBadge',     label:'TITLE BADGE'},
     {id:'roleBadge',      label:'ROLE BADGE'},
@@ -1274,7 +961,6 @@ const COLOR_SLOTS = [
     {id:'pts',            label:'POINTS NUMBER'},
     {id:'kitAccent',      label:'ALL KIT CIRCLES (accent)'},
     {id:'retiredTier',    label:'RETIRED TIER COLOR'},
-    // Per-kit overrides
     ...Object.keys(KIT_MAP).filter(k=>k!=='Overall').map(k=>({id:'kit_'+k.replace(/ /g,'_'), label:k.toUpperCase()+' CIRCLE'})),
 ];
 
@@ -1301,7 +987,6 @@ function buildColorPickers(colors){
             swatch.style.background=v||'#111';
             if(v) window._customColors[slot.id]=v;
             else delete window._customColors[slot.id];
-            // Live preview on open profile
             applyCustomColors(window._customColors);
         });
         row.appendChild(swatch);
@@ -1313,27 +998,19 @@ function buildColorPickers(colors){
 function applyCustomColors(colors){
     if(!colors) return;
     const cc=colors;
-    // Rank badge
     const rank=document.getElementById('pRank');
     if(rank&&cc.rankBadge){ rank.style.color=cc.rankBadge; rank.style.borderColor=cc.rankBadge+'88'; rank.style.background=cc.rankBadge+'18'; }
-    // Title badge
     const title=document.getElementById('pTitleBadge');
     if(title&&cc.titleBadge){ title.style.color=cc.titleBadge; title.style.borderColor=cc.titleBadge; title.style.background=cc.titleBadge+'18'; }
-    // Role badge
     document.querySelectorAll('.profile-role-badge').forEach(b=>{ if(cc.roleBadge){ b.style.color=cc.roleBadge; b.style.borderColor=cc.roleBadge; b.style.background=cc.roleBadge+'18'; } });
-    // Rival badge
     document.querySelectorAll('.rival-badge').forEach(b=>{ if(cc.rivalBadge){ b.style.color=cc.rivalBadge; b.style.borderColor=cc.rivalBadge; b.style.background=cc.rivalBadge+'18'; } });
-    // W/L badge
     document.querySelectorAll('.wl-badge').forEach(b=>{ if(cc.wlBadge){ b.style.borderColor=cc.wlBadge+'44'; } });
-    // Points
     const pts=document.getElementById('pPoints');
     if(pts&&cc.pts) pts.style.color=cc.pts;
-    // Kit circles — per-kit overrides take priority over accent, retired uses retiredTier
     document.querySelectorAll('.p-kit-item').forEach(item=>{
         const tierLabel=item.querySelector('.p-kit-tier-label');
         const circle=item.querySelector('.p-kit-circle');
         if(!tierLabel||!circle) return;
-        // Get kit name + current tier text from popup
         const spans=item.querySelectorAll('.kit-popup span');
         const currentSpan=spans[0];
         const kitSpan=spans[1];
@@ -1358,9 +1035,6 @@ function applyCustomColors(colors){
 }
 
 function resetCustomColors(){
-    // pRank/pTitleBadge are NOT reset here — applyRankTitleBadge() always
-    // re-sets them to the correct rank-based colors right after this runs,
-    // then applyCustomColors() layers any custom override on top.
     document.querySelectorAll('.profile-role-badge,.rival-badge,.wl-badge').forEach(b=>{ b.style.color=''; b.style.borderColor=''; b.style.background=''; });
     const pts=document.getElementById('pPoints');
     if(pts) pts.style.color='';
@@ -1376,7 +1050,6 @@ function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').r
    DUEL HELPERS
 ══════════════════════════════════════════════════════ */
 function duelPerspective(d, playerName){
-    // d.result is always from player1's point of view
     const isP1 = d.player1===playerName;
     const won  = isP1 ? d.result==='Won' : d.result==='Lost';
     const myScore  = isP1 ? d.player1_score : d.player2_score;
@@ -1386,12 +1059,10 @@ function duelPerspective(d, playerName){
 }
 
 function duelDescLine(d, playerName){
-    // The outcome ALWAYS belongs to d.player1 (the Discord subject who got tested).
-    // Even when viewing from player2's side, show "player1 was promoted", not player2.
     const kit  = d.kit==='Unknown'?'':d.kit;
     const tier = d.tier==='Unknown'?'':d.tier;
     if(d.outcome&&d.outcome!=='tested'){
-        const subject = d.player1; // always the tested player, never the opponent
+        const subject = d.player1;
         if(d.outcome==='failed'){
             return `${subject} failed${tier?' '+tier:''}${kit?' in '+kit:''}`;
         }
@@ -1426,10 +1097,8 @@ function closeDuelPopup(){ document.getElementById('duelPopupModal').classList.r
 
 /* ══════════════════════════════════════════════════════
    PROFILE DUEL SECTION
-   FIX: clear by player name so stale data can't persist
 ══════════════════════════════════════════════════════ */
 async function renderProfileDuels(playerName){
-    // Remove ANY existing duel section first
     document.querySelectorAll('.profile-duel-section').forEach(el=>el.remove());
     window._profileDuelData = null;
 
@@ -1450,7 +1119,6 @@ async function renderProfileDuels(playerName){
         const scoreColor = info.won?'#00ff88':'#ff4444';
         const desc = duelDescLine(d, playerName);
 
-        // Store for popup, tagged with player so we know it's fresh
         window._profileDuelData = { duel: d, player: playerName };
 
         const section=document.createElement('div');
@@ -1634,10 +1302,8 @@ function fireConfetti(){const colors=['#ffd700','#fff','var(--theme)','#ff00ff',
 async function openProfile(name){
     playBtnSound();
     if(!(name in DATA.Overall)) return;
-    // Clear ALL stale duel data before loading new profile
     document.querySelectorAll('.profile-duel-section').forEach(el=>el.remove());
     window._profileDuelData=null;
-    // Clear extras FIRST so rank/title colors set below don't get wiped
     clearProfileExtras();
     applyRankTitleBadge(name);
     typeText(document.getElementById('pName'),name,1000);
@@ -1655,24 +1321,14 @@ async function openProfile(name){
     setUrl({player:name});
     const _pModal=document.getElementById('profileModal');
     _pModal.style.display='flex';
-    _pModal.dataset.openPlayer=name; // track which player is open for W/L
+    _pModal.dataset.openPlayer=name;
     try{
         const data=await authCall("GET",`/profile/${encodeURIComponent(name)}`);
         injectProfileExtras(name,data.role,data.profile);
-        // Apply saved layout (must be after extras so elements exist)
-        // Apply layout after all extras settle (socials/rival/duels etc)
-        setTimeout(()=>applyProfileLayout(data.profile?.profile_layout||[]), 300);
         injectEditPanel(name);
-        injectLayoutEditor(name);
     }catch(e){ console.warn("Profile extras:",e.message); }
-    // Re-apply layout after duel section loads
-    renderProfileDuels(name).then(()=>{
-        const layout=AUTH?.profile?.profile_layout;
-        if(layout&&layout.length) setTimeout(()=>applyProfileLayout(layout),100);
-    }).catch(()=>{});
+    renderProfileDuels(name).catch(()=>{});
     applyPeakTiers(name);
-    // Final safeguard: re-apply rank/title badge colors AFTER all extras
-    // (custom colors, layout moves) in case anything reset them
     applyRankTitleBadge(name);
 }
 async function handleUrlOnLoad(){const p=new URLSearchParams(window.location.search);const player=p.get('player');const kit=p.get('kit');const tab=p.get('tab');if(player&&DATA.Overall&&player in DATA.Overall){openProfile(player);}else if(tab==='rankings'){switchTab('rankings');}else if(tab==='hof'||tab==='testers'){switchTab(tab);}else if(tab==='duels'){switchTab('duels');}else if(kit&&kit!=='Overall'&&KIT_MAP[kit]){CURRENT_KIT=kit;document.querySelectorAll('.kit-btn').forEach(b=>{b.classList.remove('active');b.style.opacity='0.4';});const btn=[...document.querySelectorAll('.kit-btn')].find(b=>b.textContent.trim()===kit.toUpperCase());if(btn){btn.classList.add('active');btn.style.opacity='1';}document.getElementById('filterBar').style.display='none';document.getElementById('showMoreBtn').style.display='none';document.getElementById('kitBar').style.display='flex';await renderKit(kit);}}
@@ -1682,7 +1338,7 @@ function handleSearch(val){const pop=document.getElementById('searchPopup');if(!
 // Proxy URL stored as base64
 const _MP = atob("aHR0cHM6Ly9tdWx0aWNyYWZ0LXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHAvcHJveHkvZmluZC1uZWFyYnktc2VydmVycw==");
 const MTC_SERVER_CODES = ["JC5A69FB","OPL5OBPM"];
-const SRV_REFRESH_MS = 15000; // refresh every 15s
+const SRV_REFRESH_MS = 15000;
 var _srvInterval = null;
 
 function typeTextEl(el, text, speed){
@@ -1716,8 +1372,6 @@ async function fetchServerInfo(retryCount){
             var table     = card.querySelector('.srvTable');
             var tbody     = card.querySelector('.srvTableBody');
             if(!srv){
-                // Keep last known good data — don't overwrite name with an error
-                // unless we've NEVER loaded this card successfully
                 if(!nameEl.dataset.loadedOnce) nameEl.textContent = 'UNAVAILABLE';
                 return;
             }
@@ -1734,10 +1388,7 @@ async function fetchServerInfo(retryCount){
             if(table && tbody){
                 table.style.display = 'table';
                 var rows = [
-                    ['PVP',     srv.pvp ? '✓ Enabled' : '✗ Disabled'],
-                    ['REGION',  srv.country_code || '?'],
-                    ['PREMIUM', srv.premium ? '✓ Yes' : 'No'],
-                    ['DISCORD', srv.url || '—'],
+                    ['PVP', srv.pvp ? '✓ Enabled' : '✗ Disabled'],
                 ];
                 tbody.innerHTML = rows.map(function(r){
                     return '<tr>' +
@@ -1748,7 +1399,6 @@ async function fetchServerInfo(retryCount){
             }
         });
 
-        // Retry quickly if NOTHING was found yet (proxy cold start)
         if(!anyFound && retryCount < 3){
             setTimeout(()=>fetchServerInfo(retryCount+1), 1000);
         }
@@ -1791,11 +1441,10 @@ document.getElementById('infoModal').addEventListener('click', function(){
 })();
 document.addEventListener('click',e=>{ if(!e.target.closest('.search-wrap')) document.getElementById('searchPopup').style.display='none'; });
 const canvas=document.createElement('canvas');canvas.style.cssText='position:fixed;inset:0;z-index:0;pointer-events:none;';document.body.prepend(canvas);const ctx=canvas.getContext('2d');canvas.width=window.innerWidth;canvas.height=window.innerHeight;window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});let stars=[];function spawnStar(){return{x:Math.random()*canvas.width,y:-10,size:Math.random()*3+1,speed:Math.random()*8+4,drift:Math.random()*1.5-.75};}
-// Pause star spawning when tab is hidden to prevent explosion on refocus
 let _starPaused=false;
 document.addEventListener('visibilitychange',()=>{
     if(document.hidden){ _starPaused=true; }
-    else { _starPaused=false; stars=[]; } // clear accumulated stars on return
+    else { _starPaused=false; stars=[]; }
 });
 setInterval(()=>{ if(!_starPaused) for(let i=0;i<6;i++) stars.push(spawnStar()); },80);
 (function animate(){
