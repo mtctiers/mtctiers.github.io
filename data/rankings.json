@@ -685,8 +685,10 @@
     ]
   },
   "Novelty Axe": {
+    "HT1": [
+      "Game1K"
+    ],
     "LT1": [
-      "Game1K",
       "sample"
     ],
     "HT2": [
