@@ -332,12 +332,12 @@
     }
   ],
   "Emerald": {
-    "HT1": [
-      "Game1K"
-    ],
     "LT1": [
       "system1117",
       "Dream_MultiCraft"
+    ],
+    "RHT1": [
+      "Game1K"
     ],
     "RLT1": [
       "TimmyLoal"
