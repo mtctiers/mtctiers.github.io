@@ -599,12 +599,12 @@
     ]
   },
   "Diamond": {
-    "HT1": [
-      "Game1K"
-    ],
     "LT1": [
       "system1117",
       "sample"
+    ],
+    "RHT1": [
+      "Game1K"
     ],
     "HT2": [
       "TERRORRR",
