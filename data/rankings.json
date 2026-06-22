@@ -692,11 +692,11 @@
     ]
   },
   "Novelty Axe": {
+    "HT1": [
+      "Game1K"
+    ],
     "LT1": [
       "sample"
-    ],
-    "RHT1": [
-      "Game1K"
     ],
     "HT2": [
       "system1117",
