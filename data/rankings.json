@@ -372,7 +372,8 @@
       "Terminator"
     ],
     "LT3": [
-      "MENDOR"
+      "MENDOR",
+      "Solace"
     ],
     "RHT3": [
       "Bloody_Hell",
@@ -397,9 +398,6 @@
       "MGK",
       "Afdemonking",
       "Atomix"
-    ],
-    "RRLT3": [
-      "Solace"
     ]
   },
   "Emerald KB": {
@@ -591,9 +589,6 @@
     "LT3": [
       "revan"
     ],
-    "RHT3": [
-      "vort3x"
-    ],
     "HT4": [
       "Kaeye"
     ],
@@ -603,6 +598,9 @@
     ],
     "LT5": [
       "bluedigit"
+    ],
+    "RRHT3": [
+      "vort3x"
     ]
   },
   "Diamond": {
@@ -681,14 +679,16 @@
       "Bloody_Hell"
     ],
     "HT3": [
-      "LastChance",
-      "vort3x"
+      "LastChance"
     ],
     "LT3": [
       "Husky_Multicraft",
       "revan",
       "Kaeye",
       "shadow_master"
+    ],
+    "RHT3": [
+      "vort3x"
     ],
     "RLT3": [
       "skibidi1234"
