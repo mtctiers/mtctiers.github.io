@@ -721,7 +721,8 @@
     ],
     "HT3": [
       "revan",
-      "shadow_master"
+      "shadow_master",
+      "Solace"
     ],
     "LT3": [
       "Kaeye"
@@ -737,9 +738,6 @@
     ],
     "LT5": [
       "Atomix"
-    ],
-    "RRHT3": [
-      "Solace"
     ]
   },
   "Void": {
