@@ -467,3 +467,203 @@ nav {
 }
 .edit-chip:hover { background:rgba(0,238,255,0.08); border-color:var(--purple); }
 .edit-chip.empty { color:#333; border-color:#1a1a1a; cursor:default; }
+
+/* ════════════════════════════════════════════════════════════
+   PATCHES (music player, fixed kit-popup, welcome overlay)
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Floating draggable music player ───────────────────────── */
+.music-player {
+    position: fixed;
+    bottom: 70px;
+    right: 20px;
+    left: auto;
+    top: auto;
+    z-index: 2500;
+    background: #06060a;
+    border: 1.5px solid rgba(0,238,255,0.25);
+    border-radius: 10px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.5), 0 0 30px rgba(0,238,255,0.08);
+    display: flex;
+    align-items: stretch;
+    font-family: 'MultiCraftFont', monospace;
+    color: #fff;
+    min-width: 230px;
+    user-select: none;
+}
+.music-player-drag-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    background: #000;
+    color: #444;
+    cursor: grab;
+    border-radius: 9px 0 0 9px;
+    font-size: 14px;
+    letter-spacing: -2px;
+    flex-shrink: 0;
+}
+.music-player-drag-handle:active { cursor: grabbing; }
+.music-player-body {
+    flex: 1;
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+}
+.music-track-name {
+    font-size: 0.55rem;
+    font-weight: 700;
+    color: var(--theme);
+    letter-spacing: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.music-seek {
+    width: 100%;
+    height: 14px;
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--theme);
+    background: transparent;
+}
+.music-seek::-webkit-slider-runnable-track { height: 4px; background: #1a1f2e; border-radius: 2px; }
+.music-seek::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--theme); border: 2px solid #000; margin-top: -4px; cursor: pointer;
+}
+.music-seek::-moz-range-track { height: 4px; background: #1a1f2e; border-radius: 2px; }
+.music-seek::-moz-range-thumb {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--theme); border: 2px solid #000; cursor: pointer;
+}
+.music-time-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.42rem;
+    color: #444;
+    margin-top: -4px;
+}
+.music-controls { display: flex; align-items: center; gap: 8px; }
+.music-btn {
+    background: #000;
+    border: 1px solid rgba(0,238,255,0.2);
+    color: #ccc;
+    border-radius: 5px;
+    width: 28px;
+    height: 24px;
+    font-size: 0.6rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color .2s;
+}
+.music-btn:hover { border-color: var(--purple); }
+.music-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.music-btn-play {
+    background: var(--theme);
+    color: #000;
+    border-color: var(--theme);
+    width: 32px;
+}
+.music-btn-play:hover { filter: brightness(1.1); }
+
+@media (max-width: 700px) {
+    .music-player { min-width: 190px; bottom: 64px; right: 12px; }
+    .music-track-name { font-size: 0.5rem; }
+}
+
+/* ── Kit-popup clipping fix — REAL fix, requires the matching JS ──
+   The original .kit-popup is hidden and a single floating clone is
+   positioned with getBoundingClientRect() math instead (see
+   enableFixedKitPopups in index.html), so it fully escapes
+   .profile-right's overflow-y:auto. CSS alone cannot make an
+   absolutely-positioned child escape an ancestor's overflow clip —
+   this only works because the clone is moved outside that ancestor
+   in the DOM and uses position:fixed. */
+.kit-popup-fixed {
+    position: fixed;
+    z-index: 99999;
+    pointer-events: none;
+    transition: opacity 0.12s ease;
+}
+
+/* ── Welcome / click-to-enter overlay ──────────────────────── */
+.welcome-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    background: radial-gradient(circle at 50% 40%, #0a0a10 0%, #010102 70%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.welcome-overlay.dismissed {
+    display: none;
+}
+
+.welcome-overlay-box {
+    text-align: center;
+    padding: 40px;
+    animation: cyberZoom 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.welcome-overlay-logo {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 18px;
+    filter: drop-shadow(0 0 16px var(--purple));
+    animation: swordGlow 2s infinite ease-in-out;
+}
+
+.welcome-overlay-title {
+    font-family: 'MultiCraftFont', monospace;
+    font-size: 2.2rem;
+    color: #fff;
+    margin: 0 0 12px;
+    letter-spacing: 1px;
+    text-shadow: 0 0 18px var(--purple);
+}
+
+.welcome-overlay-sub {
+    font-family: 'MultiCraftFont', monospace;
+    font-size: 0.75rem;
+    color: var(--theme);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0;
+    animation: welcomePulse 1.6s ease-in-out infinite;
+}
+
+@keyframes welcomePulse {
+    0%, 100% { opacity: 0.6; }
+    50%      { opacity: 1; }
+}
+
+@media (max-width: 700px) {
+    .welcome-overlay-title { font-size: 1.5rem; }
+    .welcome-overlay-logo { width: 48px; height: 48px; }
+}
+
+/* ── Tier card sizing fix ─────────────────────────────────────
+   .tier-card previously had a fixed width:650px from the
+   Rankings-page list style, which doesn't fit the much smaller
+   kit-grid "Retired/Active player" boxes built in renderKit().
+   That selector is shared by both contexts, so the small kit-grid
+   boxes were being stretched to 650px regardless of their content.
+   This override returns the kit-grid boxes to their intended
+   inline width (200px, set via the inline style on the element
+   itself) by letting inline styles win — achieved by not fighting
+   them here, and instead giving the kit-grid context a dedicated
+   class so future styling never collides with the Rankings list
+   rows again. */
+.tier-card.kit-grid-item {
+    width: 200px;
+}

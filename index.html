@@ -19,6 +19,13 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div class="welcome-overlay" id="welcome-overlay" onclick="dismissWelcomeOverlay()">
+    <div class="welcome-overlay-box">
+        <img src="assets/mtctiers.png" alt="" class="welcome-overlay-logo">
+        <h1 class="welcome-overlay-title">Welcome to MTC TIERS!</h1>
+        <p class="welcome-overlay-sub">Click to enter...</p>
+    </div>
+</div>
 <div class="sweep-bg"></div>
 <div id="stars"></div><div id="stars2"></div><div id="stars3"></div>
 <header>
@@ -186,6 +193,24 @@
         <label class="lc-label" for="lcCode">LOGIN CODE</label>
         <input class="lc-input" id="lcCode" type="text" placeholder="••••••••" maxlength="16" autocomplete="off" spellcheck="false">
         <button class="lc-btn" id="lcSubmit" onclick="doLogin()">LOGIN</button>
+    </div>
+</div>
+
+<!-- MUSIC PLAYER -->
+<div class="music-player" id="music-player">
+    <div class="music-player-drag-handle" id="music-drag-handle">⠿</div>
+    <div class="music-player-body">
+        <div class="music-track-name" id="music-track-name">No tracks</div>
+        <input type="range" class="music-seek" id="music-seek" min="0" max="100" value="0" step="0.1">
+        <div class="music-time-row">
+            <span id="music-time-current">0:00</span>
+            <span id="music-time-duration">0:00</span>
+        </div>
+        <div class="music-controls">
+            <button class="music-btn" id="music-prev-btn" title="Previous track">⏮</button>
+            <button class="music-btn music-btn-play" id="music-play-btn" title="Play/Pause">▶</button>
+            <button class="music-btn" id="music-next-btn" title="Next track">⏭</button>
+        </div>
     </div>
 </div>
 
@@ -459,15 +484,19 @@ function applyNameStyle(el, color, style, glowHex){
     }
     if(color){
         const parsed=parseCss(color);
-        if(parsed.includes("gradient")){
-            const stops=(color.match(/#[0-9a-fA-F]{3,8}/g)||[]);
-            el.style.backgroundImage = stops.length>=2 ? `linear-gradient(90deg,${stops.join(',')})` : parsed;
+        const stops=(color.match(/#[0-9a-fA-F]{3,8}/g)||[]);
+        if(parsed.includes("gradient") && stops.length>=2){
+            el.style.backgroundImage = `linear-gradient(90deg,${stops.join(',')})`;
             el.style.backgroundSize="100% 100%";
             el.style.webkitBackgroundClip="text";
             el.style.backgroundClip="text";
             el.style.webkitTextFillColor="transparent";
             applyGlow();
             return;
+        }else if(stops.length===1){
+            // Only one real color found — this is a plain color, not a gradient,
+            // even if parseCss's pattern-match thought it looked like one.
+            el.style.color=stops[0];
         }else{
             el.style.color=color;
         }
@@ -622,7 +651,6 @@ function injectEditPanel(profileName){
         </div>`;
     left.appendChild(panel);
 
-    // Live swatch + theme preview
     const liveTheme=[
         {id:'peThemeBg',        sw:'swatchBg',     fn:v=>{
             const m=document.querySelector('.profile-modal-content');
@@ -767,7 +795,6 @@ function injectProfileExtras(name,role,profile){
         if(pts) pts.parentNode.insertBefore(row,pts);
     }
 }
-// Profile cache for rankings hover
 const _profileCache = {};
 async function getProfileCached(name){
     if(_profileCache[name]) return _profileCache[name];
@@ -846,7 +873,6 @@ function attachRowHover(row, name){
     });
 }
 
-// Tier ranking for peak-tier comparison (lower index = better)
 const TIER_RANK_ORDER = ['HT1','LT1','HT2','LT2','HT3','LT3','HT4','LT4','HT5','LT5'];
 function tierRank(t){
     if(!t) return 999;
@@ -855,7 +881,6 @@ function tierRank(t){
     return idx===-1 ? 999 : idx;
 }
 
-// Compute each kit's PEAK (best-ever) tier from full duel history
 async function computePeakTiers(playerName){
     const peaks={};
     try{
@@ -884,7 +909,6 @@ async function computePeakTiers(playerName){
     return peaks;
 }
 
-// Inject "PEAK: X" into each kit-popup
 async function applyPeakTiers(playerName){
     const peaks = await computePeakTiers(playerName);
     if(!Object.keys(peaks).length) return;
@@ -949,7 +973,6 @@ async function fetchWLRatio(playerName){
     }catch(_){}
 }
 
-// ── Custom color definitions ──────────────────────────────────────
 const COLOR_SLOTS = [
     {id:'rankBadge',      label:'RANK BADGE'},
     {id:'titleBadge',     label:'TITLE BADGE'},
@@ -1249,7 +1272,10 @@ function applyRankTitleBadge(name){
 }
 async function renderOverall(){if(CURRENT_TAB!=='rankings'&&CURRENT_TAB!=='home')return;const lbl=document.getElementById('viewLabel');const isHome=CURRENT_TAB==='home';lbl.style.display=isHome?'none':'';if(!isHome){lbl.innerText='OVERALL';lbl.style.color=KIT_MAP['Overall'].color;}document.getElementById('filterBar').style.display=isHome?'none':'flex';document.getElementById('topPlayersTitle').style.display=isHome?'block':'none';if(!isHome)document.getElementById('filterKit').style.display='';document.getElementById('kitBar').style.display=(!isHome&&SHOW_ALL)?'flex':'none';const dl=document.getElementById('displayList');dl.innerHTML='';dl.classList.add('overall-mode');const podium=document.getElementById('podiumWrap');podium.innerHTML='';const smBtn=document.getElementById('showMoreBtn');const{entries,kitMode}=buildFilteredOverall();if(entries.length===0){podium.style.display='none';smBtn.style.display='none';dl.innerHTML=`<div class="empty-state"><h2>NO PLAYERS MATCH FILTERS</h2></div>`;return;}if(SHOW_ALL){podium.style.display='none';}else{const top3=entries.slice(0,3);await prewarmSkins(top3.map(e=>e[0]));podium.style.display='flex';for(let i=0;i<top3.length;i++){const[name,pts]=top3[i];const rank=i+1;const rankColors=['var(--gold)','#aaa','#cd7f32'];const{title:pTitle,color:pColor}=getRankTitle(pts,rank);const card=document.createElement('div');card.className=`podium-card rank-${rank}`;card.onclick=()=>{playBtnSound();openProfile(name);};card.innerHTML=`<div class="podium-name">${name}</div><div class="podium-skin-wrap"><img src="${skinSrc(name)}" alt="${name}"></div><div class="podium-platform"><div class="podium-pts-badge" style="border-color:${rankColors[i]};color:${rankColors[i]};">${pts} PTS</div><span class="podium-rank-num">${rank}</span></div><div style="font-family:'MultiCraftFont',monospace;font-size:0.45rem;color:${pColor};border:1px solid ${pColor};border-radius:20px;padding:2px 8px;margin-top:6px;letter-spacing:1px;background:${pColor}18;text-align:center;">${pTitle}</div>`;card.style.animation=`podiumDrop 0.5s cubic-bezier(0.22,1,0.36,1) ${i*0.12}s both`;podium.appendChild(card);}}if(isHome){document.getElementById('topPlayersTitle').style.display='block';const homeList=document.createElement('div');homeList.id='overallList';const homeRows=entries.slice(3,3+PREVIEW);await prewarmSkins(homeRows.map(e=>e[0]));for(let i=0;i<homeRows.length;i++){const[name,pts]=homeRows[i];const rank=i+4;const row=document.createElement('div');row.className='ol-row';row.onclick=()=>{playBtnSound();openProfile(name);};row.style.animationDelay=`${i*0.08}s`;row.innerHTML=`<span class="ol-rank">${rank}</span><div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div><div class="ol-name-block"><div class="ol-name" style="font-family:'MultiCraftFont',monospace;">${name}</div>${getTags(name)}<div style="margin-top:4px;">${titleBadgeHtml(pts,rank)}</div></div><div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>`;attachRowHover(row, name);homeList.appendChild(row);}dl.appendChild(homeList);if(entries.length>3+PREVIEW){const flDiv=document.createElement('div');flDiv.style.cssText="font-family:'MultiCraftFont',monospace;font-size:0.65rem;color:#555;cursor:pointer;margin-top:10px;margin-bottom:10px;letter-spacing:1px;text-align:center;width:100%;transition:color 0.2s;";flDiv.textContent='FULL LEADERBOARD ▶';flDiv.onmouseenter=()=>flDiv.style.color='var(--purple)';flDiv.onmouseleave=()=>flDiv.style.color='#555';flDiv.onclick=()=>switchTab('rankings');dl.appendChild(flDiv);}document.getElementById('showMoreBtn').style.display='none';return;}const listWrap=document.createElement('div');listWrap.id='overallList';const rowEntries=SHOW_ALL?entries:entries.slice(3,3+PREVIEW);await prewarmSkins(rowEntries.map(e=>e[0]));for(let i=0;i<rowEntries.length;i++){const[name,pts,tier]=rowEntries[i];const rank=SHOW_ALL?i+1:i+4;const isFullLB=SHOW_ALL;const row=document.createElement('div');row.className='ol-row'+(isFullLB?' ol-row-full':'');row.onclick=()=>{playBtnSound();openProfile(name);};if(isFullLB){const p=DATA.Players?.find(x=>x.name===name);const regCode=p?.region||'?';const regColor=REGION_MAP[regCode]?.color||'#555';const devCode=p?.device||'?';const devColor=DEVICE_MAP[devCode]?.color||'#555';let kitIconsHtml='<div class="ol-kit-icons">';Object.entries(KIT_MAP).forEach(([kname,{img,color}])=>{if(kname==='Overall')return;let tierLabel='',tierColor='#2a2a2a';if(DATA[kname]){for(let t in DATA[kname]){if(DATA[kname][t].includes(name)){const isR=t.startsWith('R');tierLabel=isR?t.slice(1):t;tierColor=isR?'#444':color;break;}}}kitIconsHtml+=`<div class="ol-kit-icon" style="border-color:${tierColor};opacity:${tierLabel?'1':'0.25'};"><img src="${img}" style="width:20px;height:20px;image-rendering:pixelated;display:block;"><span class="ol-kit-icon-label" style="color:${tierColor};font-size:0.5rem;">${tierLabel||''}</span></div>`;});kitIconsHtml+='</div>';row.innerHTML=`<span class="ol-rank">${rank}</span><div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div><div class="ol-name-block"><div class="ol-name" style="font-family:'MultiCraftFont',monospace;">${name}</div><div style="margin-top:4px;">${titleBadgeHtml(pts,rank)}</div></div><div class="tag-wrap has-hover" style="position:relative;"><span class="ol-region-badge" style="background:${regColor}22;border:1px solid ${regColor};color:${regColor};cursor:help;">${regCode}</span><div class="tag-popup" style="border-color:${regColor};">${REGION_MAP[regCode]?.label||regCode}</div></div><div class="tag-wrap has-hover" style="position:relative;"><span class="ol-region-badge" style="background:${devColor}22;border:1px solid ${devColor};color:${devColor};cursor:help;">${devCode}</span><div class="tag-popup" style="border-color:${devColor};">${DEVICE_MAP[devCode]?.label||devCode}</div></div>${kitIconsHtml}<div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>`;}else{row.innerHTML=`<span class="ol-rank">${rank}</span><div class="ol-skin"><img src="${skinSrc(name)}" alt="${name}"></div><div class="ol-name-block"><div class="ol-name">${name}</div>${getTags(name)}<div style="margin-top:4px;">${titleBadgeHtml(pts,rank)}</div></div>${kitMode&&tier?`<span class="ol-tier-badge">${tier.startsWith('R')?'Retired '+tier.slice(1):tier}</span>`:''}<div class="ol-pts"><span class="ol-pts-icon"></span>${pts} PTS</div>`;}attachRowHover(row, name);
         row.style.animationDelay=`${i*0.06}s`;listWrap.appendChild(row);}dl.appendChild(listWrap);if(!isHome&&entries.length>3+PREVIEW){smBtn.style.display='block';smBtn.textContent=SHOW_ALL?'▲ SHOW LESS':'FULL LEADERBOARD ▶';}else{smBtn.style.display='none';}}
-async function renderKit(kit){if(CURRENT_TAB!=='rankings'&&CURRENT_TAB!=='home')return;const{region,device,retired}=getFilters();const color=KIT_MAP[kit]?.color||'var(--gold)';const lbl=document.getElementById('viewLabel');lbl.innerText=kit.toUpperCase();lbl.style.color=color;document.getElementById('filterBar').style.display='flex';document.getElementById('filterKit').style.display='none';document.getElementById('topPlayersTitle').style.display='none';document.getElementById('podiumWrap').style.display='none';document.getElementById('showMoreBtn').style.display='none';const dl=document.getElementById('displayList');dl.innerHTML='';dl.classList.remove('overall-mode');const kitPlayerStatus={};for(let k in DATA){if(k==='Overall'||k==='Players')continue;for(let t in DATA[k]){const isR=t.startsWith('R');DATA[k][t].forEach(name=>{if(!kitPlayerStatus[name])kitPlayerStatus[name]={active:false,retired:false};if(isR)kitPlayerStatus[name].retired=true;else kitPlayerStatus[name].active=true;});}}function kitPlayerVisible(name){const p=DATA.Players?.find(x=>x.name===name);if(region&&(!p||p.region!==region))return false;if(device&&(!p||p.device!==device))return false;if(retired==='active'){const s=kitPlayerStatus[name];if(!s||!s.active)return false;}else if(retired==='retired'){const s=kitPlayerStatus[name];if(!s||!s.retired||s.active)return false;}return true;}const allKitPlayers=[];if(DATA[kit]){for(let t in DATA[kit])DATA[kit][t].forEach(n=>{if(!allKitPlayers.includes(n))allKitPlayers.push(n);})}await prewarmSkins(allKitPlayers);const kitTop=[];if(DATA[kit]){const tierOrder2=['HT1','RHT1','LT1','RLT1','HT2','RHT2','LT2','RLT2','HT3','RHT3','LT3','RLT3','HT4','RHT4','LT4','RLT4','HT5','RHT5','LT5','RLT5'];for(const t of tierOrder2){if(retired==='active'&&t.startsWith('R'))continue;if(retired==='retired'&&!t.startsWith('R'))continue;if(DATA[kit][t])DATA[kit][t].forEach(n=>{if(kitTop.length<3&&kitPlayerVisible(n))kitTop.push({name:n,tier:t});});if(kitTop.length>=3)break;}}if(kitTop.length>0){const mp=document.createElement('div');mp.id='podiumWrap2';mp.style.cssText='display:flex;justify-content:center;align-items:flex-end;gap:16px;margin-bottom:28px;padding:0 12px;';for(let i=0;i<kitTop.length;i++){const{name,tier}=kitTop[i];const rank=i+1;const rankColors=['var(--gold)','#aaa','#cd7f32'];const card=document.createElement('div');card.className=`podium-card rank-${rank}`;card.onclick=()=>{playBtnSound();openProfile(name);};card.innerHTML=`<div class="podium-name">${name}</div><div class="podium-skin-wrap"><img src="${skinSrc(name)}" alt="${name}"></div><div class="podium-platform"><div class="podium-pts-badge" style="border-color:${rankColors[i]};color:${rankColors[i]};">${tier}</div><span class="podium-rank-num">${rank}</span></div>`;card.style.animation=`podiumDrop 0.5s cubic-bezier(0.22,1,0.36,1) ${i*0.12}s both`;mp.appendChild(card);}dl.appendChild(mp);}const grid=document.createElement('div');grid.style.cssText="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:24px;";let anyPlayers=false;const TIER_ORDER=['HT1','RHT1','LT1','RLT1','HT2','RHT2','LT2','RLT2','HT3','RHT3','LT3','RLT3','HT4','RHT4','LT4','RLT4','HT5','RHT5','LT5','RLT5'];if(DATA[kit]){["T1","T2","T3","T4","T5"].forEach(lvl=>{const lvlNum=lvl.slice(1);const orderedTiers=TIER_ORDER.filter(t=>{const base=t.startsWith('R')?t.slice(1):t;return base.slice(-1)===lvlNum;});let col=`<div style="min-width:200px;"><div style="color:var(--purple);border-bottom:1px solid var(--border);margin-bottom:10px;text-align:center;font-family:'MultiCraftFont';font-size:0.9rem;">${lvl}</div>`;let has=false;orderedTiers.forEach(t=>{if(!DATA[kit][t])return;if(retired==='active'&&t.startsWith('R'))return;if(retired==='retired'&&!t.startsWith('R'))return;DATA[kit][t].forEach(name=>{if(!kitPlayerVisible(name))return;has=true;anyPlayers=true;const isR=t.startsWith('R');const label=isR?'Retired '+t.substring(1):t;const lc=isR?'var(--grey)':'var(--gold)';col+=`<div class="tier-card clickable" style="width:200px;padding:12px;display:flex;align-items:center;gap:10px;" onclick="openProfile('${name}')"><img src="${skinSrc(name)}" alt="${name}" style="width:36px;height:36px;image-rendering:pixelated;object-fit:cover;object-position:top;transform:scale(1.3);transform-origin:top;flex-shrink:0;"><div><div style="font-size:0.9rem;font-weight:bold;">${name}</div>${getTags(name)}<div style="font-size:0.6rem;color:${lc};margin-top:4px;font-weight:bold;">${label}</div></div></div>`;});});if(has){col+=`</div>`;grid.innerHTML+=col;}});}if(!anyPlayers){dl.innerHTML=`<div class="empty-state"><h2>NO RANKED PLAYERS</h2></div>`;return;}dl.appendChild(grid);}
+async function renderKit(kit){if(CURRENT_TAB!=='rankings'&&CURRENT_TAB!=='home')return;const{region,device,retired}=getFilters();const color=KIT_MAP[kit]?.color||'var(--gold)';const lbl=document.getElementById('viewLabel');lbl.innerText=kit.toUpperCase();lbl.style.color=color;document.getElementById('filterBar').style.display='flex';document.getElementById('filterKit').style.display='none';document.getElementById('topPlayersTitle').style.display='none';document.getElementById('podiumWrap').style.display='none';document.getElementById('showMoreBtn').style.display='none';const dl=document.getElementById('displayList');dl.innerHTML='';dl.classList.remove('overall-mode');const kitPlayerStatus={};for(let k in DATA){if(k==='Overall'||k==='Players')continue;for(let t in DATA[k]){const isR=t.startsWith('R');DATA[k][t].forEach(name=>{if(!kitPlayerStatus[name])kitPlayerStatus[name]={active:false,retired:false};if(isR)kitPlayerStatus[name].retired=true;else kitPlayerStatus[name].active=true;});}}function kitPlayerVisible(name){const p=DATA.Players?.find(x=>x.name===name);if(region&&(!p||p.region!==region))return false;if(device&&(!p||p.device!==device))return false;if(retired==='active'){const s=kitPlayerStatus[name];if(!s||!s.active)return false;}else if(retired==='retired'){const s=kitPlayerStatus[name];if(!s||!s.retired||s.active)return false;}return true;}const allKitPlayers=[];if(DATA[kit]){for(let t in DATA[kit])DATA[kit][t].forEach(n=>{if(!allKitPlayers.includes(n))allKitPlayers.push(n);})}await prewarmSkins(allKitPlayers);const kitTop=[];if(DATA[kit]){const tierOrder2=['HT1','RHT1','LT1','RLT1','HT2','RHT2','LT2','RLT2','HT3','RHT3','LT3','RLT3','HT4','RHT4','LT4','RLT4','HT5','RHT5','LT5','RLT5'];for(const t of tierOrder2){if(retired==='active'&&t.startsWith('R'))continue;if(retired==='retired'&&!t.startsWith('R'))continue;if(DATA[kit][t])DATA[kit][t].forEach(n=>{if(kitTop.length<3&&kitPlayerVisible(n))kitTop.push({name:n,tier:t});});if(kitTop.length>=3)break;}}if(kitTop.length>0){const mp=document.createElement('div');mp.id='podiumWrap2';mp.style.cssText='display:flex;justify-content:center;align-items:flex-end;gap:16px;margin-bottom:28px;padding:0 12px;';for(let i=0;i<kitTop.length;i++){const{name,tier}=kitTop[i];const rank=i+1;const rankColors=['var(--gold)','#aaa','#cd7f32'];const card=document.createElement('div');card.className=`podium-card rank-${rank}`;card.onclick=()=>{playBtnSound();openProfile(name);};card.innerHTML=`<div class="podium-name">${name}</div><div class="podium-skin-wrap"><img src="${skinSrc(name)}" alt="${name}"></div><div class="podium-platform"><div class="podium-pts-badge" style="border-color:${rankColors[i]};color:${rankColors[i]};">${tier}</div><span class="podium-rank-num">${rank}</span></div>`;card.style.animation=`podiumDrop 0.5s cubic-bezier(0.22,1,0.36,1) ${i*0.12}s both`;mp.appendChild(card);}dl.appendChild(mp);}const grid=document.createElement('div');grid.style.cssText="display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:24px;";let anyPlayers=false;const TIER_ORDER=['HT1','RHT1','LT1','RLT1','HT2','RHT2','LT2','RLT2','HT3','RHT3','LT3','RLT3','HT4','RHT4','LT4','RLT4','HT5','RHT5','LT5','RLT5'];if(DATA[kit]){["T1","T2","T3","T4","T5"].forEach(lvl=>{const lvlNum=lvl.slice(1);const orderedTiers=TIER_ORDER.filter(t=>{const base=t.startsWith('R')?t.slice(1):t;return base.slice(-1)===lvlNum;});let col=`<div style="min-width:200px;"><div style="color:var(--purple);border-bottom:1px solid var(--border);margin-bottom:10px;text-align:center;font-family:'MultiCraftFont';font-size:0.9rem;">${lvl}</div>`;let has=false;orderedTiers.forEach(t=>{if(!DATA[kit][t])return;if(retired==='active'&&t.startsWith('R'))return;if(retired==='retired'&&!t.startsWith('R'))return;DATA[kit][t].forEach(name=>{if(!kitPlayerVisible(name))return;has=true;anyPlayers=true;const isR=t.startsWith('R');const label=isR?'Retired '+t.substring(1):t;
+const lc=isR?'var(--grey)':'var(--gold)';
+col+=`<div class="tier-card clickable" style="width:200px;padding:12px;display:flex;align-items:center;gap:10px;" onclick="openProfile('${name}')"><img src="${skinSrc(name)}" alt="${name}" style="width:36px;height:36px;image-rendering:pixelated;object-fit:cover;object-position:top;transform:scale(1.3);transform-origin:top;flex-shrink:0;"><div><div style="font-size:0.9rem;font-weight:bold;">${name}</div>${getTags(name)}<div class="rk-tier-label" data-retired="${isR?'1':'0'}" style="font-size:0.6rem;color:${lc};margin-top:4px;font-weight:bold;">${label}</div></div></div>`;});});if(has){col+=`</div>`;grid.innerHTML+=col;}});}if(!anyPlayers){dl.innerHTML=`<div class="empty-state"><h2>NO RANKED PLAYERS</h2></div>`;return;}dl.appendChild(grid);}
+
 async function switchTab(tab){
     playBtnSound(); CURRENT_TAB=tab;
     document.querySelectorAll('.nav-link').forEach(n=>n.classList.remove('active'));
@@ -1299,6 +1325,70 @@ function closeProfileModal(){
     setUrl({player:''});
 }
 function fireConfetti(){const colors=['#ffd700','#fff','var(--theme)','#ff00ff','#00eeff','#ff6a00'];const canvas=document.createElement('canvas');canvas.style.cssText='position:fixed;inset:0;z-index:9999;pointer-events:none;';canvas.width=window.innerWidth;canvas.height=window.innerHeight;document.body.appendChild(canvas);const ctx=canvas.getContext('2d');const pieces=Array.from({length:120},()=>({x:Math.random()*canvas.width,y:-20-Math.random()*200,r:Math.random()*7+3,color:colors[Math.floor(Math.random()*colors.length)],vx:(Math.random()-.5)*4,vy:Math.random()*4+2,spin:Math.random()*.3-.15,angle:Math.random()*Math.PI*2,shape:Math.random()>.5?'rect':'circle',w:Math.random()*10+5,h:Math.random()*5+3,alpha:1}));const start=performance.now();const duration=2800;function draw(now){const elapsed=now-start;ctx.clearRect(0,0,canvas.width,canvas.height);pieces.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.08;p.angle+=p.spin;p.alpha=Math.max(0,1-(elapsed/duration)*1.2);ctx.globalAlpha=p.alpha;ctx.fillStyle=p.color;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.angle);if(p.shape==='rect'){ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);}else{ctx.beginPath();ctx.arc(0,0,p.r,0,Math.PI*2);ctx.fill();}ctx.restore();});ctx.globalAlpha=1;if(elapsed<duration)requestAnimationFrame(draw);else canvas.remove();}requestAnimationFrame(draw);}
+
+/* ══════════════════════════════════════════════════════
+   FIXED-POSITION KIT POPUPS (no more clipping)
+   Converts each .kit-popup to position:fixed and computes its
+   coordinates on hover, so it escapes .profile-right's
+   overflow-y:auto instead of being clipped by it.
+══════════════════════════════════════════════════════ */
+let _fixedPopupEl = null;
+
+function enableFixedKitPopups(){
+    // Single shared floating popup element, reused for whichever item is hovered.
+    if(!_fixedPopupEl){
+        _fixedPopupEl = document.createElement('div');
+        _fixedPopupEl.className = 'kit-popup kit-popup-fixed';
+        document.body.appendChild(_fixedPopupEl);
+    }
+    _fixedPopupEl.style.visibility = 'hidden';
+    _fixedPopupEl.style.opacity = '0';
+
+    document.querySelectorAll('#pTiers .p-kit-item').forEach(item=>{
+        const sourcePopup = item.querySelector('.kit-popup');
+        if(!sourcePopup || sourcePopup.classList.contains('kit-popup-fixed')) return;
+
+        // Hide the original (it stays in the DOM so other code that reads its
+        // contents, like applyPeakTiers/applyCustomColors, keeps working).
+        sourcePopup.style.visibility = 'hidden';
+        sourcePopup.style.opacity = '0';
+        sourcePopup.style.pointerEvents = 'none';
+
+        item.addEventListener('mouseenter', ()=>{
+            const liveSource = item.querySelector('.kit-popup:not(.kit-popup-fixed)');
+            if(!liveSource) return;
+            _fixedPopupEl.innerHTML = liveSource.innerHTML;
+            _fixedPopupEl.style.borderColor = liveSource.style.borderColor || '';
+
+            const rect = item.getBoundingClientRect();
+            _fixedPopupEl.style.visibility = 'visible';
+            _fixedPopupEl.style.opacity = '1';
+            _fixedPopupEl.style.position = 'fixed';
+            _fixedPopupEl.style.left = '0px';
+            _fixedPopupEl.style.top = '0px';
+            _fixedPopupEl.style.transform = 'none';
+
+            // Measure after making visible so offsetWidth/Height are accurate.
+            const popRect = _fixedPopupEl.getBoundingClientRect();
+            let left = rect.left + rect.width / 2 - popRect.width / 2;
+            let top = rect.top - popRect.height - 10;
+
+            // Keep it on-screen horizontally.
+            left = Math.max(8, Math.min(left, window.innerWidth - popRect.width - 8));
+            // If there's no room above, show it below instead.
+            if(top < 8) top = rect.bottom + 10;
+
+            _fixedPopupEl.style.left = `${left}px`;
+            _fixedPopupEl.style.top = `${top}px`;
+        });
+
+        item.addEventListener('mouseleave', ()=>{
+            _fixedPopupEl.style.visibility = 'hidden';
+            _fixedPopupEl.style.opacity = '0';
+        });
+    });
+}
+
 async function openProfile(name){
     playBtnSound();
     if(!(name in DATA.Overall)) return;
@@ -1316,6 +1406,7 @@ async function openProfile(name){
     let ranked=[],unranked=[];
     Object.keys(KIT_MAP).forEach(k=>{if(k==="Overall")return;let found=false,display="",color="var(--grey)";const img=KIT_MAP[k]?.img;if(DATA[k]){for(let t in DATA[k]){if(DATA[k][t].includes(name)){found=true;const isR=t.startsWith('R');display=isR?'Retired '+t.substring(1):t;color=isR?'var(--grey)':'var(--gold)';break;}}}const html=`<div class="p-kit-item"><div class="kit-popup" style="border-color:${color}"><span style="color:${color}">${found?display:"UNRANKED"}</span><br><span style="color:#666">${k}</span></div><div class="p-kit-circle" style="border-color:${found?color:'#222'};opacity:${found?'1':'0.3'};"><img src="${img}"></div><div class="p-kit-tier-label" style="color:${color};">${found?display:"—"}</div></div>`;if(found)ranked.push(html);else unranked.push(html);});
     document.getElementById('pTiers').innerHTML=[...ranked,...unranked].map((h,i)=>h.replace('<div class="p-kit-item">',`<div class="p-kit-item" style="animation:kitCircleIn 0.4s ease-out ${i*0.05}s both;">`)).join('');
+    enableFixedKitPopups();
     const skinWrap=document.getElementById('pSkin'); const skinImg=document.getElementById('pSkinImg');
     hasSkin(name).then(()=>{ skinImg.src=skinSrc(name); skinWrap.style.display='flex'; });
     setUrl({player:name});
@@ -1335,7 +1426,6 @@ async function handleUrlOnLoad(){const p=new URLSearchParams(window.location.sea
 function copyProfileLink(){const url=new URL(window.location.href);url.searchParams.set('player',document.getElementById('pName').innerText.trim());navigator.clipboard.writeText(url.toString()).then(()=>{const btn=document.getElementById('profileCopyBtn');btn.textContent='✓';btn.style.borderColor='var(--purple)';btn.style.color='var(--purple)';setTimeout(()=>{btn.textContent='⧉';btn.style.borderColor='';btn.style.color='';},1500);});}
 function setUrl(params){const u=new URL(window.location.href);Object.entries(params).forEach(([k,v])=>v?u.searchParams.set(k,v):u.searchParams.delete(k));window.history.replaceState({},'',u);}
 function handleSearch(val){const pop=document.getElementById('searchPopup');if(!val){pop.style.display='none';return;}const matches=Object.keys(DATA.Overall||{}).filter(n=>n.toLowerCase().includes(val.toLowerCase())).slice(0,5);pop.innerHTML=matches.map(m=>`<div class="search-item" onclick="openProfile('${m}');document.getElementById('searchPopup').style.display='none';"><b>${m}</b><span style="color:var(--purple);font-size:0.5rem;">VIEW PROFILE</span></div>`).join('')||'';pop.style.display=matches.length?'block':'none';}
-// Proxy URL stored as base64
 const _MP = atob("aHR0cHM6Ly9tdWx0aWNyYWZ0LXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHAvcHJveHkvZmluZC1uZWFyYnktc2VydmVycw==");
 const MTC_SERVER_CODES = ["JC5A69FB","OPL5OBPM"];
 const SRV_REFRESH_MS = 15000;
@@ -1433,8 +1523,182 @@ function openInfo(){
 document.getElementById('infoModal').addEventListener('click', function(){
     if(_srvInterval){ clearInterval(_srvInterval); _srvInterval=null; }
 });
+/* ══════════════════════════════════════════════════════
+   MUSIC PLAYER
+   - 1 track  → loops forever
+   - 2+ tracks → auto-advances to the next on end
+   - Track name shown = filename without ".mp3", case preserved exactly
+   - Reads audio/tracklist.json for the list of files to play
+══════════════════════════════════════════════════════ */
+let MUSIC_TRACKS = [];
+let _musicIdx = 0;
+const musicAudio = new Audio();
+musicAudio.volume = 0.6;
+
+function musicTrackNameFromFile(filename){
+    return filename.replace(/\.mp3$/i, '');
+}
+
+async function loadMusicTracklist(){
+    try{
+        const res = await fetch('audio/tracklist.json');
+        const data = await res.json();
+        MUSIC_TRACKS = (data.tracks || []).filter(Boolean);
+    }catch(e){
+        MUSIC_TRACKS = [];
+    }
+    setupMusicPlayer();
+}
+
+function setupMusicPlayer(){
+    const nameEl    = document.getElementById('music-track-name');
+    const playBtn   = document.getElementById('music-play-btn');
+    const prevBtn   = document.getElementById('music-prev-btn');
+    const nextBtn   = document.getElementById('music-next-btn');
+    const playerEl  = document.getElementById('music-player');
+    const seekEl    = document.getElementById('music-seek');
+    const curTimeEl = document.getElementById('music-time-current');
+    const durTimeEl = document.getElementById('music-time-duration');
+
+    if(!MUSIC_TRACKS.length){
+        nameEl.textContent = 'No tracks';
+        playBtn.disabled = true;
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+        seekEl.disabled = true;
+        return;
+    }
+
+    musicAudio.loop = MUSIC_TRACKS.length === 1;
+
+    musicAudio.addEventListener('ended', ()=>{
+        if(MUSIC_TRACKS.length > 1){
+            _musicIdx = (_musicIdx + 1) % MUSIC_TRACKS.length;
+            loadMusicTrack(_musicIdx, true);
+        }
+    });
+
+    prevBtn.onclick = ()=>{
+        if(MUSIC_TRACKS.length < 2) return;
+        _musicIdx = (_musicIdx - 1 + MUSIC_TRACKS.length) % MUSIC_TRACKS.length;
+        loadMusicTrack(_musicIdx, true);
+    };
+    nextBtn.onclick = ()=>{
+        if(MUSIC_TRACKS.length < 2) return;
+        _musicIdx = (_musicIdx + 1) % MUSIC_TRACKS.length;
+        loadMusicTrack(_musicIdx, true);
+    };
+    prevBtn.disabled = MUSIC_TRACKS.length < 2;
+    nextBtn.disabled = MUSIC_TRACKS.length < 2;
+
+    playBtn.onclick = ()=>{
+        if(musicAudio.paused) musicAudio.play().catch(()=>{});
+        else musicAudio.pause();
+    };
+    musicAudio.addEventListener('play',  ()=>{ playBtn.textContent='⏸'; });
+    musicAudio.addEventListener('pause', ()=>{ playBtn.textContent='▶'; });
+
+    const formatTime = (secs)=>{
+        if(!isFinite(secs) || secs < 0) return '0:00';
+        const m = Math.floor(secs/60);
+        const s = Math.floor(secs%60).toString().padStart(2,'0');
+        return `${m}:${s}`;
+    };
+    musicAudio.addEventListener('loadedmetadata', ()=>{
+        seekEl.max = musicAudio.duration || 0;
+        durTimeEl.textContent = formatTime(musicAudio.duration);
+    });
+    let isScrubbing = false;
+    musicAudio.addEventListener('timeupdate', ()=>{
+        if(isScrubbing) return;
+        seekEl.value = musicAudio.currentTime;
+        curTimeEl.textContent = formatTime(musicAudio.currentTime);
+    });
+    seekEl.addEventListener('input', ()=>{
+        isScrubbing = true;
+        curTimeEl.textContent = formatTime(parseFloat(seekEl.value));
+    });
+    seekEl.addEventListener('change', ()=>{
+        musicAudio.currentTime = parseFloat(seekEl.value);
+        isScrubbing = false;
+    });
+
+    loadMusicTrack(_musicIdx, false);
+    makeMusicPlayerDraggable(playerEl, document.getElementById('music-drag-handle'));
+    attemptMusicAutoplay();
+}
+
+function attemptMusicAutoplay(){
+    let fallbackArmed = false;
+    const armFallback = ()=>{
+        if(fallbackArmed) return;
+        fallbackArmed = true;
+        const startOnFirstInteraction = ()=>{
+            musicAudio.play().catch(()=>{});
+            document.removeEventListener('click', startOnFirstInteraction);
+            document.removeEventListener('keydown', startOnFirstInteraction);
+            document.removeEventListener('touchstart', startOnFirstInteraction);
+        };
+        document.addEventListener('click', startOnFirstInteraction, {once:true});
+        document.addEventListener('keydown', startOnFirstInteraction, {once:true});
+        document.addEventListener('touchstart', startOnFirstInteraction, {once:true});
+    };
+
+    const playPromise = musicAudio.play();
+    if(playPromise && typeof playPromise.catch === 'function'){
+        playPromise.catch(armFallback);
+    }
+    // Some browsers neither resolve nor reject promptly (or return undefined
+    // entirely on older engines) when blocking autoplay — double-check actual
+    // playback state shortly after, and arm the fallback if it never started.
+    setTimeout(()=>{
+        if(musicAudio.paused) armFallback();
+    }, 600);
+}
+
+function loadMusicTrack(index, autoplay){
+    const nameEl = document.getElementById('music-track-name');
+    const filename = MUSIC_TRACKS[index];
+    musicAudio.src = `audio/${filename}`;
+    nameEl.textContent = musicTrackNameFromFile(filename);
+    if(autoplay) musicAudio.play().catch(()=>{});
+}
+
+function makeMusicPlayerDraggable(el, handle){
+    let isDragging = false, offsetX = 0, offsetY = 0;
+    const startDrag = (clientX, clientY)=>{
+        isDragging = true;
+        const rect = el.getBoundingClientRect();
+        offsetX = clientX - rect.left;
+        offsetY = clientY - rect.top;
+    };
+    const moveDrag = (clientX, clientY)=>{
+        if(!isDragging) return;
+        const x = clientX - offsetX, y = clientY - offsetY;
+        const maxX = window.innerWidth - el.offsetWidth;
+        const maxY = window.innerHeight - el.offsetHeight;
+        el.style.left = `${Math.max(0, Math.min(x, maxX))}px`;
+        el.style.top  = `${Math.max(0, Math.min(y, maxY))}px`;
+        el.style.right = 'auto';
+        el.style.bottom = 'auto';
+    };
+    const endDrag = ()=>{ isDragging = false; };
+    handle.addEventListener('mousedown', (e)=>{ startDrag(e.clientX, e.clientY); e.preventDefault(); });
+    document.addEventListener('mousemove', (e)=> moveDrag(e.clientX, e.clientY));
+    document.addEventListener('mouseup', endDrag);
+    handle.addEventListener('touchstart', (e)=>{ const t=e.touches[0]; startDrag(t.clientX, t.clientY); }, {passive:true});
+    document.addEventListener('touchmove', (e)=>{ const t=e.touches[0]; moveDrag(t.clientX, t.clientY); }, {passive:true});
+    document.addEventListener('touchend', endDrag);
+}
+
+function dismissWelcomeOverlay(){
+    const overlay = document.getElementById('welcome-overlay');
+    if(overlay) overlay.classList.add('dismissed');
+}
+document.addEventListener('keydown', dismissWelcomeOverlay, {once:true});
 
 (async()=>{
+    loadMusicTracklist(); // fire immediately, in parallel — don't wait on auth/rankings
     await restoreSession();
     await load();
     await handleUrlOnLoad();
