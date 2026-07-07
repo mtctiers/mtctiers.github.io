@@ -329,6 +329,11 @@
       "name": "sample",
       "region": "AS",
       "device": "TP"
+    },
+    {
+      "name": "-_Hades_-",
+      "region": "NA",
+      "device": "MK"
     }
   ],
   "Emerald": {
