@@ -377,14 +377,14 @@
       "-_Hades_-"
     ],
     "LT3": [
-      "MENDOR",
-      "Solace"
+      "MENDOR"
     ],
     "RHT3": [
       "Mane"
     ],
     "RLT3": [
-      "vort3x"
+      "vort3x",
+      "Solace"
     ],
     "HT4": [
       "FarXD",
@@ -516,14 +516,16 @@
       "CJSHORT",
       "RayValidd",
       "Rangee",
-      "amjad",
-      "Solace"
+      "amjad"
     ],
     "LT3": [
       "Herobrine",
       "Kaeye",
       "revan",
       "Redistdrext"
+    ],
+    "RHT3": [
+      "Solace"
     ],
     "HT4": [
       "shadow_master",
@@ -651,7 +653,9 @@
     ],
     "LT3": [
       "Kaeye",
-      "shadow_master",
+      "shadow_master"
+    ],
+    "RLT3": [
       "Solace"
     ],
     "HT4": [
