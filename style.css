@@ -667,3 +667,26 @@ nav {
 .tier-card.kit-grid-item {
     width: 200px;
 }
+
+.profile-embed-btn { 
+    position: absolute; 
+    bottom: 12px; 
+    right: 48px; /* Offset so it sits right next to the copy button */
+    background: #111; 
+    border: 1px solid #333; 
+    color: #888; 
+    border-radius: 50%; 
+    width: 28px; 
+    height: 28px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer; 
+    font-size: 0.75rem; 
+    z-index: 10; 
+    transition: border-color .2s, color .2s; 
+}
+.profile-embed-btn:hover { 
+    border-color: var(--purple); 
+    color: #fff; 
+}

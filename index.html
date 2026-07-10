@@ -152,6 +152,7 @@
 <div id="profileModal" class="modal-overlay" onclick="closeProfileModal()">
     <div class="profile-modal-content" onclick="event.stopPropagation()">
         <button class="profile-close-btn" onclick="closeProfileModal()">✕</button>
+        <button class="profile-embed-btn" id="profileEmbedBtn" onclick="copyEmbedCode()" title="Copy embed code">🗔</button>
         <button class="profile-copy-btn" id="profileCopyBtn" onclick="copyProfileLink()">⧉</button>
         <div class="profile-left">
             <div id="pBadgeRow" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
@@ -1424,6 +1425,69 @@ async function openProfile(name){
 }
 async function handleUrlOnLoad(){const p=new URLSearchParams(window.location.search);const player=p.get('player');const kit=p.get('kit');const tab=p.get('tab');if(player&&DATA.Overall&&player in DATA.Overall){openProfile(player);}else if(tab==='rankings'){switchTab('rankings');}else if(tab==='hof'||tab==='testers'){switchTab(tab);}else if(tab==='duels'){switchTab('duels');}else if(kit&&kit!=='Overall'&&KIT_MAP[kit]){CURRENT_KIT=kit;document.querySelectorAll('.kit-btn').forEach(b=>{b.classList.remove('active');b.style.opacity='0.4';});const btn=[...document.querySelectorAll('.kit-btn')].find(b=>b.textContent.trim()===kit.toUpperCase());if(btn){btn.classList.add('active');btn.style.opacity='1';}document.getElementById('filterBar').style.display='none';document.getElementById('showMoreBtn').style.display='none';document.getElementById('kitBar').style.display='flex';await renderKit(kit);}}
 function copyProfileLink(){const url=new URL(window.location.href);url.searchParams.set('player',document.getElementById('pName').innerText.trim());navigator.clipboard.writeText(url.toString()).then(()=>{const btn=document.getElementById('profileCopyBtn');btn.textContent='✓';btn.style.borderColor='var(--purple)';btn.style.color='var(--purple)';setTimeout(()=>{btn.textContent='⧉';btn.style.borderColor='';btn.style.color='';},1500);});}
+
+/* ══════════════════════════════════════════════════════
+   PROFILE EMBED SYSTEM
+   Lets any player's profile be embedded standalone via
+   ?embed=PlayerName — strips the site chrome down to just
+   the profile card, suitable for dropping in an <iframe>.
+══════════════════════════════════════════════════════ */
+function isEmbedMode(){
+    return new URLSearchParams(window.location.search).get('embed');
+}
+
+function copyEmbedCode(){
+    const name = document.getElementById('pName').innerText.trim();
+    if(!name) return;
+    const url = new URL(window.location.href);
+    url.search = '';
+    url.searchParams.set('embed', name);
+    const iframeCode = `<iframe src="${url.toString()}" width="480" height="360" style="border:none;border-radius:12px;" loading="lazy"></iframe>`;
+    navigator.clipboard.writeText(iframeCode).then(()=>{
+        const btn=document.getElementById('profileEmbedBtn');
+        if(!btn) return;
+        const original=btn.textContent;
+        btn.textContent='✓'; btn.style.borderColor='var(--purple)'; btn.style.color='var(--purple)';
+        setTimeout(()=>{ btn.textContent=original; btn.style.borderColor=''; btn.style.color=''; },1500);
+    }).catch(()=>{});
+}
+
+async function renderEmbedProfile(name){
+    document.body.classList.add('embed-mode');
+    document.querySelector('.welcome-overlay')?.remove();
+    document.querySelector('nav')?.remove();
+    document.querySelector('header')?.remove();
+    document.getElementById('viewLabel')?.remove();
+    document.getElementById('kitBar')?.remove();
+    document.getElementById('filterBar')?.remove();
+    document.getElementById('topPlayersTitle')?.remove();
+    document.getElementById('podiumWrap')?.remove();
+    document.getElementById('displayList')?.remove();
+    document.getElementById('showMoreBtn')?.remove();
+    document.querySelector('.info-btn')?.remove();
+    document.getElementById('music-player')?.remove();
+    document.getElementById('infoModal')?.remove();
+    document.getElementById('loginModal')?.remove();
+    document.getElementById('duelPopupModal')?.remove();
+
+    const modal = document.getElementById('profileModal');
+    if(!modal) return;
+
+    if(!DATA.Overall || !(name in DATA.Overall)){
+        modal.style.display='flex';
+        modal.innerHTML = `<div style="font-family:'MultiCraftFont',monospace;color:#ff4444;text-align:center;padding:40px;width:100%;">PLAYER NOT FOUND</div>`;
+        return;
+    }
+
+    modal.classList.add('embed-modal');
+    modal.style.display = 'flex';
+    modal.onclick = null; // don't close on click inside an embed
+    modal.querySelector('.profile-close-btn')?.remove();
+    modal.querySelector('.profile-copy-btn')?.remove();
+    modal.querySelector('.profile-embed-btn')?.remove();
+
+    await openProfile(name);
+}
 function setUrl(params){const u=new URL(window.location.href);Object.entries(params).forEach(([k,v])=>v?u.searchParams.set(k,v):u.searchParams.delete(k));window.history.replaceState({},'',u);}
 function handleSearch(val){const pop=document.getElementById('searchPopup');if(!val){pop.style.display='none';return;}const matches=Object.keys(DATA.Overall||{}).filter(n=>n.toLowerCase().includes(val.toLowerCase())).slice(0,5);pop.innerHTML=matches.map(m=>`<div class="search-item" onclick="openProfile('${m}');document.getElementById('searchPopup').style.display='none';"><b>${m}</b><span style="color:var(--purple);font-size:0.5rem;">VIEW PROFILE</span></div>`).join('')||'';pop.style.display=matches.length?'block':'none';}
 const _MP = atob("aHR0cHM6Ly9tdWx0aWNyYWZ0LXByb2R1Y3Rpb24udXAucmFpbHdheS5hcHAvcHJveHkvZmluZC1uZWFyYnktc2VydmVycw==");
@@ -1560,6 +1624,8 @@ function setupMusicPlayer(){
     const curTimeEl = document.getElementById('music-time-current');
     const durTimeEl = document.getElementById('music-time-duration');
 
+    if(!nameEl || !playerEl) return; // removed in embed mode
+
     if(!MUSIC_TRACKS.length){
         nameEl.textContent = 'No tracks';
         playBtn.disabled = true;
@@ -1658,6 +1724,7 @@ function attemptMusicAutoplay(){
 
 function loadMusicTrack(index, autoplay){
     const nameEl = document.getElementById('music-track-name');
+    if(!nameEl) return;
     const filename = MUSIC_TRACKS[index];
     musicAudio.src = `audio/${filename}`;
     nameEl.textContent = musicTrackNameFromFile(filename);
@@ -1698,26 +1765,33 @@ function dismissWelcomeOverlay(){
 document.addEventListener('keydown', dismissWelcomeOverlay, {once:true});
 
 (async()=>{
-    loadMusicTracklist(); // fire immediately, in parallel — don't wait on auth/rankings
+    const embedName = isEmbedMode();
+    if(!embedName) loadMusicTracklist(); // skip music entirely in embeds
     await restoreSession();
     await load();
-    await handleUrlOnLoad();
-})();
-document.addEventListener('click',e=>{ if(!e.target.closest('.search-wrap')) document.getElementById('searchPopup').style.display='none'; });
-const canvas=document.createElement('canvas');canvas.style.cssText='position:fixed;inset:0;z-index:0;pointer-events:none;';document.body.prepend(canvas);const ctx=canvas.getContext('2d');canvas.width=window.innerWidth;canvas.height=window.innerHeight;window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});let stars=[];function spawnStar(){return{x:Math.random()*canvas.width,y:-10,size:Math.random()*3+1,speed:Math.random()*8+4,drift:Math.random()*1.5-.75};}
-let _starPaused=false;
-document.addEventListener('visibilitychange',()=>{
-    if(document.hidden){ _starPaused=true; }
-    else { _starPaused=false; stars=[]; }
-});
-setInterval(()=>{ if(!_starPaused) for(let i=0;i<6;i++) stars.push(spawnStar()); },80);
-(function animate(){
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    if(!_starPaused){
-        for(let i=0;i<stars.length;i++){const s=stars[i];ctx.beginPath();ctx.fillStyle='white';ctx.shadowBlur=10;ctx.shadowColor='#00eeff';ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();s.y+=s.speed;s.x+=s.drift;if(s.y>canvas.height+20){stars.splice(i,1);i--;}}
+    if(embedName){
+        await renderEmbedProfile(embedName);
+    } else {
+        await handleUrlOnLoad();
     }
-    requestAnimationFrame(animate);
 })();
+document.addEventListener('click',e=>{ if(!e.target.closest('.search-wrap')) document.getElementById('searchPopup')?.style && (document.getElementById('searchPopup').style.display='none'); });
+if(!isEmbedMode()){
+    const canvas=document.createElement('canvas');canvas.style.cssText='position:fixed;inset:0;z-index:0;pointer-events:none;';document.body.prepend(canvas);const ctx=canvas.getContext('2d');canvas.width=window.innerWidth;canvas.height=window.innerHeight;window.addEventListener('resize',()=>{canvas.width=window.innerWidth;canvas.height=window.innerHeight;});let stars=[];function spawnStar(){return{x:Math.random()*canvas.width,y:-10,size:Math.random()*3+1,speed:Math.random()*8+4,drift:Math.random()*1.5-.75};}
+    let _starPaused=false;
+    document.addEventListener('visibilitychange',()=>{
+        if(document.hidden){ _starPaused=true; }
+        else { _starPaused=false; stars=[]; }
+    });
+    setInterval(()=>{ if(!_starPaused) for(let i=0;i<6;i++) stars.push(spawnStar()); },80);
+    (function animate(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        if(!_starPaused){
+            for(let i=0;i<stars.length;i++){const s=stars[i];ctx.beginPath();ctx.fillStyle='white';ctx.shadowBlur=10;ctx.shadowColor='#00eeff';ctx.arc(s.x,s.y,s.size,0,Math.PI*2);ctx.fill();s.y+=s.speed;s.x+=s.drift;if(s.y>canvas.height+20){stars.splice(i,1);i--;}}
+        }
+        requestAnimationFrame(animate);
+    })();
+}
 </script>
 </body>
 </html>
