@@ -1453,6 +1453,7 @@ function copyEmbedCode(){
 }
 
 async function renderEmbedProfile(name){
+    document.documentElement.classList.add('embed-mode');
     document.body.classList.add('embed-mode');
     document.querySelector('.welcome-overlay')?.remove();
     document.querySelector('nav')?.remove();

@@ -668,25 +668,77 @@ nav {
     width: 200px;
 }
 
-.profile-embed-btn { 
-    position: absolute; 
-    bottom: 12px; 
-    right: 48px; /* Offset so it sits right next to the copy button */
-    background: #111; 
-    border: 1px solid #333; 
-    color: #888; 
-    border-radius: 50%; 
-    width: 28px; 
-    height: 28px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    cursor: pointer; 
-    font-size: 0.75rem; 
-    z-index: 10; 
-    transition: border-color .2s, color .2s; 
+.profile-embed-btn {
+    position: absolute;
+    top: 12px;
+    right: 52px; /* sits left of the close button, above the copy button's old spot */
+    background: #111;
+    border: 1px solid #333;
+    color: #888;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.75rem;
+    z-index: 10;
+    transition: border-color .2s, color .2s;
 }
-.profile-embed-btn:hover { 
-    border-color: var(--purple); 
-    color: #fff; 
+.profile-embed-btn:hover {
+    border-color: var(--purple);
+    color: #fff;
 }
+
+/* ══════════════════════════════════════════════════════
+   PROFILE MODAL / MUSIC PLAYER STACKING ORDER
+   Profile modal must render above the music player.
+══════════════════════════════════════════════════════ */
+#profileModal { z-index: 2100; }
+.music-player { z-index: 900; }
+
+/* ══════════════════════════════════════════════════════
+   PROFILE EMBED MODE
+   Strips site chrome for standalone ?embed=PlayerName pages
+   and removes the fullscreen-overlay look so the profile
+   card becomes the entire embeddable page content.
+══════════════════════════════════════════════════════ */
+html.embed-mode,
+body.embed-mode {
+    background: transparent !important;
+    height: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    display: block;
+}
+
+#profileModal.embed-modal {
+    position: static !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    inset: auto !important;
+    z-index: 1 !important;
+    padding: 0 !important;
+    width: 100%;
+    height: auto;
+    display: flex !important;
+}
+
+.profile-modal-content.embed-modal,
+#profileModal.embed-modal .profile-modal-content {
+    position: static !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: none !important;
+    margin: 0 !important;
+    border-radius: 12px !important;
+    box-sizing: border-box;
+}
+
+.embed-modal .profile-embed-btn,
+.embed-modal .profile-copy-btn,
+.embed-modal .profile-close-btn { display: none !important; }
