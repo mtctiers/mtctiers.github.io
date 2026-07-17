@@ -356,7 +356,6 @@
       "Vorthexis"
     ],
     "LT2": [
-      "ChillPotato",
       "jogg",
       "RayValidd",
       "Redistdrext",
@@ -369,7 +368,8 @@
       "x9jm"
     ],
     "RLT2": [
-      "LifoMC"
+      "LifoMC",
+      "ChillPotato"
     ],
     "HT3": [
       "CJSHORT",
@@ -717,8 +717,10 @@
       "Game1K"
     ],
     "LT1": [
-      "x9jm",
       "LastChance"
+    ],
+    "RLT1": [
+      "x9jm"
     ],
     "HT2": [
       "system1117",
@@ -767,12 +769,12 @@
     "HT1": [
       "Game1K"
     ],
-    "HT2": [
-      "x9jm"
-    ],
     "LT2": [
       "LastChance",
       "Vorthexis"
+    ],
+    "RHT2": [
+      "x9jm"
     ],
     "RLT2": [
       "TimmyLoal"
