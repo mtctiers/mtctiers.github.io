@@ -339,11 +339,6 @@
       "name": "spareman2",
       "region": "AS",
       "device": "MB"
-    },
-    {
-      "name": "_Mario34_",
-      "region": "NA",
-      "device": "MK"
     }
   ],
   "Emerald": {
@@ -635,8 +630,7 @@
       "ramin_RG",
       "skibidi1234",
       "sample",
-      "_Mario34",
-      "_Mario34_"
+      "_Mario34"
     ],
     "LT2": [
       "CosmicallyXVII",
