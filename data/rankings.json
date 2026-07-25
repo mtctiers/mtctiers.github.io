@@ -334,6 +334,11 @@
       "name": "Ashar",
       "region": "AS",
       "device": "MK"
+    },
+    {
+      "name": "spareman2",
+      "region": "AS",
+      "device": "MB"
     }
   ],
   "Emerald": {
