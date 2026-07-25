@@ -342,7 +342,7 @@
     },
     {
       "name": "_Mario34_",
-      "region": "?",
+      "region": "NA",
       "device": "MK"
     }
   ],
@@ -635,7 +635,8 @@
       "ramin_RG",
       "skibidi1234",
       "sample",
-      "_Mario34"
+      "_Mario34",
+      "_Mario34_"
     ],
     "LT2": [
       "CosmicallyXVII",
