@@ -614,7 +614,6 @@
   },
   "Diamond": {
     "LT1": [
-      "sample",
       "Terminator",
       "system1117"
     ],
@@ -624,7 +623,8 @@
     "HT2": [
       "ramin_RG",
       "skibidi1234",
-      "Vorthexis"
+      "Vorthexis",
+      "sample"
     ],
     "LT2": [
       "CosmicallyXVII",
