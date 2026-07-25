@@ -613,12 +613,10 @@
     ]
   },
   "Diamond": {
-    "HT1": [
-      "system1117"
-    ],
     "LT1": [
       "sample",
-      "Terminator"
+      "Terminator",
+      "system1117"
     ],
     "RHT1": [
       "Game1K"
