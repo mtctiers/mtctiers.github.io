@@ -141,11 +141,6 @@
       "device": "MK"
     },
     {
-      "name": "ChillPotato",
-      "region": "SA",
-      "device": "MK"
-    },
-    {
       "name": "RayValidd",
       "region": "AS",
       "device": "MK"
@@ -378,8 +373,7 @@
       "Possessed_YT"
     ],
     "RLT2": [
-      "LifoMC",
-      "ChillPotato"
+      "LifoMC"
     ],
     "HT3": [
       "CJSHORT",
@@ -509,7 +503,6 @@
       "TERRORRR",
       "TimmyLoal",
       "Dream_MultiCraft",
-      "ChillPotato",
       "Ashar"
     ],
     "RLT2": [
@@ -704,12 +697,12 @@
     "HT1": [
       "Game1K"
     ],
+    "HT2": [
+      "x9jm"
+    ],
     "LT2": [
       "Vorthexis",
       "LastChance"
-    ],
-    "RHT2": [
-      "x9jm"
     ],
     "RLT2": [
       "TimmyLoal"
