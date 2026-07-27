@@ -339,6 +339,11 @@
       "name": "_Mario34_",
       "region": "NA",
       "device": "MK"
+    },
+    {
+      "name": "ChillPotato",
+      "region": "SA",
+      "device": "MK"
     }
   ],
   "Emerald": {
