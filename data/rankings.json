@@ -359,6 +359,11 @@
       "name": "MrLivingstone",
       "region": "AS",
       "device": "MB"
+    },
+    {
+      "name": "Verlin",
+      "region": "NA",
+      "device": "MB"
     }
   ],
   "Emerald": {
