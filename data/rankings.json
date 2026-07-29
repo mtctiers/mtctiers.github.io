@@ -354,6 +354,11 @@
       "name": "Space2k",
       "region": "NA",
       "device": "MK"
+    },
+    {
+      "name": "MrLivingstone",
+      "region": "AS",
+      "device": "MB"
     }
   ],
   "Emerald": {
