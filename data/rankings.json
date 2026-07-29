@@ -344,6 +344,11 @@
       "name": "ChillPotato",
       "region": "SA",
       "device": "MK"
+    },
+    {
+      "name": "Charm_Of_Luck",
+      "region": "NA",
+      "device": "MK"
     }
   ],
   "Emerald": {
